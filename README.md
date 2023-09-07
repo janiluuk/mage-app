@@ -35,8 +35,10 @@ Within the download you'll find the following directories and files:
 
 ```
 vimage-app
-    ├── script (docker scripts)
+    ├── index.html 
     ├── public
+    │   ├── layout
+    │   ├── themes
     │   ├── favicon.png
     │   └── index.html
     ├── src
@@ -47,39 +49,37 @@ vimage-app
     │   │   ├── js
     │   │   └── scss
     │   ├── components (custom components)
+    |   |   └── component-name
     |   ├── layouts (layout blocks)
-    |   ├── pages (migrating to views)
     |   ├── service (temporary mock data for UI dev)
-    |   ├── services (migrating to store/services)
+    |   ├── services (use only these to connect to API!)
     │   ├── mixins
     │   │   ├── formMixin.js
     │   │   └── showSwal.js
     │   ├── router
     |   |    └── index.js
     |   |    └── routes.js (extra routes)
-    │   ├── services(expired, migrating to store/services)
-    │   │   ├── auth-header.js
-    │   │   ├── auth.service.js
-    │   │   └── profile.service.js
     │   ├── store
     │   │   ├── auth.module.js
     |   |   ├── index.js
-    |   |   |── modules (extra modules for RBAC, tags etc.)
-    |   |   |── services (extra services)
+    |   |   |── modules
+    |   |   |    ├── module-name
+    |   |   |── services (extra services, deprecating)
     │   │   └── profile.module.js
     │   ├── views (naming e.g. Profile/EditProfie.vue)
     │   │   ├── components
     │   ├── App.vue
-    │   ├── main.js
-    │   └── material-dashboard.js (legacy crap on its way out)
+    │   └── main.js
     ├── .browserslistrc
+    ├── .whyareyoulookingatthis
     ├── .eslintrc.js
     ├── .gitignore
     ├── babel.config.json
     ├── vue.config.js
+    ├── webpack.config.js
     ├── .env.example
     ├── Dockerfile
     ├── vite.config.js
-    ├── index.html
+    ├── docker-compose.yml
     ├── package.json
     └── README.md
