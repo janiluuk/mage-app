@@ -1,4 +1,4 @@
-<template>
+template>
   <div class="main-container w-100" :class="{ loading: isLoading, banner: (!videoFile || errorMessage) }">
     <div class="page-container w-100">
       <div class="w-100 d-flex flex-column justify-content-center align-items-center text-align-center position-absolute"

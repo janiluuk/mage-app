@@ -1,14 +1,23 @@
 <template>
-  <div class="w-100">
+  <div class="home-banner">
     <div class="text-center">
       <div class="hero-banner">What do you like to create today?</div>
     </div>
     <div class="banner-item-row">
       <div class="banner-item">
         <div class="banner-media-container">
-            <img src="../../public/img/mona1.png" class="banner-media-main"/>
+          <img src="../../public/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="../../public/img/mona2.png" />
+            <img src="../../public/img/mona2.gif" />
+          </div>
+          <div class="banner-overlay">
+            <div class="banner-overlay-icon">
+              <i class="pi pi-upload"></i>
+            </div>
+            <div class="banner-overlay-body">
+              <div class="banner-overlay-title">Upload an image</div>
+              <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif, size less than 2MB</div>
+            </div>
           </div>
         </div>
         <div class="banner-content-container">
@@ -18,9 +27,18 @@
       </div>
       <div class="banner-item">
         <div class="banner-media-container">
-            <img src="../../public/img/mona1.png" class="banner-media-main"/>
+          <img src="../../public/img/mona.jpg" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="../../public/img/mona2.png" />
+            <img src="../../public/img/mona.jpg" />
+          </div>
+          <div class="banner-overlay">
+            <div class="banner-overlay-icon">
+              <i class="pi pi-upload"></i>
+            </div>
+            <div class="banner-overlay-body">
+              <div class="banner-overlay-title">Upload a video</div>
+              <div class="banner-overlay-desc">Formats .mp4, size less than 50MB</div>
+            </div>
           </div>
         </div>
         <div class="banner-content-container">
@@ -44,20 +62,31 @@ export default {
 };
 </script>
 
-<style scoped type="scss">
+<style scoped lang="scss">
+
+.home-banner {
+  display: flex;
+  flex-flow: column;
+  padding-top: 1.5rem;
+}
 .hero-banner {
-  font-size: 4rem;
+  font-size: 2.5rem;
   font-weight: 700;
   line-height: 1.2;
 }
 
 .banner-item-row {
-  margin: 4rem 0 2rem 0;
+  margin: 3rem 0 2rem 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  flex-flow: row;
+  flex-flow: column;
   column-gap: 2rem;
+  row-gap: 2rem;
+}
+
+.banner-item {
+  cursor: pointer;
 }
 
 .banner-description {
@@ -73,9 +102,11 @@ export default {
 .banner-media-container {
   position: relative;
   width: min-content;
+  border-radius: 6px;
+  overflow: hidden;
 }
 .banner-media-main {
-  max-width: 300px;
+  width: 420px;
   display: block;
 }
 .banner-media-secondary {
@@ -84,13 +115,50 @@ export default {
   right: 0;
   left: 0;
   bottom: 0;
+  z-index: 1;
   overflow: hidden;
-  animation: slide 10s infinite ease-in-out;
+  border-right: 2px solid rgba(18, 18, 18, 0.4);
+  animation: slide 20s infinite ease-in-out;
 }
 .banner-media-secondary img {
   display: block;
   filter: grayscale(1);
   height: 100%;
+}
+
+.banner-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  flex-flow: column;
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+  background: rgba(28, 28, 28, 0.2);
+  backdrop-filter: blur(30px);
+  row-gap: 0.5rem;
+  opacity: 0;
+
+  .banner-item:hover & {
+    animation: appear 0.3s ease-in-out;
+    opacity: 1;
+  }
+}
+
+.banner-overlay-icon i {
+  font-size: 3rem;
+}
+
+.banner-overlay-title {
+  font-size: 1.5rem;
+}
+
+.banner-overlay-desc {
+  opacity: 0.5;
 }
 
 @keyframes slide {
@@ -102,6 +170,30 @@ export default {
   }
   90%, 100% {
     right: 0;
+  }
+}
+
+@keyframes appear {
+  0% {
+    opacity: 0;
+    bottom: -2rem;
+  }
+  100% {
+    opacity: 1;
+    top: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-banner {
+    padding-top: 3rem;
+  }
+  .hero-banner {
+    font-size: 3.5rem;
+  }
+  .banner-item-row {
+    flex-flow: row;
+    column-gap: 2rem;
   }
 }
 
