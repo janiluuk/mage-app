@@ -188,6 +188,8 @@ export default {
       this.isLoading = false;
       this.videoShow = false;
       this.videoFile = false;
+      this.status = '';
+      this.errorMessage = false;
 
     },
     secondsToFFmpegTime(seconds) {
@@ -248,19 +250,31 @@ export default {
       this.fileType = this.currentFile.type;
       this.fileSize = this.currentFile.size;
       const reader = new FileReader();
+      
       reader.addEventListener('progress', function(progress) { 
           console.log(progress);
-        
-        
       });
   
       if (this.currentFile.size > 1024 * 1024 * 20) {
         this.errorMessage = "File is too big, maximum 20mb or 15 seconds allowed!";
         return;
       }
-      if (['loadend', 'load'].includes(event.type)) {
+      this.videoFile = event.target.files[0];
+      this.videoPreview = URL.createObjectURL(this.videoFile);
+        
+        if (this.status !== "error")
+        this.uploadVideo(false)
+        else {
+          this.errorMessage = "error";
+        }
+//      this.transcode(this.currentFile);
+    },
 
-          const getSize = () => this.currentFile.size;
+  
+    async uploadVideo(blob=false, filename=false) {
+      this.isLoading = true;
+      let formData = new FormData();
+      const getSize = () => this.currentFile.size;
           const readChunk = (chunkSize, offset) =>
             new Promise((resolve, reject) => {
               const filereader = new FileReader();
@@ -277,24 +291,22 @@ export default {
               .analyzeData(getSize, readChunk)
               .then((result) => {
                 this.videoInfo = this.getMediaMetadata(result);
-                console.log(result);
+              
+                if (this.videoInfo && this.videoInfo.duration > 15) {
+                    this.status='error';
+                    this.isLoading = false;
+                    this.errorMessage = "File is too long, maximum 15 seconds allowed!";
+                  return;
+                } 
               })
               .catch((error) => {
                 alert(error);
               });
           });
-        }
-
-
-//      this.transcode(this.currentFile);
-    },
-
-  
-    async uploadVideo(blob=false, filename) {
-      this.isLoading = true;
-      let formData = new FormData();
+      
+      if (this.status == 'error') return;
       if (blob == false) {
-        formData.append("video", this.currentFile);
+        formData.append("video", this.videoFile);
       } else {
         formData.append("video", blob, this.currentFile.name);
       }
