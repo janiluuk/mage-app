@@ -18,7 +18,7 @@
       // Check if the theme is saved in localStorage
       const savedTheme = localStorage.getItem("usertheme") ? JSON.parse(localStorage.getItem("usertheme")).theme : false;
       // If a theme is saved, use it; otherwise, use the default theme
-      const themeToUse = savedTheme ? "/themes/"+ savedTheme + "/theme.css": "/themes/arya-dark-orange/theme.css";
+      const themeToUse = savedTheme ? "/themes/"+ savedTheme + "/theme.css": "/themes/arya-orange/theme.css";
 
       // Update the href attribute of the link element
       themeLink.setAttribute("href", themeToUse);
