@@ -16,13 +16,13 @@
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
                         v-if="hasPreviewAnimation && (job.operation == 'animation' || (job.operation == 'preview' && !hasPreviewImage))"
                         class="w-100 preview-100 text-center img-with-blur"
-                        :src="job.preview_animation.replace('https://api.dudeisland.eu', '')" @error="imageLoadOnError"
+                        :src="job.preview_animation" @error="imageLoadOnError"
                         v-bind:alt="animation" preview />
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
                         v-if="hasPreviewImage && (job.operation != 'animation' || (job.operation == 'animation' && !hasPreviewAnimation))"
                         class="w-100 preview-100 img-with-blur"
-                        :src="job.preview_img.replace('https://api.dudeisland.eu', '')" @error="imageLoadOnError"
+                        :src="job.preview_img" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
                     <VideoEditProgress :job="job"></VideoEditProgress>
                 </div>
@@ -31,7 +31,7 @@
                 <div class="text-center position-relative w-100 mt-1" v-if="isJobReady">
                     <vue-plyr :options="options">
                         <video controls crossorigin="anonymous" playsinline
-                            :data-poster="job.preview_img.replace('https://api.dudeisland.eu', '')">
+                            :data-poster="job.preview_img">
                             <source size="720" crossorigin="anonymous" :src="job.url" type="video/mp4" />
                         </video>
                     </vue-plyr>
@@ -101,7 +101,7 @@ export default {
             return (this.$props.job.status == 'finished' && this.$props.job.url && this.$props.job.url.length > 0);
         },
         originalUrl() {
-            const url = this.$props.job.original_url.replace('https://api.dudeisland.eu', '');
+            const url = this.$props.job.original_url;
             if (url && url.length > 0)
                 return url;
             return false;
