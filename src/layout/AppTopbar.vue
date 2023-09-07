@@ -77,40 +77,22 @@ const isOutsideClicked = (event) => {
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
 
-const overlayMenuItems = ref([
-    {
-        label: 'View profile',
-        icon: 'pi pi-save',
-        to: '/profile'
-    },
-
-    {
-        label: 'My account',
-        icon: 'pi pi-refresh',
-        to: '/account'
-    },
-    {
-        label: 'Logout',
-        icon: 'pi pi-trash',
-        to: '/signout'
-    }
-
-]);
 </script>
 
 <template>
     <div class="layout-topbar">
         <router-link to="/" class="layout-topbar-logo">
             <img :src="logoUrl" alt="logo" />
-            <span>Vimage</span>
+            <span>Vimage:stable </span>
         </router-link>
 
-        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
+<!--        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
         </button>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
         </button>
+-->
         <div class="layout-topbar-logo"></div>
         <AuthMenu
             v-if="loggedInUser"
