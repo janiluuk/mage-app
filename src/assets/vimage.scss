@@ -1,0 +1,434 @@
+// =========================================================
+// * Material Dashboard 2 Laravel - v3.0.2
+// =========================================================
+//
+// * Product Page: https://www.creative-tim.com/product/material-dashboard-pro
+// * Copyright 2021 Creative Tim (https://www.creative-tim.com)
+//
+// Coded by www.creative-tim.com
+//
+// =========================================================
+//
+// * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+
+// Color system
+$text-color: rgba(255, 255, 255, 0.87);
+$border-radius: 4px;
+$spacer: 1rem !default;
+
+
+// Custom CSS
+
+@keyframes gradient-animation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes startup-appear-animation {
+  0% {
+    opacity: 0;
+    padding-top: 20%;
+  }
+  70% {
+    opacity: 0.7;
+    padding-top: 9%;
+  }
+  100% {
+    opacity: 1;
+    padding-top: 10%;
+  }
+}
+
+@mixin text-vibrant {
+  background: linear-gradient(45deg, #f6f6f6, #ffeb37);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@mixin bg-gradient-vibrant {
+  border: 1px solid transparent;
+  background: linear-gradient(45deg, #44d8ff, #ffe666 90%) !important;
+  background-clip: padding-box,border-box !important;
+  background-origin: border-box,border-box !important;
+}
+
+@mixin bg-gradient-dark {
+  border: 1px solid transparent;
+  background: linear-gradient(45deg, rgb(5 13 25 / 70%), rgb(8 20 38 / 70%) 90%);
+  background-clip: padding-box,border-box;
+  background-origin: border-box,border-box;
+}
+
+  .main-container {
+    transition: background 0.3s linear;
+    position: relative;
+  }
+
+  .main-container.banner, .main-container.loading {
+    border-radius: 2rem;
+    height: calc(100vh - 170px);
+    background-color: lighten(#1a2035, 15);
+  }
+
+  .main-container.banner:hover, .main-container.banner:focus, .main-container.banner:active {
+    background: linear-gradient(45deg, lighten(#1a2035, 15), lighten(#1a2035, 15), #e9e9e9, lighten(#1a2035, 15), lighten(#1a2035, 15));
+    background-size: 500% 500%;
+    animation: gradient-animation 4s ease infinite;
+  }
+
+  .main-container.loading, .main-container.loading:hover, .main-container.loading:focus, .main-container.loading:active {
+    background: linear-gradient(45deg,#ff5899,#336fff,#ffe666,#336fff, #ff5899);
+    background-size: 500% 500%;
+    animation: gradient-animation 2s ease infinite;
+  }
+
+  .main-container.banner .page-container, .main-container.loading .page-container {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-radius: 2rem;
+    background-color: var(--surface-ground);
+    border: 5px dotted var(--surface-ground);
+    background-clip: padding-box,border-box;
+    background-origin: border-box,border-box;
+  }
+
+  .page-container > div {
+    height: 100%;
+  }
+
+  .upload-area {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 20px;
+    border-radius: 2rem;
+    background-color: var(--surface-ground);
+  }
+
+  .form-label, .field > label {
+    font-weight: bold;
+    letter-spacing: 0.2px;
+    color: rgba(#eee, 0.5);
+    font-size: 11px;
+    text-transform: uppercase;
+    transition: color 0.3s ease-in-out;
+  }
+
+  i.blur-spinner {
+    position: absolute;
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    filter: blur(0.7em);
+    font-size: 1.5em;
+  }
+
+.header {
+    background: transparent;
+    border: 5px dashed #1a2035;
+    border-radius: 2rem;
+    height: calc(100vh - 150px);
+    margin-top: 70px;
+  }
+
+.text-vibrant {
+  @include text-vibrant();
+}
+
+.bg-gradient-vibrant {
+  @include bg-gradient-vibrant();
+}
+
+button.bg-gradient-vibrant:hover {
+  border-color: transparent !important;
+  @include bg-gradient-vibrant();
+}
+
+.bg-gradient-dark {
+  @include bg-gradient-dark();
+}
+
+.border-light-opacity-10 {
+  border-color: rgba(#eee, 10%);
+}
+
+.border-dark-opacity-30 {
+  border-color: rgba(#000, 30%);
+}
+
+.bg-light-opacity-8 {
+  background-color: rgba(#eee, 8%);
+}
+
+.sample-container {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: $border-radius;
+}
+
+.floating-button {
+  position: fixed;
+  bottom: $spacer  * 2;
+  right: $spacer * 2;
+  z-index: 9;
+}
+
+.card-thumbnail-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  overflow: hidden;
+  border-radius: $border-radius;
+  background-color: rgba(#eee, 0.1);
+  z-index: 0;
+}
+
+.card-thumbnail-info {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+}
+
+.card-thumbnail-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.card-thumbnail-image,
+.card-thumbnail-image-fill {
+  &:deep img {
+    max-height: 100%;
+    width: auto;
+    margin: auto;
+  }
+}
+
+.card-thumbnail-image-fill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 0;
+  filter: blur(50px);
+}
+
+// Hide file selector in landing page button
+.hero-button {
+  input {
+    display: none;
+  }
+}
+
+// Edit page
+.editor-container {
+  border: none;
+  background: transparent;
+
+  &:deep .p-splitter-gutter {
+    &:hover {
+      background: var(--surface-hover);
+    }
+  }
+
+  &:deep .p-splitter-gutter-resizing {
+    background: var(--surface-b);
+  }
+
+  &.p-splitter-horizontal:deep .p-splitter-gutter-handle {
+    background: var(--primary-color);
+    min-height: 40px;
+  }
+
+  &:deep .p-inputtext {
+    background: var(--surface-card);
+  }
+}
+
+.video-preview-container {
+  video {
+    width: 100%;
+  }
+}
+
+// Library
+.library {
+  &:deep .p-dataview-header {
+    border-width: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  &:deep .p-dataview-content {
+    border: none;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  &:deep .p-paginator-bottom {
+    margin-bottom: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.grid-item {
+  border-radius: $border-radius + 2px;
+  padding: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s linear, border-color 0.2s linear;
+
+  &:hover {
+    border-color: var(--surface-border);
+    background-color: var(--surface-card);
+  }
+}
+
+// Help button
+.help-btn {
+  display: inline-flex;
+  font-size: 0.8em;
+  border: 1px solid;
+  border-radius: 100%;
+  height: 2em;
+  width: 2em;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.15s linear;
+
+  i {
+    font-size: 1em;
+    line-height: 0;
+  }
+
+  &:hover, &:focus, &:active {
+    opacity: 0.8;
+  }
+}
+
+// Helper classes
+.w-100 {
+  width: 100%;
+}
+
+.preview-100:deep {
+  text-align: center;
+  > img {
+    width: auto;
+    max-width: 100%;
+    max-height: 400px;
+    margin: auto;
+  }
+}
+
+img.preview-100 {
+  width: auto;
+  max-width: 100%;
+  max-height: 400px;
+  margin: auto;
+}
+
+.p-image:deep .p-image-preview-indicator {
+  border: none;
+}
+
+.pull-right {
+  float:right;
+}
+
+.pull-left {
+  float:left;
+}
+
+.clear-both {
+  clear:both;
+}
+
+.text-light {
+  color: rgba($text-color, 0.5);
+}
+
+.text-warning {
+  color: #ffe666;
+}
+
+.mw-0 {
+  min-width: 0;
+}
+
+.position-relative {
+  position: relative;
+}
+
+.position-absolute {
+  position: absolute;
+}
+
+.overflow-hidden {
+  overflow: hidden;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-column {
+  flex-flow: column;
+}
+
+.flex-row {
+  flex-flow: row;
+}
+
+.justify-content-center {
+  justify-content: center;
+}
+
+.align-items-center {
+  align-items: center;
+}
+
+.flex-fill {
+  flex: 1 1 auto;
+}
+
+.text-align-left {
+  text-align: left;
+}
+
+.text-align-right {
+  text-align: right;
+}
+
+.text-align-center {
+  text-align: center;
+}

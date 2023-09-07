@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+      <meta charset="UTF-8">
+      <link rel="icon" href="/favicon.ico">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>VImage Beta</title>
+    
+      <link id="theme-css" rel="stylesheet" type="text/css" href="/themes/lara-dark-teal/theme.css">
+
+  
+    <!-- Font Awesome Icons -->
+    <script type="text/javascript">
+      (function() {      // Grab the link element by its ID
+      const themeLink = document.getElementById("theme-css");
+
+      // Check if the theme is saved in localStorage
+      const savedTheme = localStorage.getItem("usertheme") ? JSON.parse(localStorage.getItem("usertheme")).theme : false;
+      // If a theme is saved, use it; otherwise, use the default theme
+      const themeToUse = savedTheme ? "/themes/"+ savedTheme + "/theme.css": "/themes/arya-dark-orange/theme.css";
+
+      // Update the href attribute of the link element
+      themeLink.setAttribute("href", themeToUse);
+
+    })();
+    </script>
+     <script src="https://kit.fontawesome.com/42d5adcbca.js" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+  
+  </head>
+  
+      <body class="dark dark-version">
+
+      <div id="app"></div>
+      <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>

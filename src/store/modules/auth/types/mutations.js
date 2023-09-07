@@ -1,0 +1,4 @@
+export const USER_LOGOUT = 'USER_LOGOUT';
+export const SET_LOGGED_USER = 'SET_LOGGED_USER';
+export const SET_LOGIN_STATUS = 'SET_LOGIN_STATUS';
+export const SET_TOKEN_DATA = 'SET_TOKEN_DATA';
