@@ -86,6 +86,7 @@ export default {
       videoShow: false,
       url: null,
       progress: 0,
+      filesizeLimit: 50,
       isPortrait: false,
       video: null,
       videoFile: null,
@@ -255,8 +256,8 @@ export default {
           console.log(progress);
       });
   
-      if (this.currentFile.size > 1024 * 1024 * 20) {
-        this.errorMessage = "File is too big, maximum 20mb or 15 seconds allowed!";
+      if (this.currentFile.size > 1024 * 1024 * this.filesizeLimit) {
+        this.errorMessage = "File is too big, maximum "+this.filesizeLimit+"mb or 15 seconds allowed!";
         return;
       }
       this.videoFile = event.target.files[0];
