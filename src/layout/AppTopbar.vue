@@ -21,7 +21,6 @@ onMounted(() => {
 
     bindOutsideClickListener();
     activeRoute.value = router.currentRoute.value.path;
-    AuthMenu
 });
 
 onBeforeUnmount(() => {
@@ -86,13 +85,13 @@ const isOutsideClicked = (event) => {
             <span>Vimage:stable </span>
         </router-link>
 
-<!--        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
+        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
         </button>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
         </button>
--->
+
         <div class="layout-topbar-logo"></div>
         <AuthMenu
             v-if="loggedInUser"
