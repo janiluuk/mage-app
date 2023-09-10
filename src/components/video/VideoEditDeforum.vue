@@ -311,6 +311,11 @@ export default {
     handleItemSelect(itemIndex) {
       
       const currentItem = this.selectableItems[itemIndex].label;
+      if (this.selectedItems[itemIndex] && this.selectedItems[itemIndex] != null  ) {
+        this.selectedItems[itemIndex] = null;
+        return;
+      } 
+        
       this.selectedItems[itemIndex] = this.selectableItems[itemIndex].label;
       
     },
