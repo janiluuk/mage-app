@@ -201,6 +201,23 @@ const conflictingItems = {
   "Rotate Counter-Clockwise": "Rotate Clockwise",
 };
 
+const job = ref({
+  prompt: "",
+  negative_prompt: "",
+  prompts: [],
+});
+
+const conflictingItems = {
+  Zoom: "Zoom out",
+  "Zoom out": "Zoom",
+  Up: "Down",
+  Down: "Up",
+  Left: "Right",
+  Right: "Left",
+  "Rotate Clockwise": "Rotate Counter-Clockwise",
+  "Rotate Counter-Clockwise": "Rotate Clockwise",
+};
+
 const addPrompt = () => {
   lastPromptTime.value = lastPromptTime.value + 3;
   const promptTime = {
