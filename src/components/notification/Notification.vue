@@ -1,5 +1,4 @@
 <template>
-
     {{  $props.notification.showing == true ? this.showNotification($props.notification.text, $props.notification.detail, $props.notification.severity, $props.notification.id) : "" }} 
 </template>
 
@@ -37,7 +36,8 @@ export default {
     }),
     showNotification(summary, detail="", severity="info", id) {
       
-      this.toast.add({ severity: severity, summary: summary, detail: detail, life: 6000});
+      this.toast.add({ severity: severity, summary: summary, detail: detail});
+      this.removeErrorNotification(id);
     },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;

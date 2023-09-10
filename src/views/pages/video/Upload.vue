@@ -123,7 +123,7 @@ export default {
       });
  
       if (!this.fileSizeLimit[fileType]) {
-        alert("not supported");
+       // alert("not supported");
       }
 
       if (fileSize > 1024 * 1024 * this.fileSizeLimit[fileType]) {

@@ -14,7 +14,7 @@
       <!-- Main settings container -->
       <Splitter class="mb-5 editor-container">
         <SplitterPanel :size="30" :minSize="10" class="mw-0">
-          <VideoEvditPrevview :job="job" />
+          <VideoEditPreview :job="job" />
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
@@ -42,7 +42,7 @@
                     :disabled="isVideoProcessing || isJobReady"></Textarea>
                 </div>
 
-                <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                <!----<div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2" :style="{ color: denoisingColor }">Strength: {{ denoisingText
                   }} <div class="help-btn" @click="toggleOverlay"><i class="fa fa-question"></i></div></label>
                   <OverlayPanel ref="op" :showCloseIcon="true">
@@ -52,12 +52,12 @@
                     :disabled="isVideoProcessing" />
                   <Slider v-model="job.denoising" :class="{ denoisingColor }" :min="0.2" :max="0.8" :step="0.025"
                     :disabled="isVideoProcessing" /><br />
-                  <!--  <label class="mb-1 ms-0 mt-2">Debugging controlnet 1 weight:{{ controlnet[0].weight }}</label>
+                    <label class="mb-1 ms-0 mt-2">Debugging controlnet 1 weight:{{ controlnet[0].weight }}</label>
                   <Slider v-model="controlnet[0].weight" :min="0.2" :max="0.8" :step="0.025"/>
                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 2 weight:{{ controlnet[1].weight }}</label>
                   <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
-                -->
-                </div>
+              
+                </div> -->
                 <h3>Camera movement</h3>
                 <div class="horizontal-select mt-2 pt-1 pb-1">
                   <div v-for="(item, itemIndex) in selectableItems" :key="itemIndex" class="selectable-item"
@@ -65,7 +65,7 @@
                     {{ item.label }}
                   </div>
                 </div>
-                <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                <!-- <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
                   <div class="flex  align-items-center justify-content-center">
                     <div class="field-radiobutton mb-0 mr-3">
@@ -77,7 +77,7 @@
                     </InputText>
                   </div>
                 </div>
-
+                -->
               </div>
             </div>
           </form>
@@ -301,11 +301,16 @@ export default {
     }),
 
     isSelected(itemIndex) {
-      return this.selectedItems.includes(itemIndex);
+      const currentItem = this.selectedItems[itemIndex];
+      if (!currentItem) return false;
+      let selected = this.selectedItems.some(
+        (index) => this.selectableItems[index] == currentItem.label
+      );
+      return selected;
     },
     handleItemSelect(itemIndex) {
+      
       const currentItem = this.selectableItems[itemIndex].label;
-      console.log(this.selectedItems);
       this.selectedItems[itemIndex] = this.selectableItems[itemIndex].label;
       
     },

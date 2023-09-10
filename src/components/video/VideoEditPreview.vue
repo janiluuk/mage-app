@@ -38,7 +38,6 @@
 
                     <!-- Original video -->
                 </div>
-                
                 <div v-if="job.status == 'pending' || (!hasPreviewAnimation && !hasPreviewImage)"
                     class="video-preview-container mb-3">
                     <div v-if="job.generator == 'vid2vid'">
@@ -49,8 +48,9 @@
                             </video>
                         </div>
                     </div>
-                    <div v-else-if="job.generator == 'deforum'" class="preview-100 mt-1">
 
+                    <div v-else-if="job.generator == 'deforum'" class="preview-100 mt-1">
+                        
                         <label class="form-label">Original image</label>
                         <div class="preview-100 mt-1">
                             <Image crossorigin="anonymous" 
