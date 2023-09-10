@@ -6,6 +6,7 @@ import VideoLibraryTabs from "@/components/library/VideoLibraryTabs.vue";
 import UserProfile from "@/views/api/profile/UserProfile.vue";
 import VideoEdit from "@/components/video/VideoEdit.vue";
 import Deforum from "@/views/dev/Deforum.vue";
+import PromptTool from "@/components/prompt/PromptTool.vue";
 import Signup from "@/views/pages/auth/Signup.vue";
 import ForgotPassword from "@/views/pages/auth/ForgotPassword.vue";
 import PasswordReset from "@/views/api/PasswordReset.vue";
@@ -186,6 +187,12 @@ const router = createRouter({
           path: "/profile",
           name: "profile",
           component: UserProfile,
+          meta: { requiresAuth: true },
+        },
+        {
+          path: "/prompt",
+          name: "promptTool",
+          component: PromptTool,
           meta: { requiresAuth: true },
         },
         {
