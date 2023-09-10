@@ -61,7 +61,6 @@ const isOutsideClicked = (event) => {
 
 <template>
     <div class="layout-wrapper" :class="containerClass">
-        <notifications-component></notifications-component>
 
         <app-topbar></app-topbar>
         
@@ -69,7 +68,10 @@ const isOutsideClicked = (event) => {
             <app-sidebar></app-sidebar>
         </div>
         <div class="layout-main-container">
+            <NotificationsComponent></NotificationsComponent>
+
             <div class="layout-main">
+
                 <router-view></router-view>
             </div>
             <app-footer></app-footer>

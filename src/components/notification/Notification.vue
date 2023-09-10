@@ -1,10 +1,12 @@
 <template>
-      <Message :severity="notification.variant" @dismissed="onDismissed"  @dismiss-count-down="countDownChanged">{{ notification.text }}</Message>
+
+    {{  $props.notification.showing == true ? this.showNotification($props.notification.text, $props.notification.detail, $props.notification.severity, $props.notification.id) : "" }} 
 </template>
 
 <script>
 import * as notificationActions from '@/store/modules/notification/types/actions';
 import { mapActions } from 'vuex';
+import { useToast } from "primevue/usetoast";
 
 export default {
   name: 'Notification',
@@ -20,15 +22,23 @@ export default {
       id: Number,
       showing: Boolean,
       text: String,
+      detail: String,
       variant: String
     }
+  },
+  setup() {
+    const toast = useToast();
+    return { toast };
   },
 
   methods: {
     ...mapActions('notification', {
-      removeErrorNotification: notificationActions.REMOVE_ERROR_NOTIFICATION
+      removeErrorNotification: notificationActions.REMOVE_ERROR_NOTIFICATION,
     }),
-
+    showNotification(summary, detail="", severity="info", id) {
+      
+      this.toast.add({ severity: severity, summary: summary, detail: detail, life: 6000});
+    },
     countDownChanged(dismissCountDown) {
       this.dismissCountDown = dismissCountDown;
     },
@@ -38,7 +48,9 @@ export default {
     },
 
     onDismissed() {
-      this.removeErrorNotification(this.notification.id);
+      this.removeErrorNotification(this.$props.notification.id);
+
+      this.toast.removeAllGroups();
     }
   },
 

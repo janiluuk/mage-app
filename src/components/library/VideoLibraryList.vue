@@ -94,7 +94,7 @@ export default {
             this.$emit('delete-job', id);
         },
         editJob(id) {
-            this.$router.push(`/edit/${id}`);
+            this.$router.push(`/edit/vid2vid/${id}`);
         },
         retryJob(id) {
             this.$emit('retry-job', id);

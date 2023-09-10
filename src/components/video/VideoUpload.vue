@@ -274,7 +274,6 @@ export default {
   
     async uploadVideo(blob=false, filename=false) {
       this.isLoading = true;
-      let formData = new FormData();
       const getSize = () => this.currentFile.size;
           const readChunk = (chunkSize, offset) =>
             new Promise((resolve, reject) => {
@@ -306,6 +305,9 @@ export default {
           });
       
       if (this.status == 'error') return;
+
+      let formData = new FormData();
+
       if (blob == false) {
         formData.append("video", this.videoFile);
       } else {
@@ -320,7 +322,7 @@ export default {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': 'Bearer ' + this.getToken()
-            }
+            }r
           });
         this.videoUrl = response.data.url;
 

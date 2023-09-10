@@ -5,6 +5,7 @@ import AuthService from "@/services/auth/AuthService";
 import VideoLibraryTabs from "@/components/library/VideoLibraryTabs.vue";
 import UserProfile from "@/views/api/profile/UserProfile.vue";
 import VideoEdit from "@/components/video/VideoEdit.vue";
+import VideoEditDeforum from "@/components/video/VideoEditDeforum.vue";
 import Deforum from "@/views/dev/Deforum.vue";
 import Signup from "@/views/pages/auth/Signup.vue";
 import ForgotPassword from "@/views/pages/auth/ForgotPassword.vue";
@@ -217,10 +218,16 @@ const router = createRouter({
         },
         // Other routes
         {
-          path: "/edit/:id", // :id is a dynamic route parameter for the video ID
+          path: "/edit/vid2vid/:id", // :id is a dynamic route parameter for the video ID
           name: "Video Editor",
           requiresAuth: true,
           component: VideoEdit,
+        },
+        {
+          path: "/edit/deforum/:id", // :id is a dynamic route parameter for the video ID
+          name: "Deforum Editor",
+          requiresAuth: true,
+          component: VideoEditDeforum,
         },
       ],
     },

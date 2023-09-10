@@ -16,7 +16,7 @@
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
-            <div class="md:mb-3 mb-4 pl-3">
+            <div class="col-12 md:mb-2 mb-3 mt-2">
               <label class="form-label mb-1 ms-0 mt-2">Selected Model: <strong>{{ job.model_name }}</strong></label>
               <div class="model-selector-container mt-1">
                 <ModelfileSelector :modelId="job.model_id" :modelName="job.model_name" @update:modelId="updateModelId"
@@ -24,8 +24,10 @@
               </div>
             </div>
             <div class="pl-3">
-
+              
               <div class="p-fluid formgrid grid">
+                <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                </div>
                 <div class="field col-12 md:mb-2 mb-3">
                   <div class="message p-error p-danger">{{ validation.firstError('job.prompt') }}</div>
                   <label class="mb-1 ms-0">Prompt</label>
@@ -38,8 +40,8 @@
                     :disabled="isVideoProcessing || isJobReady"></Textarea>
                 </div>
 
-                <div class="field col-12 md:col-6 md:mb-3 mb-4">
-                  <label class="mb-1 ms-0" :style="{ color: denoisingColor }">Strength: {{ denoisingText
+                <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                  <label class="mb-1 ms-0 mt-2" :style="{ color: denoisingColor }">Strength: {{ denoisingText
                   }} <div class="help-btn" @click="toggleOverlay"><i class="fa fa-question"></i></div></label>
                   <OverlayPanel ref="op" :showCloseIcon="true">
                     <p>Help text goes here</p>
@@ -54,8 +56,8 @@
                   <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
                 -->
                 </div>
-                <div class="field col-12 md:col-6 md:mb-3 mb-4">
-                  <label class="mb-1 ms-0">Seed</label>
+                <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                  <label class="mb-1 ms-0 mt-2">Seed</label>
                   <div class="flex  align-items-center justify-content-center">
                     <div class="field-radiobutton mb-0 mr-3">
                       <InputSwitch v-model="switchValue" :disabled="isVideoProcessing" />
@@ -81,15 +83,15 @@
 <script>
 import ModelfileSelector from '@/components/Modelfile/ModelfileSelector.vue';
 import VideoEditOverlay from '@/components/video/VideoEditOverlay.vue';
-import VideoEditPreview from '@/components/video/VideoEditPreview.vue';
 import VideoEditToolbar from '@/components/video/VideoEditToolbar.vue';
+import VideoEditPreview from '@/components/video/VideoEditPreview.vue';
 import VideoEntry from '@/components/video/VideoEntry.vue';
 import VideoPlayer from '@/components/video/VideoPlayer.vue';
 import showSwal from "@/mixins/showSwal.js";
 import _ from 'lodash';
-import SimpleVueValidator from 'simple-vue3-validator';
 import { ref } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
+import SimpleVueValidator from 'simple-vue3-validator';
 
 const Validator = SimpleVueValidator.Validator;
 
@@ -116,7 +118,7 @@ export default {
       switchValue: false,
       formChanged: false,
       interval: false,
-
+      
       job: {
         status: null,
         model_id: 0,
@@ -127,7 +129,7 @@ export default {
         job_time: 0,
         denoising: 0.4,
         seed: -1,
-
+        
       },
       controlnet: [
         {
@@ -146,7 +148,7 @@ export default {
           pixel_perfect: true,
           loopback: true
         }
-      ],
+      ],  
     };
   },
 
@@ -245,7 +247,7 @@ export default {
       cancel: 'videojobs/cancel',
     }),
     async handlePreviewSubmit(frameCount) {
-
+      
       let validationStatus = await this.$validate()
           .then(function (success) { return success; });
         if (validationStatus) {
@@ -258,7 +260,7 @@ export default {
 
         }
     },
-    async handleFinalizeJob()
+    async handleFinalizeJob() 
     {
       try {
         await this.finalize(this.formAttributes);
@@ -329,3 +331,4 @@ export default {
 <style scoped lang="scss">
 @import '@/assets/vimage.scss';
 </style>
+

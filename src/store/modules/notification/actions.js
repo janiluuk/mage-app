@@ -25,6 +25,7 @@ export default {
   },
 
   [actions.SET_SUCCESS_NOTIFICATION]: async ({ commit }, text) => {
+   
     commit(mutations.SET_NOTIFICATION, {
       id: uuidv4(),
       showing: true,

@@ -154,7 +154,7 @@ const mapGetters = () => {
     )
 }
 const menuClick = (id, event) => {
-    router.push(`/edit/${id}`);
+    router.push(`/edit/vid2vid/${id}`);
 }
 
 const getMenu = (id) => {
@@ -163,7 +163,7 @@ const getMenu = (id) => {
             label: 'Edit',
             icon: 'pi pi-pencil',
             command: (target) => {
-                router.push(`/edit/${id}`);
+                router.push(`/edit/vid2vid/${id}`);
             }
         },
         {

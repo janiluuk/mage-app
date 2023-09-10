@@ -10,7 +10,7 @@
                     <label v-if="isJobReady" class="form-label mb-1 text-primary"><i class="pi pi-check"></i>Completed
                         video. Job duration {{ getFormattedDuration(job.job_time) }}</label>
                 <div class="img-with-overlay mt-1"
-                    v-if="!isJobReady && (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage || isJobSketch)">
+                    v-if="!isJobReady && (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage)">
                     
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
@@ -38,15 +38,27 @@
 
                     <!-- Original video -->
                 </div>
-
+                
                 <div v-if="job.status == 'pending' || (!hasPreviewAnimation && !hasPreviewImage)"
                     class="video-preview-container mb-3">
-                    <label class="form-label">Original video</label>
-                    <div class="preview-100 mt-1">
-                        <video crossorigin="anonymous" ref="videoPlayer" class="video-js" controls preload="auto">
-                            <source v-if="originalUrl" :src="originalUrl" type="video/mp4">
-                        </video>
+                    <div v-if="job.generator == 'vid2vid'">
+                        <label class="form-label">Original video</label>
+                        <div class="preview-100 mt-1">
+                            <video crossorigin="anonymous" ref="videoPlayer" class="video-js" controls preload="auto">
+                                <source v-if="originalUrl" :src="originalUrl" type="video/mp4">
+                            </video>
+                        </div>
                     </div>
+                    <div v-else-if="job.generator == 'deforum'" class="preview-100 mt-1">
+
+                        <label class="form-label">Original image</label>
+                        <div class="preview-100 mt-1">
+                            <Image crossorigin="anonymous" 
+                        :src="job.original_url" @error="imageLoadOnError"
+                        v-bind:alt="pic" class="preview-100" preview />
+                        </div>
+                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -158,7 +170,7 @@ export default {
 .preview-100>video,
 img.preview-100 {
     width: auto;
-    max-width: 100%;
+    max-width: 400px;
     max-height: 400px;
     margin: auto;
 }

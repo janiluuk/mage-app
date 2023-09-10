@@ -10,6 +10,7 @@ axios.interceptors.request.use(
       config.headers['Authorization'] = `Bearer ${AuthService.getToken()}`;      
     }
     config.headers['Accept'] = "application/vnd.api+json"
+    
     return config;
   },
   error => Promise.reject(error)

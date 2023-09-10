@@ -83,18 +83,6 @@
           </div>
         </div>
       </div>
-      <div class="field col-12 md:col-6 md:mb-2 mb-3">
-                  <label class="mb-1 ms-0 mt-2">Seed</label>
-                  <div class="flex align-items-center justify-content-center">
-                    <div class="field-radiobutton mb-0 mr-3">
-                      <InputSwitch v-model="switchValue" :disabled="isVideoProcessing" />
-                      <label>Randomize</label>
-                    </div>
-                    <InputText type="number" v-model.number="job.seed"
-                      :disabled="isVideoProcessing || switchValue == true">
-                    </InputText>
-                  </div>
-                </div>
     </div>
   </div>
 </template>
@@ -149,6 +137,36 @@ const selectableItems = [
 const isSelected = (itemIndex) => {
   return selectedItems.value.includes(itemIndex);
 };
+
+const handleItemSelect = (itemIndex) => {
+  const currentItem = selectableItems[itemIndex].label;
+  const conflictingItem = conflictingItems[currentItem];
+
+  if (currentItem === "None") {
+    selectedItems.value = [0];
+  } else {
+    if (isSelectedItemLabel("None")) {
+      selectedItems.value = selectedItems.value.filter(
+        (index) => selectableItems[index].label !== "None"
+      );
+    }
+    if (conflictingItem && isSelectedItemLabel(conflictingItem)) {
+      selectedItems.value = selectedItems.value.filter(
+        (index) => selectableItems[index].label !== conflictingItem
+      );
+    }
+    selectedItems.value = isSelectedItemLabel(currentItem)
+      ? selectedItems.value.filter((index) => index !== itemIndex)
+      : [...selectedItems.value, itemIndex];
+  }
+};
+
+const isSelectedItemLabel = (label) => {
+  return selectedItems.value.some(
+    (index) => selectableItems[index].label === label
+  );
+};
+
 const job = ref({
   prompt: "",
   negative_prompt: "",

@@ -7,13 +7,13 @@ const initialState = {
   item: {},
   meta: {},
   url: null,
-  progress: {}
+  progress: 0
 };
 export const videojobs = {
     namespaced: true,
     state: initialState,
     actions: {
-        list({commit, dispatch}, params) {
+          list({commit, dispatch}, params) {
             return VideoJobService.list(params)
               .then(({list, meta}) => {
                 meta = { 'page' : { 'total': list.length}};
@@ -43,10 +43,17 @@ export const videojobs = {
             return VideoJobService.destroy(id);
           },
         
-          upload({commit, dispatch}, {item, image}) {
-            return VideoJobService.upload(item, image)
-              .then((url) => {
-                commit('SET_URL', url);
+          upload({commit, dispatch}, item) {
+            commit('SET_PROGRESS', 0);
+            const updateProgress = function( progressEvent ) {
+              commit('SET_PROGRESS', parseInt( Math.round( ( progressEvent.loaded / progressEvent.total ) * 100 )));
+            }.bind(this);
+
+            return VideoJobService.upload(item.attachment, item.type, updateProgress)
+              .then((result) => {
+                commit('SET_URL', result.data.url);
+                commit('SET_PROGRESS', result.data.url);
+                return result.data;
               });
           },
           preview({commit, dispatch}, attributes) {

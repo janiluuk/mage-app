@@ -25,7 +25,7 @@
                     <Column style="width: 15%">
                         <template #header> View </template>
                         <template #body ="slotProps">
-                            <Button icon="pi pi-search" type="button" class="p-button-text" @click="$router.push('/edit/'+slotProps.data.id);"></Button>
+                            <Button icon="pi pi-search" type="button" class="p-button-text" @click="$router.push('/edit/vid2vid/'+slotProps.data.id);"></Button>
                         </template>
                     </Column>
                 </DataTable>

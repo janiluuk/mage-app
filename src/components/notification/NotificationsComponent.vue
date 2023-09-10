@@ -1,15 +1,12 @@
 <template>
-  <div class="notifications-list">
-    <template>
-  <div v-for="notification in notifications">
+    <div v-for="notification in notifications">
       <Notification
         :key="notification.id"
         :notification="notification"
       ></Notification>
     </div>
-    </template>
-  </div>
 </template>
+
 
 <script>
 import { mapGetters } from 'vuex';
