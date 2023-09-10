@@ -138,23 +138,6 @@ const isSelected = (itemIndex) => {
   return selectedItems.value.includes(itemIndex);
 };
 
-const job = ref({
-  prompt: "",
-  negative_prompt: "",
-  prompts: [],
-});
-
-const conflictingItems = {
-  Zoom: "Zoom out",
-  "Zoom out": "Zoom",
-  Up: "Down",
-  Down: "Up",
-  Left: "Right",
-  Right: "Left",
-  "Rotate Clockwise": "Rotate Counter-Clockwise",
-  "Rotate Counter-Clockwise": "Rotate Clockwise",
-};
-
 const handleItemSelect = (itemIndex) => {
   const currentItem = selectableItems[itemIndex].label;
   const conflictingItem = conflictingItems[currentItem];
@@ -182,23 +165,6 @@ const isSelectedItemLabel = (label) => {
   return selectedItems.value.some(
     (index) => selectableItems[index].label === label
   );
-};
-
-const job = ref({
-  prompt: "",
-  negative_prompt: "",
-  prompts: [],
-});
-
-const conflictingItems = {
-  Zoom: "Zoom out",
-  "Zoom out": "Zoom",
-  Up: "Down",
-  Down: "Up",
-  Left: "Right",
-  Right: "Left",
-  "Rotate Clockwise": "Rotate Counter-Clockwise",
-  "Rotate Counter-Clockwise": "Rotate Clockwise",
 };
 
 const job = ref({
