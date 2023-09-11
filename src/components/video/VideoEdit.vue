@@ -24,7 +24,7 @@
               </div>
             </div>
             <div class="pl-3">
-              
+
               <div class="p-fluid formgrid grid">
                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                 </div>
@@ -50,11 +50,11 @@
                     :disabled="isVideoProcessing" />
                   <Slider v-model="job.denoising" :class="{ denoisingColor }" :min="0.2" :max="0.8" :step="0.025"
                     :disabled="isVideoProcessing" /><br/>
-                  <!--  <label class="mb-1 ms-0 mt-2">Debugging controlnet 1 weight:{{ controlnet[0].weight }}</label>
+                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 1 weight:{{ controlnet[0].weight }}</label>
                   <Slider v-model="controlnet[0].weight" :min="0.2" :max="0.8" :step="0.025"/>
                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 2 weight:{{ controlnet[1].weight }}</label>
                   <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
-                -->
+                  {{ job.generation_parameters }}
                 </div>
                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
@@ -83,15 +83,15 @@
 <script>
 import ModelfileSelector from '@/components/Modelfile/ModelfileSelector.vue';
 import VideoEditOverlay from '@/components/video/VideoEditOverlay.vue';
-import VideoEditToolbar from '@/components/video/VideoEditToolbar.vue';
 import VideoEditPreview from '@/components/video/VideoEditPreview.vue';
+import VideoEditToolbar from '@/components/video/VideoEditToolbar.vue';
 import VideoEntry from '@/components/video/VideoEntry.vue';
 import VideoPlayer from '@/components/video/VideoPlayer.vue';
 import showSwal from "@/mixins/showSwal.js";
 import _ from 'lodash';
+import SimpleVueValidator from 'simple-vue3-validator';
 import { ref } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
-import SimpleVueValidator from 'simple-vue3-validator';
 
 const Validator = SimpleVueValidator.Validator;
 
@@ -118,7 +118,7 @@ export default {
       switchValue: false,
       formChanged: false,
       interval: false,
-      
+
       job: {
         status: null,
         model_id: 0,
@@ -129,7 +129,7 @@ export default {
         job_time: 0,
         denoising: 0.4,
         seed: -1,
-        
+
       },
       controlnet: [
         {
@@ -148,7 +148,7 @@ export default {
           pixel_perfect: true,
           loopback: true
         }
-      ],  
+      ],
     };
   },
 
@@ -247,7 +247,7 @@ export default {
       cancel: 'videojobs/cancel',
     }),
     async handlePreviewSubmit(frameCount) {
-      
+
       let validationStatus = await this.$validate()
           .then(function (success) { return success; });
         if (validationStatus) {
@@ -260,7 +260,7 @@ export default {
 
         }
     },
-    async handleFinalizeJob() 
+    async handleFinalizeJob()
     {
       try {
         await this.finalize(this.formAttributes);
@@ -331,4 +331,3 @@ export default {
 <style scoped lang="scss">
 @import '@/assets/vimage.scss';
 </style>
-
