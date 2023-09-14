@@ -27,7 +27,6 @@ export default {
             perPage: 5,
             currentPage: 1,
             perPageOptions: [5, 10, 25, 50],
-            
         },
         menuOptions: [
             {
@@ -79,6 +78,32 @@ export default {
         updateQuery(query) {
             this.$emit.change - query(query);
         },
+        getCollection(statuses) {
+            return _.filter(this.collection, function (item) { return _.includes(statuses, item.status) || !statuses ? item : false });
+        },
+        changeTab(tabIndex) {
+            this.activeTab = tabIndex;
+        },
+        getListDebounced: _.debounce(function () {
+            this.getList();
+        }, 300),
+        getList() {
+            let params = {
+                include: "modelfile,user",
+                ...(this.sort ? { sort: this.sort } : {}),
+                filter: {
+                    ...(this.query ? { name: this.query } : {}),
+                    ...(this.query ? { filename: this.query } : {}),
+                    ...(this.query ? { status: this.query } : {}),
+                    ...(this.generator ? { generator: this.generator } : {}),
+
+                }
+            };
+
+            this.$store.dispatch("videojobs/list", params).then(() => {
+                this.collection = this.$store.getters["videojobs/list"];
+                this.total = this.$store.getters["videojobs/listTotal"];
+            });
         setPagination(pagination) {
             this.$emit.change - pagination(pagination);
         },

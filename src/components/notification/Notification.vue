@@ -36,7 +36,7 @@ export default {
     }),
     showNotification(summary, detail="", severity="info", id) {
       
-      this.toast.add({ severity: severity, summary: summary, detail: detail});
+      this.toast.add({ severity: severity, summary: summary, detail: detail, life: 3000});
       this.removeErrorNotification(id);
     },
     countDownChanged(dismissCountDown) {

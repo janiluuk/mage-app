@@ -87,10 +87,28 @@ const store = useStore();
 const menuRefs = ref([]);
 const sortOrder = ref('-updated_at');
 const sortField = ref(null);
+const generatorFilter = ref(null);
+const queryFilter = ref('');
+const statusFilter = ref('');
+
 const sortOptions = ref([
     { label: 'From latest to oldest', value: '-updated_at' },
     { label: 'From oldest to latest', value: 'updated_at' }
 ]);
+const generatorOptions = ref([
+    { label: 'All', value: '' },
+    { label: 'Video to video', value: 'vid2vid' },
+    { label: 'Text to image', value: 'deforum' }
+
+]);
+const statusOptions = ref([
+    { label: 'All', value: false },
+    { label: 'Finished', value: ['finished'] },
+    { label: 'In the works', value: ['preview', 'processing','cancelled', 'approved']  },
+    { label: 'Failed', value: ['error'] }
+
+]);
+
 sortField.value = '-updated_at';
 
 const getFormattedDuration = (seconds) => {
@@ -224,12 +242,20 @@ const onSortChange = (event) => {
     <div class="library">
         <h3>My Library</h3>
         <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="12" :sortOrder="sortOrder"
-            :sortField="sortField">
+            :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
             <template #header>
                 <div class="grid grid-nogutter">
                     <div class="col-6 text-left">
                         <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
                             placeholder="Sort By Activity" @change="onSortChange($event)" />
+                    </div>
+                    <div class="col-6 text-left">
+                        <Dropdown v-model="generatorFilter" :options="generatorOptions" optionLabel="label"
+                            placeholder="Show all generators" @change="onGeneratorFilterChange($event)" />
+                    </div>
+                    <div class="col-6 text-left">
+                        <Dropdown v-model="statusFilter" :options="statusOptions" optionLabel="label"
+                            placeholder="All states" @change="onStatusFilterChange($event)" />
                     </div>
                     <div class="col-6 text-right">
                         <DataViewLayoutOptions v-model="layout" />
