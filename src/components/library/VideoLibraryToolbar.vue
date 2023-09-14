@@ -19,6 +19,7 @@
             </div>
 </template>
 <script>
+import _ from 'lodash';
 /* eslint-disable */
 export default {
     name: "VideoLibraryToolbar",
@@ -84,9 +85,11 @@ export default {
         changeTab(tabIndex) {
             this.activeTab = tabIndex;
         },
-        getListDebounced: _.debounce(function () {
+        getListDebounced() { 
+            _.debounce(function () {
             this.getList();
-        }, 300),
+            }, 300);
+        },
         getList() {
             let params = {
                 include: "modelfile,user",
@@ -104,6 +107,7 @@ export default {
                 this.collection = this.$store.getters["videojobs/list"];
                 this.total = this.$store.getters["videojobs/listTotal"];
             });
+        },
         setPagination(pagination) {
             this.$emit.change - pagination(pagination);
         },
