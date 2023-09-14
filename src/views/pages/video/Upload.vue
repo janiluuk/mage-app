@@ -5,33 +5,33 @@
     </div>
 
     <div class="banner-item-row">
-      <ProgressBar :value="getProgress" v-if="getProgress > 0"></ProgressBar>
-
-      <div class="banner-item">
+      <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
+        <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
           <img src="/public/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
             <img src="/public/img/mona2.gif" />
           </div>
-          <div class="banner-overlay"  v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
+          <div class="banner-overlay">
             <div class="banner-overlay-icon">
               <i class="pi pi-upload"></i>
             </div>
-            <input class="display-none" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
-
             <div class="banner-overlay-body">
               <div class="banner-overlay-title">Upload an image</div>
               <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif, size less than 2MB</div>
-              
+
             </div>
           </div>
         </div>
+
+        <ProgressBar :value="getProgress" v-if="getProgress > 0"></ProgressBar>
         <div class="banner-content-container">
           <div class="banner-header">Animation </div>
           <div class="banner-description">Turn images into gorgeous animated clips</div>
         </div>
       </div>
-      <div class="banner-item">
+      <div class="banner-item" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
+        <input class="file-input" type="file" accept="video/*" @change="uploadHandler($event, 'vid2vid')">
         <div class="banner-media-container">
           <img src="/public/img/mona.jpg" class="banner-media-main"/>
           <div class="banner-media-secondary">
@@ -40,13 +40,10 @@
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
               <i class="pi pi-upload"></i>
-            </div>        
-
-            <div class="banner-overlay-body" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
-              <input class="display-none" type="file" accept="video/*" @change="uploadHandler($event, 'vid2vid')">
-
+            </div>
+            <div class="banner-overlay-body">
               <div class="banner-overlay-title">Upload a video</div>
-              <div class="banner-overlay-desc">Formats .mp4, size less than 50MB</div>
+              <div class="banner-overlay-desc">Format .mp4, size less than 50MB</div>
             </div>
           </div>
         </div>
@@ -67,8 +64,8 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
 import * as notificationActions from '@/store/modules/notification/types/actions';
+import { mapActions, mapGetters } from 'vuex';
 
 
 export default {
@@ -118,10 +115,10 @@ export default {
       this.setSuccessNotification('Uploading in progress');
       const reader = new FileReader();
 
-      reader.addEventListener('progress', function(progress) { 
+      reader.addEventListener('progress', function(progress) {
           console.log(progress);
       });
- 
+
       if (!this.fileSizeLimit[fileType]) {
        // alert("not supported");
       }
@@ -174,7 +171,7 @@ export default {
 }
 
 .banner-item {
-  cursor: pointer;
+  position: relative;
 
   &.coming-soon {
     display: flex;
@@ -186,6 +183,17 @@ export default {
     background: #eeeeee0a;
     border-radius: 6px;
   }
+}
+
+.file-input {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  opacity: 0;
+  z-index: 3;
+  cursor: pointer;
 }
 
 .banner-icon i {
