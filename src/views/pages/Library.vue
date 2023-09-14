@@ -55,7 +55,6 @@ onMounted(() => {
     intervalId = setInterval(() => {
         getJobList();
     }, 2000);
-    console.log(store.getters['videojobs/listWithoutPending']());
 
 })
 
@@ -87,8 +86,12 @@ const store = useStore();
 const menuRefs = ref([]);
 const sortOrder = ref('-updated_at');
 const sortField = ref(null);
-const generatorFilter = ref(null);
+const generatorFilterKey = ref('');
+const generatorFilter = ref('');
+const queryFilterKey = ref('');
 const queryFilter = ref('');
+
+const statusFilterKey = ref('');
 const statusFilter = ref('');
 
 const sortOptions = ref([
@@ -132,7 +135,12 @@ const getJobList = () => {
         ...(sortField.value ? { sort: sortField.value } : {}),
     };
     store.dispatch("videojobs/list", params).then(() => {
+        if (generatorFilter.value && generatorFilter.value != "") {
+            dataviewValue.value = store.getters["videojobs/filterList"](queryFilter.value, statusFilter.value, generatorFilter.value);
+
+        } else {
         dataviewValue.value = store.getters["videojobs/listWithoutPending"]();
+        }
         total.total = store.getters["videojobs/listTotal"];
     });
 };
@@ -231,6 +239,26 @@ const onSortChange = (event) => {
         sortKey.value = sortValue;
     }
 };
+
+
+const onQueryFilterChange = (event) => {
+    const value = event.target.value;
+    queryFilterKey.value = event.target.value;
+    queryFilter.value = value;
+};
+
+const onGeneratorFilterChange = (event) => {
+    const value = event.value.value;
+    generatorFilterKey.value = event.value;
+    generatorFilter.value = value;
+};
+
+const onStatusFilterChange = (event) => {
+    const value = event.value.value;
+
+    statusFilter.value = value;
+    statusFilterKey.value = event.value;
+};
 </script>
 
 <template>
@@ -245,23 +273,34 @@ const onSortChange = (event) => {
             :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
             <template #header>
                 <div class="grid grid-nogutter">
-                    <div class="col-6 text-left">
-                        <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
-                            placeholder="Sort By Activity" @change="onSortChange($event)" />
-                    </div>
-                    <div class="col-6 text-left">
-                        <Dropdown v-model="generatorFilter" :options="generatorOptions" optionLabel="label"
-                            placeholder="Show all generators" @change="onGeneratorFilterChange($event)" />
-                    </div>
-                    <div class="col-6 text-left">
-                        <Dropdown v-model="statusFilter" :options="statusOptions" optionLabel="label"
-                            placeholder="All states" @change="onStatusFilterChange($event)" />
-                    </div>
+
                     <div class="col-6 text-right">
                         <DataViewLayoutOptions v-model="layout" />
                     </div>
                 </div>
-                <VideoLibraryToolbar></VideoLibraryToolbar>
+                <Menubar :model="menuOptions">
+                    <template #start>
+                        <div class="col-6 text-left">
+                        <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
+                            placeholder="Sort By Activity" @change="onSortChange($event)" />
+                    </div>
+                    <div class="col-6 text-left">
+                        <Dropdown v-model="generatorFilterKey" :options="generatorOptions" optionLabel="label"
+                            placeholder="Show all generators" @change="onGeneratorFilterChange($event)" />
+                    </div>
+                    <div class="col-6 text-left">
+                        <Dropdown v-model="statusFilterKey" :options="statusOptions" optionLabel="label"
+                            placeholder="All states" @change="onStatusFilterChange($event)" />
+                    </div>
+                    </template>
+                    <template #end>
+
+                        <span class="p-input-icon-left">
+                            <i class="pi pi-search" />
+                            <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
+                        </span>
+                    </template>
+                </Menubar>
 
             </template>
             <template #list="slotProps">

@@ -152,7 +152,7 @@ export const videojobs = {
       var list = state.list;
       if (list.length <1) return [];
 
-      if (query) {
+      if (query && query != '') {
         list = list.filter((job) => {
           return (
             job.prompt.toLowerCase().includes(query.toLowerCase()) ||
@@ -162,11 +162,15 @@ export const videojobs = {
       }
       
       if (status.length > 0) {
-        list = getters.filterByStatus(status);
+        list = list.filter((job) => {
+          return status.includes(job.status.toLowerCase());
+        });
       }
 
-      if (generator) {
-        list = getters.filterByGenerator(generator);
+      if (generator && generator != "") {
+        list = list.filter((job) => {
+          return job.generator.toLowerCase().includes(generator.toLowerCase());
+        });
       }
 
       return list;

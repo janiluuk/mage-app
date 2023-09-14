@@ -2,11 +2,7 @@
         <div class="col-12">
                 <Menubar :model="menuOptions">
                     <template #start>
-                        <Dropdown v-model="pagination.perPage" name="pages">
-                            <option v-for="item in pagination.perPageOptions" :key="item" :label="item" :value="item">
-                                {{ item }}
-                            </option>
-                        </Dropdown>
+
                     </template>
                     <template #end>
 
