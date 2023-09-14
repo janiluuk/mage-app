@@ -24,7 +24,7 @@
                         class="w-100 preview-100 img-with-blur"
                         :src="job.preview_img.replace('https://api.dudeisland.eu', '')" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
-                        <div v-if="(!isJobReady && job.generator == 'deforum' && (!hasPreviewAnimation && !hasPreviewImage && isVideoProcessing))" class="preview-100 mt-1">
+                        <div v-if="(!isJobReady && job.generator == 'deforum' && (job.operation == 'finalize' || (!hasPreviewAnimation && !hasPreviewImage && isVideoProcessing)))" class="preview-100 mt-1">
 
                     <label class="form-label">Original image</label>
                     <div class="preview-100 mt-1">
