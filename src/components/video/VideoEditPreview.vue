@@ -10,26 +10,26 @@
                 <label v-if="isJobReady" class="form-label mb-1 text-primary"><i class="pi pi-check"></i>Completed
                     video. Job duration {{ getFormattedDuration(job.job_time) }}</label>
                 <div class="img-with-overlay mt-1"
-                    v-if="!isJobReady && (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage)">
+                    v-if="!isJobReady && (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage || job.generator == 'deforum')">
 
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewAnimation && (job.operation == 'animation' || (job.operation == 'preview' && !hasPreviewImage))"
+                        v-if="hasPreviewAnimation && (job.operation == 'animation') || (job.operation == 'preview' && !hasPreviewImage)"
                         class="w-100 preview-100 text-center img-with-blur" :src="getPreviewAnimation"
                         @error="imageLoadOnError" v-bind:alt="animation" preview />
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewImage && (job.operation != 'animation' || (job.operation == 'animation' && !hasPreviewAnimation))"
+                        v-if="hasPreviewImage && !hasPreviewAnimation && (job.operation != 'animation' || (job.operation == 'animation' && !hasPreviewAnimation))"
                         class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
-                        <div v-if="!isJobReady && job.generator == 'deforum'" class="preview-100 mt-1">
+                        <div v-if="(!isJobReady && job.generator == 'deforum' && !hasPreviewAnimation && !hasPreviewImage) || isVideoProcessing" class="preview-100 mt-1">
 
-<label class="form-label">Original image</label>
-<div class="preview-100 mt-1">
-    <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
-        v-bind:alt="pic" class="preview-100" preview />
-</div>
-</div>
+                    <label class="form-label">Original image</label>
+                    <div class="preview-100 mt-1">
+                        <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
+                            v-bind:alt="pic" class="preview-100" preview />
+                    </div>
+                    </div>
                     <VideoEditProgress :job="job"></VideoEditProgress>
                 </div>
                 <!-- preview box end-->

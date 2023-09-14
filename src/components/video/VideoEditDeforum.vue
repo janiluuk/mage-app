@@ -289,7 +289,7 @@ export default {
         prompt: this.job.prompt,
         negative_prompt: this.job.negative_prompt,
         videoId: this.videoId,
-        controlnet: this.controlnet
+        length: this.job.length
       };
     }
   },
@@ -338,7 +338,6 @@ export default {
         var options = _.clone(this.formAttributes);
         options.frameCount = frameCount;
         await this.previewDeforum(options);
-        this.switchValue = 0;
 
       }
     },
