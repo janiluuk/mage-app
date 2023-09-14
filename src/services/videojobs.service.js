@@ -136,4 +136,11 @@ export default {
   async preview(params) {
     return await requestService.post("/submit", params);
   },
+  async previewDeforum(params) {
+    return await requestService.post("/submitDeforum", params);
+  },
+  async finalizeDeforum(params) {
+    return await requestService.post("/finalizeDeforum", params);
+  },
+
 };

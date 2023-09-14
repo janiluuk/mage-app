@@ -133,6 +133,7 @@ export default {
         status: null,
         model_id: 0,
         operation: 'preview',
+        preset: 'zoom',
         cfg_scale: 7,
         progress: 1,
         estimated_time_left: 0,
@@ -281,6 +282,7 @@ export default {
 
       return {
         modelId: this.job.model_id,
+        preset: this.job.preset,
         denoising: this.job.denoising,
         cfgScale: this.job.cfg_scale,
         seed: this.switchValue ? -1 : this.job.seed,
@@ -295,8 +297,8 @@ export default {
   methods: {
     ...mapActions({
       fetchJob: 'videojobs/get',
-      finalize: 'videojobs/finalize',
-      preview: 'videojobs/preview',
+      finalizeDeforum: 'videojobs/finalizeDeforum',
+      previewDeforum: 'videojobs/previewDeforum',
       cancel: 'videojobs/cancel',
     }),
 
@@ -335,14 +337,14 @@ export default {
         this.job.status = 'processing';
         var options = _.clone(this.formAttributes);
         options.frameCount = frameCount;
-        await this.preview(options);
+        await this.previewDeforum(options);
         this.switchValue = 0;
 
       }
     },
     async handleFinalizeJob() {
       try {
-        await this.finalize(this.formAttributes);
+        await this.finalizeDeforum(this.formAttributes);
         this.job.status = 'approved';
         this.job.operation = 'finalize';
       } catch (error) {

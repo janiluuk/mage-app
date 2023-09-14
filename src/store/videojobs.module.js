@@ -76,6 +76,16 @@ export const videojobs = {
         //commit('SET_URL', url);
       });
     },
+    previewDeforum({ commit, dispatch }, attributes) {
+      return VideoJobService.previewDeforum(attributes).then((url) => {
+        //commit('SET_URL', url);
+      });
+    },
+    finalizeDeforum({ commit, dispatch }, attributes) {
+      return VideoJobService.finalizeDeforum(attributes).then((url) => {
+        //commit('SET_URL', url);
+      });
+    },
     cancel({ commit, dispatch }, id) {
       return VideoJobService.cancelJob(id).then((response) => {
         commit("SET_PROGRESS", 0);
@@ -171,7 +181,7 @@ export const videojobs = {
         if (status == 'error') {
             statusFilter = ['error']
         }
-        list = list.filter((job) => {
+          list = list.filter((job) => {
           return statusFilter.includes(job.status.toLowerCase());
         });
       }
