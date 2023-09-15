@@ -54,7 +54,7 @@
                   <Slider v-model="controlnet[0].weight" :min="0.2" :max="0.8" :step="0.025"/>
                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 2 weight:{{ controlnet[1].weight }}</label>
                   <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
-                  {{ job.generation_parameters }}
+            
                 </div>
                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
