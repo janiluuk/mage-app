@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { mapState } from 'vuex';
 import VideoLibraryToolbar from '@/components/library/VideoLibraryToolbar.vue';
+import RecentJobs from '@/pages/Dashboard/RecentJobs.vue';
 
 
 const toast = useToast();
@@ -275,7 +276,7 @@ const onStatusFilterChange = (event) => {
     </div>
     <div class="library">
         <h3>My Library</h3>
-        <DataView :value="dataviewValue" :layout="layout" :paginator="true" :rows="12" :sortOrder="sortOrder"
+        <DataView :value="dataviewValue" :layout="layout" :paginator="layout =='grid'" :rows="12" :sortOrder="sortOrder"
             :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
             <template #header>
                 <div class="grid grid-nogutter">
@@ -309,57 +310,7 @@ const onStatusFilterChange = (event) => {
                 </Menubar>
 
             </template>
-            <template #list="slotProps">
-                <div class="col-12">
-                    <div class="flex flex-column md:flex-row align-items-center p-2 w-full">
-                        <div class="flex mjustify-content-left">
-
-                            <Image :src="slotProps.data.preview_animation" :alt="slotProps.data.preview_animation"
-                                class="my-4 md:my-0 shadow-2 mr-5" width="250" preview />
-                        </div>
-                        <div class="flex-1 text-center md:text-left">
-                            <div class="font-bold text-2xl">{{ slotProps.data.prompt }}</div>
-                            <div class="mb-3">{{ slotProps.data.modelfile.name }}</div>
-                            <div class="flex align-items-right">
-                                <span :class="'product-badge status-' + slotProps.data.status.toLowerCase()">{{
-                                    slotProps.data.status }}</span>
-                                <ProgressBar v-if="slotProps.data.status == 'processing'" :value="slotProps.data.progress"
-                                    class="text-xs overlay-progress-bar"></ProgressBar>
-
-                            </div>
-                        </div>
-
-                        <div
-                            class="flex flex-row md:flex-column justify-content-between w-full md:w-auto align-items-left md:align-items-beginning mt-5 md:mt-0">
-                            <span class="text-2xl font-semibold mb-2 align-self-left md:align-left">
-                                <i class="pi pi-clock"></i>
-                                {{ getFormattedDuration(slotProps.data.length) }}</span>
-                            {{ addInputRef(slotProps.data.id) }}
-                            <SplitButton v-if="slotProps.data.status == 'finished'"
-                                :label="slotProps.data.status == 'finished' ? 'View' : 'Nope'" icon="pi pi-search"
-                                :model="getMenu(slotProps.data.id, slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
-                                class="p-button-primary"></SplitButton>
-                            <SplitButton v-if="slotProps.data.status == 'error'" label="Edit" icon="pi pi-sync"
-                                :model="getMenu(slotProps.data.id,  slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
-                                class="p-button-danger">
-                            </SplitButton>
-                            <SplitButton v-if="slotProps.data.status == 'preview'" label="Edit" icon="pi pi-save"
-                                :model="getMenu(slotProps.data.id,  slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
-                                class="p-button-warning">
-                            </SplitButton>
-                            <SplitButton v-if="slotProps.data.status == 'pending'" label="Edit" icon="pi pi-pen"
-                                :model="getMenu(slotProps.data.id, this.$router)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
-                                class="p-button-info"></SplitButton>
-                            <SplitButton v-if="slotProps.data.status == 'processing' || slotProps.data.status == 'approved'"
-                                label="Cancel" icon="pi pi-times" :model="getMenu(slotProps.data.id)"
-                                @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="p-button-danger p-button-sm"></SplitButton>
-
-                            <ConfirmPopup></ConfirmPopup>
-                            <Toast />
-                        </div>
-                    </div>
-                </div>
-            </template>
+           
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
@@ -429,6 +380,7 @@ const onStatusFilterChange = (event) => {
                 </div>
             </template>
         </DataView>
+        <RecentJobs v-if="layout !='grid'"></RecentJobs>
     </div>
 </template>
 

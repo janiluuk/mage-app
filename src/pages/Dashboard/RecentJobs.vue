@@ -1,6 +1,5 @@
 <template>
 <div class="card">
-                <h5>Recent Projects</h5>
                 <DataTable :value="jobs" :rows="5" :paginator="true" responsiveLayout="scroll">
                     <Column style="width: 15%">
                         <template #header> Image </template>
