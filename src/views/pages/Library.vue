@@ -188,9 +188,8 @@ const getMenu = (id, type) => {
             icon: 'pi pi-pencil',
             command: (target) => {
                 router.push(`/edit/${type}/${id}`);
-            }
-        },
-        {
+            },
+        },{
             label: 'Delete',
             icon: 'pi pi-times',
             command: (target) => {
@@ -314,7 +313,7 @@ const onStatusFilterChange = (event) => {
                     <div class="flex flex-column md:flex-row align-items-center p-2 w-full">
                         <div class="flex mjustify-content-left">
 
-                            <Image :src="slotProps.data.preview_animation" :alt="slotProps.data.preview_animation"
+                            <Image crossorigin="anonymous" :src="slotProps.data.preview_animation" :alt="slotProps.data.preview_animation"
                                 class="my-4 md:my-0 shadow-2 mr-5" width="250" preview />
                         </div>
                         <div class="flex-1 text-center md:text-left">
@@ -386,12 +385,12 @@ const onStatusFilterChange = (event) => {
 
                                 <img crossorigin="anonymous" class="bottom"
                                         v-if="slotProps.data.id != 1171 && slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
-                                    v-lazy="{ src: slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img, lifecycle: lazyOptions.lifecycle }"
+                                    v-lazy="{ src: slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img || '', lifecycle: lazyOptions.lifecycle }"
                                     width="100" />
                             </span>
 
                             <span class="card-thumbnail-image-fill">
-                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img :  slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img.replace('https://api.dudeisland.eu','') :  slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                             </span>
 

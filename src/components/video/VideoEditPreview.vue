@@ -7,8 +7,22 @@
 
                 <!-- progress box start -->
                 <label v-if="!isJobReady && !isJobSketch" class="form-label mb-1">Preview</label>
-                <label v-if="isJobReady" class="form-label mb-1 text-primary"><i class="pi pi-check"></i>Completed
-                    video. Job duration {{ getFormattedDuration(job.job_time) }}</label>
+                    <label v-if="isJobReady" class="form-label mb-1 text-primary"><i class="pi pi-check"></i>Completed
+                        video. Job duration {{ getFormattedDuration(job.job_time) }}</label>
+                <div class="img-with-overlay mt-1"
+                    v-if="!isJobReady && (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage)">
+                    
+                    <Image crossorigin="anonymous"
+                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
+                        v-if="hasPreviewAnimation && (job.operation == 'animation' || (job.operation == 'preview' && !hasPreviewImage))"
+                        class="w-100 preview-100 text-center img-with-blur"
+                        :src="job.preview_animation.replace('https://api.dudeisland.eu', '')" @error="imageLoadOnError"
+                        v-bind:alt="animation" preview />
+                    <Image
+                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
+                        v-if="hasPreviewImage && (job.operation != 'animation' || (job.operation == 'animation' && !hasPreviewAnimation))"
+                        class="w-100 preview-100 img-with-blur"
+                        :src="job.preview_img ? job.preview_img.replace('https://api.dudeisland.eu', '') : ''" @error="imageLoadOnError"
 
                     <div class="img-with-overlay mt-1"
                     v-if="!isJobReady || (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage || job.generator == 'deforum')">
@@ -23,7 +37,7 @@
                         v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
                         class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
-                        <div v-if="(!isJobReady && job.generator == 'deforum'  || (!hasPreviewAnimation && !hasPreviewImage))" class="preview-100 mt-1">
+                        <div v-if="(!isJobReady && job.generator == 'deforum'  || showOriginal == true )" class="preview-100 mt-1">
                     <label class="form-label">Original image</label>
                     <div class="preview-100 mt-1">
                         <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
@@ -37,16 +51,25 @@
 
                 <div class="text-center position-relative w-100 mt-1" v-if="isJobReady">
                     <vue-plyr :options="options">
+<<<<<<< HEAD
                         <video controls crossorigin="anonymous" playsinline
                             :data-poster="job.preview_img.replace('https://api.dudeisland.eu', '')">
+=======
+                        <video controls crossorigin="anonymous" playsinline :data-poster="job.preview_img ? job.preview_img.replace('https://api.dudeisland.eu', '') : ''">
+>>>>>>> c7e57d1 (Fixes)
                             <source size="720" crossorigin="anonymous" :src="job.url" type="video/mp4" />
                         </video>
                     </vue-plyr>
 
                     <!-- Original video -->
                 </div>
+<<<<<<< HEAD
 
                 <div v-if="job.status == 'pending' || showOriginal == true"
+=======
+                
+                <div v-if="job.status == 'pending' || (!hasPreviewAnimation && !hasPreviewImage) || showOriginal"
+>>>>>>> c7e57d1 (Fixes)
                     class="video-preview-container mb-3">
                     <div v-if="job.generator == 'vid2vid'">
                         <label class="form-label">Original video</label>

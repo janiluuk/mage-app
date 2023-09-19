@@ -5,17 +5,17 @@
                     <Column style="width: 15%">
                         <template #header> Image </template>
                         <template #body="slotProps">
-                            <img  crossorigin="anonymous" :src="slotProps.data.preview_img" :alt="slotProps.preview_img" width="50" class="shadow-2" />
+                            <img crossorigin="anonymous" :src="slotProps.data.preview_img" :alt="slotProps.preview_img" width="50" class="shadow-2" />
                         </template>
                     </Column>
                     <Column field="generator" header="Type" :sortable="true" style="width: 35%">
                         <template #body="slotProps">
-                            Img2Img
+                            {{ slotProps.data.generator }}
                         </template>
 
                     </Column>
 
-                    <Column field="original_filename" header="Name" :sortable="true" style="width: 35%"></Column>
+                    <Column field="original_filename" header="Name" :sortable="true" style="max-width: 25%"></Column>
                     <Column field="slotProps.data.progress" header="Progress" :sortable="true" style="width: 35%">
                        
                         <template #body="slotProps">
@@ -25,7 +25,7 @@
                     <Column style="width: 15%">
                         <template #header> View </template>
                         <template #body ="slotProps">
-                            <Button icon="pi pi-search" type="button" class="p-button-text" @click="$router.push('/edit/vid2vid/'+slotProps.data.id);"></Button>
+                            <Button icon="pi pi-search" type="button" class="p-button-text" @click="$router.push('/edit/'+ slotProps.data.generator + '/'+slotProps.data.id);"></Button>
                         </template>
                     </Column>
                 </DataTable>

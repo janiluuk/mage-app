@@ -60,6 +60,10 @@ export default ({ mode }) => {
           target: 'https://api.dudeisland.eu',
           changeOrigin: true,
         },
+        '/files': {
+          target: 'https://api.dudeisland.eu',
+          changeOrigin: true,
+        },
 
       },
       cors: { origin: "*" },

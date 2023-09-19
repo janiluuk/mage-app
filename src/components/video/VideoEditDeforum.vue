@@ -7,14 +7,14 @@
       v-if="job.status == 'error' || errorMessage != ''">
       <span class="text-primary text-lg">{{ errorMessage }}</span>
     </div>
-    <VideoEditToolbar :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob"
+    <VideoEditToolbar :showOriginal="showOriginal" @submit:showoriginal="onShowOriginal" :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob"
       @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit"
       @submit:finalize="handleFinalizeJob" />
     <div class="editor" v-if="job.status != null">
       <!-- Main settings container -->
       <Splitter class="mb-5 editor-container">
         <SplitterPanel :size="30" :minSize="10" class="mw-0">
-          <VideoEditPreview :job="job" />
+          <VideoEditPreview :job="job" :showOriginal="showOriginal"/>
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
@@ -131,6 +131,7 @@ export default {
       videoId: null,
       overlayActive: false,
       isLoading: false,
+      showOriginal: false,
       isFetching: false,
       errorMessage: '',
       switchValue: false,
@@ -299,7 +300,8 @@ export default {
         prompt: this.job.prompt,
         negative_prompt: this.job.negative_prompt,
         videoId: this.videoId,
-        length: this.job.length ? this.job.length : this.job.finallength
+        controlnet: this.controlnet,
+        length: this.job.finallength ? this.job.finallength : this.job.length
       };
     }
   },
@@ -311,7 +313,9 @@ export default {
       previewDeforum: 'videojobs/previewDeforum',
       cancel: 'videojobs/cancel',
     }),
-
+    onShowOriginal() {
+      this.showOriginal = !this.showOriginal
+    },
     isSelected(itemIndex) {
       const currentItem = this.selectedItems[itemIndex];
       if (!currentItem) return false;
