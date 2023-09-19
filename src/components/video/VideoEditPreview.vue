@@ -2,33 +2,26 @@
     <div class="pr-3" v-if="job.status != ''">
         <!-- Sample video -->
         <div class="sample-container mb-1">
+            <Galleria :value="getImages" :responsiveOptions="responsiveOptions" :numVisible="5"
+                containerStyle="max-width: 640px">
+                <template #item="slotProps">
 
+                    <img :src="slotProps.item.url" :alt="slotProps.item.url" style="width: 100%" />
+                </template>
+                <template #thumbnail="slotProps">
+
+                    <img :src="slotProps.item.url" :alt="slotProps.item.url" />
+                </template>
+            </Galleria>
             <div class="w-100 sample-area p-3 text-center">
-
                 <!-- progress box start -->
-                <label v-if="!isJobReady && !isJobSketch" class="form-label mb-1">Preview</label>
-                <label v-if="isJobReady" class="form-label mb-1 text-primary"><i class="pi pi-check"></i>Completed
-                    video. Job duration {{ getFormattedDuration(job.job_time) }}</label>
 
-                    <div class="img-with-overlay mt-1"
+                <div class="img-with-overlay mt-1"
                     v-if="!isJobReady || (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage || job.generator == 'deforum')">
 
-                    <Image crossorigin="anonymous"
-                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewAnimation || (job.operation == 'animation' && hasPreviewAnimation)"
-                        class="w-100 preview-100 text-center img-with-blur" :src="getPreviewAnimation"
-                        @error="imageLoadOnError" v-bind:alt="animation" preview />
-                    <Image crossorigin="anonymous"
-                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
-                        class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
-                        v-bind:alt="pic" preview />
-                        <div v-if="(!isJobReady && job.generator == 'deforum'  || (!hasPreviewAnimation && !hasPreviewImage))" class="preview-100 mt-1">
-                    <label class="form-label">Original image</label>
-                    <div class="preview-100 mt-1">
-                        <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
-                            v-bind:alt="pic" class="preview-100" preview />
-                    </div>
+
+                    <div v-if="(!isJobReady && job.generator == 'deforum' && showOriginal)" class="preview-100 mt-1">
+
                     </div>
                     <VideoEditProgress :job="job"></VideoEditProgress>
                 </div>
@@ -45,22 +38,30 @@
                     <!-- Original video -->
                 </div>
 
-                <div v-if="job.status == 'pending' || showOriginal == true"
-                    class="video-preview-container mb-3">
-                    <div v-if="job.generator == 'vid2vid'">
-                        <label class="form-label">Original video</label>
-                        <div class="preview-100 mt-1">
-                            <video crossorigin="anonymous" ref="videoPlayer" class="video-js" controls preload="auto">
-                                <source v-if="originalUrl" :src="originalUrl" type="video/mp4">
-                            </video>
-                        </div>
-                    </div>
 
-
-
-                </div>
             </div>
         </div>
+
+
+
+        <div v-if="job.generator == 'deforum' && (job.status == 'pending' || showOriginal == true)">
+
+            <label class="form-label">Original image</label>
+            <div class="preview-100 mt-1">
+                <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError" v-bind:alt="pic"
+                    class="preview-100" preview />
+            </div>
+        </div>
+        <div v-else-if="job.generator == 'vid2vid' && (job.status == 'pending' || showOriginal == true)"
+            class="video-preview-container mb-3">
+            <label class="form-label">Original video</label>
+            <div class="preview-100 mt-1">
+                <video crossorigin="anonymous" ref="videoPlayer" class="video-js" controls preload="auto">
+                    <source v-if="originalUrl" :src="originalUrl" type="video/mp4">
+                </video>
+            </div>
+        </div>
+
     </div>
 </template>
 <script>
@@ -89,6 +90,17 @@ export default {
         },
         isJobSketch() {
             return (this.$props.job.status === 'pending');
+        },
+        getImages() {
+            let images = [];
+
+            if (this.hasPreviewAnimation) images.push({ url: this.$props.job.preview_animation });
+            if (this.hasPreviewImage) images.push({ url: this.$props.job.preview_img });
+            if (this.$props.job.generator == 'deforum') images.push({ url: this.$props.job.original_url });
+            else
+                images.push({ url: this.$props.job.thumbmnail });
+
+            return images;
         },
         isAnimationProcessing() {
             return this.isVideoProcessing && this.$props.job.operation == 'animation';
