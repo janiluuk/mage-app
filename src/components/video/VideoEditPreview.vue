@@ -15,12 +15,12 @@
 
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewAnimation && (job.operation == 'animation' || !hasPreviewImage)"
+                        v-if="hasPreviewAnimation || (job.operation == 'animation' && hasPreviewAnimation)"
                         class="w-100 preview-100 text-center img-with-blur" :src="getPreviewAnimation"
                         @error="imageLoadOnError" v-bind:alt="animation" preview />
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewImage && (job.operation != 'animation') || (job.operation == 'animation' && !hasPreviewAnimation) || !hasPreviewAnimation"
+                        v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
                         class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
                         <div v-if="(!isJobReady && job.generator == 'deforum'  || (!hasPreviewAnimation && !hasPreviewImage))" class="preview-100 mt-1">
@@ -45,7 +45,7 @@
                     <!-- Original video -->
                 </div>
 
-                <div v-if="job.status == 'pending'"
+                <div v-if="job.status == 'pending' || showOriginal == true"
                     class="video-preview-container mb-3">
                     <div v-if="job.generator == 'vid2vid'">
                         <label class="form-label">Original video</label>
@@ -80,6 +80,7 @@ export default {
     },
     props: {
         job: { type: Object, default: {} },
+        showOriginal: { type: Boolean, default: false }
     },
     computed: {
         imageLoadOnError(e) {

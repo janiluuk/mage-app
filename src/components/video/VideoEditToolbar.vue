@@ -5,8 +5,11 @@
             <Button class="p-button-plain p-button-text" icon="pi pi-bars" label="Options"
                 @click.prevent="toggleMenu(job.id, $event)"></Button>
             <ConfirmPopup></ConfirmPopup>
-            <Button type="button" class="p-button-success" icon="pi pi-image" label="Wizard"
+            <Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
+            @click="$emit('submit:showoriginal', 1)" />
+            <Button type="button" class="ml-5 p-button-success" icon="pi pi-image" label="Wizard"
             @click="$emit('submit:overlay', 1)" />
+
             <Toast />
             <VideoInfoDialog :job="job" :infodialog="infodialog" @dialog:close="closeInfoDialog"></VideoInfoDialog>
         </template>
@@ -84,6 +87,7 @@ export default {
     props: {
         job: { type: Object, default: { status: '' } },
         formChanged: { type: Boolean, default: false },
+        showOriginal: { type: Boolean, default: false }
     },
     computed: {
         isJobSketch() {
