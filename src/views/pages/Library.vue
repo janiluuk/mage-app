@@ -177,17 +177,17 @@ const mapGetters = () => {
         )
     )
 }
-const menuClick = (id, event) => {
-    router.push(`/edit/vid2vid/${id}`);
+const menuClick = (id, type="vid2vid", event) => {
+    router.push(`/edit/${type}/${id}`);
 }
 
-const getMenu = (id) => {
+const getMenu = (id, type) => {
     return [
         {
             label: 'Edit',
             icon: 'pi pi-pencil',
             command: (target) => {
-                router.push(`/edit/vid2vid/${id}`);
+                router.push(`/edit/${type}/${id}`);
             }
         },
         {
@@ -337,22 +337,22 @@ const onStatusFilterChange = (event) => {
                             {{ addInputRef(slotProps.data.id) }}
                             <SplitButton v-if="slotProps.data.status == 'finished'"
                                 :label="slotProps.data.status == 'finished' ? 'View' : 'Nope'" icon="pi pi-search"
-                                :model="getMenu(slotProps.data.id)" @click="menuClick(slotProps.data.id)"
+                                :model="getMenu(slotProps.data.id, slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
                                 class="p-button-primary"></SplitButton>
                             <SplitButton v-if="slotProps.data.status == 'error'" label="Edit" icon="pi pi-sync"
-                                :model="getMenu(slotProps.data.id)" @click="menuClick(slotProps.data.id)"
+                                :model="getMenu(slotProps.data.id,  slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
                                 class="p-button-danger">
                             </SplitButton>
                             <SplitButton v-if="slotProps.data.status == 'preview'" label="Edit" icon="pi pi-save"
-                                :model="getMenu(slotProps.data.id)" @click="menuClick(slotProps.data.id)"
+                                :model="getMenu(slotProps.data.id,  slotProps.data.generator)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
                                 class="p-button-warning">
                             </SplitButton>
                             <SplitButton v-if="slotProps.data.status == 'pending'" label="Edit" icon="pi pi-pen"
-                                :model="getMenu(slotProps.data.id, this.$router)" @click="menuClick(slotProps.data.id)"
+                                :model="getMenu(slotProps.data.id, this.$router)" @click="menuClick(slotProps.data.id, slotProps.data.generator)"
                                 class="p-button-info"></SplitButton>
                             <SplitButton v-if="slotProps.data.status == 'processing' || slotProps.data.status == 'approved'"
                                 label="Cancel" icon="pi pi-times" :model="getMenu(slotProps.data.id)"
-                                @click="menuClick(slotProps.data.id)" class="p-button-danger p-button-sm"></SplitButton>
+                                @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="p-button-danger p-button-sm"></SplitButton>
 
                             <ConfirmPopup></ConfirmPopup>
                             <Toast />
@@ -363,8 +363,8 @@ const onStatusFilterChange = (event) => {
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
-                    <div @click="menuClick(slotProps.data.id)" class="grid-item m-1">
-                        <div :class="{ 'has-preview': slotProps.data.preview_animation && slotProps.data.preview_animation.includes('png') }"
+                    <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
+                        <div :class="{ 'has-preview': slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif')) }"
                             class="card-thumbnail-container position-relative mb-2">
                             <div class="card-thumbnail-info flex align-items-end justify-content-between m-2">
                                 <div class="flex align-items-center">
@@ -380,18 +380,18 @@ const onStatusFilterChange = (event) => {
 
                             <span class="card-thumbnail-image">
                                 <img crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
-                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                                 <img  crossorigin="anonymous" class="top" v-if="slotProps.data.id == 1171" lazy="loading" width="100" />
 
                                 <img crossorigin="anonymous" class="bottom"
-                                        v-if="slotProps.data.id != 1171 && slotProps.data.preview_animation && slotProps.data.preview_animation.includes('png')"
+                                        v-if="slotProps.data.id != 1171 && slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
                                     v-lazy="{ src: slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img, lifecycle: lazyOptions.lifecycle }"
                                     width="100" />
                             </span>
 
                             <span class="card-thumbnail-image-fill">
-                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img :  slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                             </span>
 
@@ -412,10 +412,10 @@ const onStatusFilterChange = (event) => {
                                 </div>
                                 <div class="flex align-items-center justify-content-between">
 
-                                    <Menu :popup="true" :model="getMenu(slotProps.data.id)"
+                                    <Menu :popup="true" :model="getMenu(slotProps.data.id,  slotProps.data.generator)"
                                         :ref="(el) => { return addInputRef(el, slotProps.data.id); }" />
 
-                                    <Button icon="pi pi-bars" @click.prevent="toggleMenu(slotProps.data.id, $event)"
+                                    <Button icon="pi pi-bars" @click.prevent="toggleMenu(slotProps.data.id, $event,)"
                                         class="p-button-icon-only p-button-rounded p-button-secondary p-button-text p-button-sm"></Button>
 
 
