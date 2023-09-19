@@ -16,7 +16,7 @@
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
                         v-if="hasPreviewAnimation && (job.operation == 'animation' || (job.operation == 'preview' && !hasPreviewImage))"
                         class="w-100 preview-100 text-center img-with-blur"
-                        :src="job.preview_animation.replace('https://api.dudeisland.eu', '')" @error="imageLoadOnError"
+                        :src="job.preview_animation ? job.preview_animation.replace('https://api.dudeisland.eu', '') : ''" @error="imageLoadOnError"
                         v-bind:alt="animation" preview />
                     <Image
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
@@ -26,16 +26,7 @@
                     />
                     <div class="img-with-overlay mt-1" v-if="!isJobReady || (isJobApproved || isVideoProcessing || hasPreviewAnimation || hasPreviewImage || job.generator == 'deforum')">
 
-                    <Image crossorigin="anonymous"
-                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewAnimation || (job.operation == 'animation' && hasPreviewAnimation)"
-                        class="w-100 preview-100 text-center img-with-blur" :src="getPreviewAnimation"
-                        @error="imageLoadOnError" v-bind:alt="animation" preview />
-                    <Image crossorigin="anonymous"
-                        :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
-                        class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
-                        v-bind:alt="pic" preview />
+                   
                         <div v-if="(!isJobReady && job.generator == 'deforum'  || showOriginal == true )" class="preview-100 mt-1">
                     <label class="form-label">Original image</label>
                     <div class="preview-100 mt-1">
@@ -44,6 +35,7 @@
                     </div>
                     </div>
                     <VideoEditProgress :job="job"></VideoEditProgress>
+                </div>
                 </div>
                 <!-- preview box end-->
 
