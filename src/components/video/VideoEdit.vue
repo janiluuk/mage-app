@@ -7,12 +7,12 @@
       v-if="job.status == 'error' || errorMessage != ''">
       <span class="text-primary text-lg">{{ errorMessage }}</span>
     </div>
-    <VideoEditToolbar :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob" @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit" @submit:finalize="handleFinalizeJob"/>
+    <VideoEditToolbar :job="job" :formChanged="formChanged" :showOriginal="showOriginal" @submit:cancel="handleCancelJob" @submit:showoriginal="onShowOriginal" @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit" @submit:finalize="handleFinalizeJob"/>
     <div class="editor" v-if="job.status != null">
       <!-- Main settings container -->
       <Splitter class="mb-5 editor-container">
         <SplitterPanel :size="30" :minSize="10" class="mw-0">
-          <VideoEditPreview :job="job" />
+          <VideoEditPreview :job="job" :showOriginal="showOriginal"/>
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
@@ -112,6 +112,7 @@ export default {
     return {
       videoId: null,
       overlayActive: false,
+      showOriginal: false,
       isLoading: false,
       isFetching: false,
       errorMessage: '',
@@ -290,6 +291,10 @@ export default {
     toggleOverlay(event) {
       this.op.toggle(event);
     },
+    onShowOriginal() {
+      this.showOriginal = !this.showOriginal
+    },
+
     toggleFullscreenOverlay() {
       this.overlayActive = !this.overlayActive
     },
