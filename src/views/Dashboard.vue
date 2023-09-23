@@ -122,7 +122,10 @@ watch(
             <BalanceAvailable></BalanceAvailable>
         </div>
         <div class="col-12 xl:col-6">
-            <RecentJobs></RecentJobs>          
+            <div class="card">
+                    <h5>Recent Projects</h5>
+            <RecentJobs></RecentJobs>       
+            </div>   
         </div>
     </div>
 </template>

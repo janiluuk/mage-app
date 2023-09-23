@@ -7,7 +7,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { mapState } from 'vuex';
 import VideoLibraryToolbar from '@/components/library/VideoLibraryToolbar.vue';
-import RecentJobs from '@/pages/Dashboard/RecentJobs.vue';
+import ListVIew from '@/components/library/ListView.vue';
 
 
 const toast = useToast();
@@ -182,7 +182,7 @@ const menuClick = (id, type="vid2vid", event) => {
     router.push(`/edit/${type}/${id}`);
 }
 
-const getMenu = (id, type) => {
+const getMenu = (id, type, status) => {
     return [
         {
             label: 'Edit',
@@ -210,12 +210,11 @@ const getMenu = (id, type) => {
                 });
             }
         },
-        {
-            label: 'Use as template',
-            icon: 'pi pi-copy'
-        },
+
         {
             label: 'Download',
+            disabled: status !== 'finished',
+
             icon: 'pi pi-download',
             command: (target) => {
 
@@ -281,12 +280,13 @@ const onStatusFilterChange = (event) => {
             <template #header>
                 <div class="grid grid-nogutter">
 
-                    <div class="col-6 text-right">
-                        <DataViewLayoutOptions v-model="layout" />
-                    </div>
+
                 </div>
                 <Menubar :model="menuOptions">
                     <template #start>
+                        <div class="col-6 text-right">
+                        <DataViewLayoutOptions v-model="layout" />
+                    </div>
                         <div class="col-6 text-left">
                         <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
                             placeholder="Sort By Activity" @change="onSortChange($event)" />
@@ -306,7 +306,9 @@ const onStatusFilterChange = (event) => {
                             <i class="pi pi-search" />
                             <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
                         </span>
+         
                     </template>
+          
                 </Menubar>
 
             </template>
@@ -363,7 +365,7 @@ const onStatusFilterChange = (event) => {
                                 </div>
                                 <div class="flex align-items-center justify-content-between">
 
-                                    <Menu :popup="true" :model="getMenu(slotProps.data.id,  slotProps.data.generator)"
+                                    <Menu :popup="true" :model="getMenu(slotProps.data.id,  slotProps.data.generator, slotProps.data.status)"
                                         :ref="(el) => { return addInputRef(el, slotProps.data.id); }" />
 
                                     <Button icon="pi pi-bars" @click.prevent="toggleMenu(slotProps.data.id, $event,)"
@@ -380,7 +382,7 @@ const onStatusFilterChange = (event) => {
                 </div>
             </template>
         </DataView>
-        <RecentJobs v-if="layout !='grid'"></RecentJobs>
+        <ListView v-if="layout !='grid'" :jobs="dataviewValue" :queryFilter="queryFilter" :statusFilter="statusFilter" :generatorFilter="generatorFilter"></ListView>
     </div>
 </template>
 
