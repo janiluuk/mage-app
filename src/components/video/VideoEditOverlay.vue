@@ -485,15 +485,15 @@ export default {
 }
 
 .p-scrollpanel .p-scrollpanel-bar {
-  background: #193b6a;
+  background: #545c5e;
   transition: background 0.15s linear, box-shadow 0.15s linear, opacity 0.15s linear;
   height: 7px;
   border-radius: 2px;
   &:hover, &:active {
-    background: #5dead4;
+    background: #56d9f6;
   }
   &:focus {
-    box-shadow: 0 0 0 1px #2e588f;
+    box-shadow: 0 0 0 1px #6f8388;
   }
 }
 

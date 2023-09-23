@@ -88,9 +88,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
 import ModelfileSelector from "@/components/Modelfile/ModelfileSelector.vue";
-import { toRaw } from "vue";
+import { ref, toRaw } from "vue";
 
 const lastPromptTime = ref(0);
 const selectedItems = ref([]);
@@ -222,7 +221,8 @@ const validation = {
 };
 </script>
 
-<style>
+<style lang="scss">
+@import '@/assets/vimage.scss';
 .horizontal-select {
   display: flex;
   overflow-x: auto;
@@ -230,19 +230,24 @@ const validation = {
 }
 .selectable-item {
   padding: 8px 12px;
-  border: 1px solid #ccc;
+  border: 1px solid #383838;
+  color: #ccc;
   border-radius: 16px;
+  margin: 0 0.25rem;
   cursor: pointer;
   transition:
-    background-color 0.2s,
-    color 0.2s,
-    border-color 0.2s;
+    background-color 0.2s linear,
+    color 0.2 linear,
+    border-color 0.2s linear;
   white-space: nowrap;
-}
 
-.selectable-item.selected {
-  background-color: white;
-  color: black;
-  border-color: transparent;
+  &:hover {
+    border-color: #ccc;
+    color: #ccc;
+  }
+  &.selected {
+    color: #121212;
+    @include bg-gradient-vibrant();
+  }
 }
 </style>

@@ -7,7 +7,7 @@
             <ConfirmPopup></ConfirmPopup>
             <Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
             @click="$emit('submit:showoriginal', 1)" />
-            <Button type="button" class="ml-5 p-button-success" icon="pi pi-image" label="Wizard"
+            <Button type="button" class="ml-5 p-button-success hidden" icon="pi pi-image" label="Wizard"
             @click="$emit('submit:overlay', 1)" />
 
             <Toast />
