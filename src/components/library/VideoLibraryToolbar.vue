@@ -81,7 +81,7 @@ export default {
         changeTab(tabIndex) {
             this.activeTab = tabIndex;
         },
-        getListDebounced() { 
+        getListDebounced() {
             _.debounce(function () {
             this.getList();
             }, 300);

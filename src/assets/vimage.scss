@@ -282,42 +282,6 @@ button.bg-gradient-vibrant:hover {
   }
 }
 
-// Library
-.library {
-  &:deep .p-dataview-header {
-    border-width: 0;
-    border-radius: 0;
-    background: transparent;
-    padding: 0;
-  }
-
-  &:deep .p-dataview-content {
-    border: none;
-    background: transparent;
-    border-radius: 0;
-  }
-
-  &:deep .p-paginator-bottom {
-    margin-bottom: 50px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-}
-
-.grid-item {
-  border-radius: $border-radius + 2px;
-  padding: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: background-color 0.2s linear, border-color 0.2s linear;
-
-  &:hover {
-    border-color: var(--surface-border);
-    background-color: var(--surface-card);
-  }
-}
-
 // Help button
 .help-btn {
   display: inline-flex;

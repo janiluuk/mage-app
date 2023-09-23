@@ -5,9 +5,6 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import { mapState } from 'vuex';
-import VideoLibraryToolbar from '@/components/library/VideoLibraryToolbar.vue';
-import ListVIew from '@/components/library/ListView.vue';
 
 
 const toast = useToast();
@@ -172,7 +169,7 @@ const mapStates = () => {
 const mapGetters = () => {
     const store = useStore();
     return Object.fromEntries(
-        
+
         Object.keys(store.getters['videojobs']).map(
             key => [key, computed(() => store.getters.videojobs[key])]
         )
@@ -278,41 +275,39 @@ const onStatusFilterChange = (event) => {
         <DataView :value="dataviewValue" :layout="layout" :paginator="layout =='grid'" :rows="12" :sortOrder="sortOrder"
             :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
             <template #header>
-                <div class="grid grid-nogutter">
-
-
-                </div>
                 <Menubar :model="menuOptions">
                     <template #start>
-                        <div class="col-6 text-right">
-                        <DataViewLayoutOptions v-model="layout" />
-                    </div>
-                        <div class="col-6 text-left">
-                        <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
+                      <div class="menu-list">
+                        <div>
+                          <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
                             placeholder="Sort By Activity" @change="onSortChange($event)" />
-                    </div>
-                    <div class="col-6 text-left">
-                        <Dropdown v-model="generatorFilterKey" :options="generatorOptions" optionLabel="label"
+                        </div>
+                        <div>
+                          <Dropdown v-model="generatorFilterKey" :options="generatorOptions" optionLabel="label"
                             placeholder="Show all generators" @change="onGeneratorFilterChange($event)" />
-                    </div>
-                    <div class="col-6 text-left">
-                        <Dropdown v-model="statusFilterKey" :options="statusOptions" optionLabel="label"
+                        </div>
+                        <div>
+                          <Dropdown v-model="statusFilterKey" :options="statusOptions" optionLabel="label"
                             placeholder="All states" @change="onStatusFilterChange($event)" />
-                    </div>
+                        </div>
+                      </div>
                     </template>
                     <template #end>
-
+                      <div class="menu-list">
+                        <div>
+                          <DataViewLayoutOptions v-model="layout" />
+                        </div>
                         <span class="p-input-icon-left">
-                            <i class="pi pi-search" />
-                            <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
+                          <i class="pi pi-search" />
+                          <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
                         </span>
-         
+                      </div>
                     </template>
-          
+
                 </Menubar>
 
             </template>
-           
+
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
@@ -431,7 +426,55 @@ span>img[lazy=error] {
 
   img[lazy=loaded] {
   }
+.library {
+  :deep .p-dataview-header {
+    border-width: 0;
+    border-radius: 0;
+    padding: 0;
+    position: sticky;
+    top: 5rem;
+    z-index: 2;
+    background: rgb(18 18 18 / 20%);
+    backdrop-filter: blur(30px);
+  }
 
+  :deep .p-dataview-content {
+    border: none;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  :deep .p-paginator-bottom {
+    margin-bottom: 5rem;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  :deep .p-menubar {
+    background: transparent;
+  }
+}
+
+.menu-list {
+  display: flex;
+  flex-flow: row;
+  column-gap: 0.5rem;
+}
+
+.grid-item {
+  border-radius: 6px;
+  padding: 4px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color 0.2s linear, border-color 0.2s linear;
+
+  &:hover {
+    border-color: var(--surface-border);
+    background-color: var(--surface-card);
+  }
+}
 .card-thumbnail-container {
     position: relative;
     height: 100%;

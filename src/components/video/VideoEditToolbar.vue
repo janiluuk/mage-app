@@ -2,7 +2,7 @@
     <Toolbar class="video-edit-toolbar p-toolbar p-2 mb-3">
         <template v-slot:start>
             <Menu :popup="true" :model="getMenu()" ref="menu" />
-            <Button class="p-button-plain p-button-text" icon="pi pi-bars" label="Options"
+            <Button class="p-button-plain p-button-text mr-2" icon="pi pi-bars" label="Options"
                 @click.prevent="toggleMenu(job.id, $event)"></Button>
             <ConfirmPopup></ConfirmPopup>
             <Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
@@ -227,9 +227,7 @@ export default {
 <style scoped type="scss">
 .video-edit-toolbar {
     background-color: rgb(18 18 18 / 20%);
-    background-color: var(--surface-card);
-    opacity: 0.8;
-    backdrop-filter: blur(30px);
+    backdrop-filter: blur(20px);
     position: sticky;
     top: 5rem;
     z-index: 2;
