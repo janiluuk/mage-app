@@ -70,7 +70,9 @@
                     <div class="item-selector">
                       <div v-for="(item, itemIndex) in selectableItems" :key="itemIndex" class="selectable-item"
                         :class="{ selected: isSelected(itemIndex) }" @click="handleItemSelect(itemIndex)">
-                        {{ item.label }}
+                        <div class="selectable-item-content">
+                          {{ item.label }}
+                        </div>
                       </div>
                     </div>
                   </ScrollPanel>
@@ -421,13 +423,49 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/vimage.scss';
-</style>
-<style scoped lang="scss">
+  @import '@/assets/vimage.scss';
   .item-selector {
     display: flex;
     flex-flow: row;
     width: max-content;
     margin: 0.5rem auto 0 auto;
   }
+  .selectable-item {
+  padding: 1px;
+  border: none;
+  color: #ccc;
+  border-radius: 16px;
+  margin: 0 0.25rem;
+  cursor: pointer;
+  transition:
+    background-color 0.2s linear,
+    color 0.2s linear;
+  white-space: nowrap;
+  border: 1px solid transparent;
+
+  .selectable-item-content {
+    outline: 1px solid #373737;
+    background-color: var(--surface-card);
+    padding: 8px 12px;
+    border-radius: 15px;
+    transition: outline-color 0.2s linear;
+  }
+
+
+  &:hover {
+    color: #ccc;
+    .selectable-item-content {
+    outline-color: #ccc;
+    }
+  }
+
+  &.selected {
+    color: #ccc;
+    @include bg-gradient-vibrant();
+    .selectable-item-content {
+      outline-color: transparent;
+      background-color: rgba(0, 0, 0, 0.8);
+    }
+  }
+}
 </style>

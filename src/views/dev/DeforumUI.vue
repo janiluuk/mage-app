@@ -58,7 +58,9 @@
           :class="{ selected: isSelected(itemIndex) }"
           @click="handleItemSelect(itemIndex)"
         >
-          {{ item.label }}
+          <div class="selectable-item-content">
+            {{ item.label }}
+          </div>
         </div>
       </div>
       <h3>+ Prompt change in time</h3>
@@ -221,33 +223,11 @@ const validation = {
 };
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 @import '@/assets/vimage.scss';
 .horizontal-select {
   display: flex;
   overflow-x: auto;
   gap: 8px;
-}
-.selectable-item {
-  padding: 8px 12px;
-  border: 1px solid #383838;
-  color: #ccc;
-  border-radius: 16px;
-  margin: 0 0.25rem;
-  cursor: pointer;
-  transition:
-    background-color 0.2s linear,
-    color 0.2 linear,
-    border-color 0.2s linear;
-  white-space: nowrap;
-
-  &:hover {
-    border-color: #ccc;
-    color: #ccc;
-  }
-  &.selected {
-    color: #121212;
-    @include bg-gradient-vibrant();
-  }
 }
 </style>
