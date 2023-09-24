@@ -515,4 +515,14 @@ span>img[lazy=error] {
   }
 }
 
+@media (max-width: 860px) {
+  .library {
+    :deep .p-menubar {
+      flex-flow: column-reverse;
+      row-gap: 0.5rem;
+      align-items: flex-start;
+    }
+  }
+}
+
 </style>
