@@ -1,24 +1,20 @@
 <template>
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
             <button @click="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
-                class="p-link layout-topbar-button">
-                <i class="pi pi-upload"></i>
-                <span>Upload content</span>
+                class="p-link topbar-button">
+                <i class="pi pi-upload mr-2"></i>
+                <span>Create!</span>
             </button>
             <button @click="onTopBarActionButton('/library/');" :class="{ 'active-route': checkActiveRoute('/library/') }"
-                class="p-link layout-topbar-button">
-                <i class="pi pi-images"></i>
-                <span>My gallery</span>
+                class="p-link topbar-button">
+                <i class="pi pi-images mr-2"></i>
+                <span>My library</span>
             </button>
-
-
-
-
             <Menu ref="menu" :model="getOverlayMenu()" :popup="true" />
             <button icon="pi pi-angle-down" :label="user.email" @click="toggleMenu"
-                :class="{ 'active-route': checkActiveRoute('/profile/') }" class="p-link layout-topbar-button">
-                <i class="pi pi-user"></i> 
-                <span></span>               
+                :class="{ 'active-route': checkActiveRoute('/profile/') }" class="p-link topbar-button">
+                <i class="pi pi-user mr-2"></i>
+                <span>Account</span>
 
             </button>
         </div>
@@ -26,14 +22,13 @@
 </template>
 
 <script>
-import { useStore } from 'vuex'
-import { mapActions, mapGetters } from 'vuex'
 import * as authActions from '@/store/modules/auth/types/actions';
 import * as authGetters from '@/store/modules/auth/types/getters';
 import * as notificationActions from '@/store/modules/notification/types/actions';
+import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { mapActions, mapGetters } from 'vuex';
 
 const menu = ref(null);
 const activeRoute = ref(false);
@@ -55,7 +50,7 @@ export default {
             profile_picture: String
         },
         topbarMenuClasses: { type: Object, default: {'layout-topbar-menu-mobile-active': false} }
-        
+
     },
     defaults: {
         topbarMenuActive: { value: null },
@@ -74,7 +69,7 @@ export default {
         onTopBarActionButton(route) {
           activeRoute.value = route;
             this.$router.push(route);
-        },        
+        },
         toggleMenu(event) {
             this.$refs.menu.toggle(event);
         },
@@ -114,3 +109,34 @@ export default {
     }
 };
 </script>
+
+<style scoped lang="scss">
+@import '@/assets/vimage.scss';
+button.p-link.topbar-button {
+  font-size: 1.2rem;
+  display: flex;
+  font-weight: 600;
+  height: 5rem;
+  align-items: center;
+  border-radius: 0;
+  padding: 0 1rem;
+
+  i.pi {
+    font-size: 1.4rem;
+  }
+
+  &:focus {
+    box-shadow: none;
+    background-color: transparent;
+  }
+
+  &:hover, &:active {
+    background-color: var(--surface-hover);
+  }
+
+  &.active-route {
+    box-shadow: inset 0 -3px 0 #ffd64e;
+    background-color: transparent;
+  }
+}
+</style>

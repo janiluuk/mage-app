@@ -350,9 +350,9 @@ const onStatusFilterChange = (event) => {
                                 :value="slotProps.data.progress" class="text-xs overlay-progress-bar mb-1"></ProgressBar>
                             <div class="flex align-items-start justify-content-between">
                                 <div>
-                                    <div class="text-md font-semibold mb-1">{{ slotProps.data.prompt }}</div>
-                                    <div class="text-sm text-light mb-1">
-                                        <i class="pi pi-history mr-1"></i>
+                                    <div class="text-sm font-semibold mb-1">{{ slotProps.data.prompt }}</div>
+                                    <div class="text-xs text-light mb-1">
+                                        <i class="text-xs pi pi-history mr-1"></i>
                                         <span>{{ moment(slotProps.data.updated_at).fromNow()
                                         }}</span>
                                     </div>

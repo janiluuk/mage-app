@@ -80,14 +80,13 @@ const isOutsideClicked = (event) => {
 
 <template>
     <div class="layout-topbar">
-        <router-link to="/" class="layout-topbar-logo">
-            <img :src="logoUrl" alt="logo" />
-            <span>Vimage:stable </span>
-        </router-link>
-
-        <button class="p-link layout-menu-button layout-topbar-button" @click="onMenuToggle()">
+        <button class="p-link layout-menu-button layout-topbar-button ml-0 mr-2" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
         </button>
+        <router-link to="/" class="layout-topbar-logo">
+            <img :src="logoUrl" alt="logo" />
+            <span>Vimage:stable</span>
+        </router-link>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
         </button>
@@ -103,3 +102,15 @@ const isOutsideClicked = (event) => {
 
     </div>
 </template>
+<style scoped lang="scss">
+@import '@/assets/vimage.scss';
+.layout-topbar .layout-topbar-logo {
+  border-radius: 0;
+  img {
+    height: 5rem;
+  }
+  &:focus {
+    box-shadow: none;
+  }
+}
+</style>
