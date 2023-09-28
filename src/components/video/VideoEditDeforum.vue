@@ -42,10 +42,10 @@
                     :disabled="isVideoProcessing || isJobReady"></Textarea>
                 </div>
                 <div class="field col-12 md:col-6 md:mb-3 mb-4">
-                  <label class="mb-1 ms-0 mt-2">Length: {{ job.finallength }} seconds</label>
-                  <InputNumber v-model="job.finallength" :min="4" :max="20" :step="1.0" showButtons
+                  <label class="mb-1 ms-0 mt-2">Length: {{ job.length }} seconds</label>
+                  <InputNumber v-model="job.length" :min="4" :max="20" :step="1.0" showButtons
                     :disabled="isVideoProcessing" />
-                  <Slider v-model="job.finallength" :min="4" :max="20" :step="1.0" :disabled="isVideoProcessing"/>
+                  <Slider v-model="job.length" :min="4" :max="20" :step="1.0" :disabled="isVideoProcessing"/>
                 </div>
                 <!----<div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2" :style="{ color: denoisingColor }">Strength: {{ denoisingText
@@ -78,7 +78,7 @@
                   </ScrollPanel>
                   </div>
                 </div>
-                <!-- <div class="field col-12 md:col-6 md:mb-2 mb-3">
+                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
                   <div class="flex  align-items-center justify-content-center">
                     <div class="field-radiobutton mb-0 mr-3">
@@ -90,7 +90,6 @@
                     </InputText>
                   </div>
                 </div>
-                -->
               </div>
             </div>
           </form>
@@ -147,7 +146,7 @@ export default {
         model_id: 0,
         operation: 'preview',
         preset: 'zoom',
-        finallength: 4,
+        length: 10,
         cfg_scale: 7,
         progress: 1,
         estimated_time_left: 0,
@@ -303,7 +302,7 @@ export default {
         prompt: this.job.prompt,
         negative_prompt: this.job.negative_prompt,
         videoId: this.videoId,
-        length: this.job.finallength ? this.job.finallength : this.job.length
+        length: this.job.length
       };
     }
   },
