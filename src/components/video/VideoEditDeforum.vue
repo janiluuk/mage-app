@@ -23,8 +23,9 @@
                 <ModelfileSelector :modelId="job.model_id" :modelName="job.model_name" @update:modelId="updateModelId"
                   @update:modelName="updateModelName" />
               </div>
-            -->
+           
             </div>
+             -->
             <div class="pl-3">
 
               <div class="p-fluid formgrid grid">
