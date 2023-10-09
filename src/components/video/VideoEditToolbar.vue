@@ -1,16 +1,16 @@
 <template>
     <Toolbar class="video-edit-toolbar p-toolbar p-2 mb-3">
         <template v-slot:start>
-            <Menu :popup="true" :model="getMenu()" ref="menu" />
+            <!-- <Menu :popup="true" :model="getMenu()" ref="menu" />
             <Button class="p-button-plain p-button-text mr-2" icon="pi pi-bars" label="Options"
                 @click.prevent="toggleMenu(job.id, $event)"></Button>
-            <ConfirmPopup></ConfirmPopup>
+            <ConfirmPopup></ConfirmPopup>-->
             <!--<Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
             @click="$emit('submit:showoriginal', 1)" /> -->
-
+<!--
             <Button type="button" class="ml-5 p-button-success hidden" icon="pi pi-image" label="Wizard"
             @click="$emit('submit:overlay', 1)" />
-
+-->
             <Toast />
             <VideoInfoDialog :job="job" :infodialog="infodialog" @dialog:close="closeInfoDialog"></VideoInfoDialog>
         </template>

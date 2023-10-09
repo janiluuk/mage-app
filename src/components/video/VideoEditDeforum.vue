@@ -15,9 +15,10 @@
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
+               <!--
             <div class="col-12 md:mb-2 mb-3 mt-2">
               <label class="form-label mb-1 ms-0 mt-2">Selected Model: <strong>{{ job.model_name }}</strong></label>
-             <!--
+          
               <div class="model-selector-container mt-1">
                 <ModelfileSelector :modelId="job.model_id" :modelName="job.model_name" @update:modelId="updateModelId"
                   @update:modelName="updateModelName" />
