@@ -7,9 +7,6 @@
       v-if="job.status == 'error' || errorMessage != ''">
       <span class="text-primary text-lg">{{ errorMessage }}</span>
     </div>
-    <VideoEditToolbar :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob"
-      @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit"
-      @submit:finalize="handleFinalizeJob" />
     <div class="editor" v-if="job.status != null">
       <!-- Main settings container -->
       <Splitter class="mb-5 editor-container">
@@ -20,10 +17,12 @@
           <form v-on:submit.prevent="">
             <div class="col-12 md:mb-2 mb-3 mt-2">
               <label class="form-label mb-1 ms-0 mt-2">Selected Model: <strong>{{ job.model_name }}</strong></label>
+             <!--
               <div class="model-selector-container mt-1">
                 <ModelfileSelector :modelId="job.model_id" :modelName="job.model_name" @update:modelId="updateModelId"
                   @update:modelName="updateModelName" />
               </div>
+            -->
             </div>
             <div class="pl-3">
 
@@ -36,6 +35,7 @@
                   <Textarea rows="4" autoResize placeholder="Type your prompt here" v-model="job.prompt"
                     :disabled="isVideoProcessing"></Textarea>
                 </div>
+                <!--
                 <div class="field col-12 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Negative Prompt</label>
                   <Textarea rows="2" autoResize placeholder="Type your negative prompt here" v-model="job.negative_prompt"
@@ -47,6 +47,7 @@
                     :disabled="isVideoProcessing" />
                   <Slider v-model="job.length" :min="4" :max="20" :step="1.0" :disabled="isVideoProcessing"/>
                 </div>
+                -->
                 <!----<div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2" :style="{ color: denoisingColor }">Strength: {{ denoisingText
                   }} <div class="help-btn" @click="toggleOverlay"><i class="fa fa-question"></i></div></label>
@@ -62,7 +63,7 @@
                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 2 weight:{{ controlnet[1].weight }}</label>
                   <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
 
-                </div> -->
+                </div>
                 <div class="field col-12 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Camera movemment</label>
                   <div class="model-selector-container">
@@ -78,6 +79,8 @@
                   </ScrollPanel>
                   </div>
                 </div>
+                 -->  
+                <!--
                  <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
                   <div class="flex  align-items-center justify-content-center">
@@ -90,11 +93,16 @@
                     </InputText>
                   </div>
                 </div>
+                -->
               </div>
             </div>
           </form>
+          <VideoEditToolbar :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob"
+          @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit"
+          @submit:finalize="handleFinalizeJob" />
         </SplitterPanel>
       </Splitter>
+
       <OverlayPanel ref="op">
       </OverlayPanel>
     </div>
@@ -140,10 +148,10 @@ export default {
       formChanged: false,
       interval: false,
       selectedItems: [0, 'Zoom'],
-
+      length: 4,
       job: {
         status: null,
-        model_id: 0,
+        model_id: 1,
         operation: 'preview',
         preset: 'zoom',
         length: 10,
@@ -302,7 +310,7 @@ export default {
         prompt: this.job.prompt,
         negative_prompt: this.job.negative_prompt,
         videoId: this.videoId,
-        length: this.job.length
+        length: this.length
       };
     }
   },

@@ -2,9 +2,7 @@
   <div class="home-banner">
     <div class="text-center">
       <div class="hero-banner">What do you like to create today?</div>
-    </div>
-
-    <div class="banner-item-row">
+      <div class="banner-item-row">
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
@@ -30,6 +28,7 @@
           <div class="banner-description">Turn images into gorgeous animated clips</div>
         </div>
       </div>
+    <!--
       <div class="banner-item" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="video/*" @change="uploadHandler($event, 'vid2vid')">
         <div class="banner-media-container">
@@ -58,6 +57,9 @@
           <div class="banner-header with-tag">Record a video <Tag value="Coming Soon"></Tag></div>
           <div class="banner-description">Directly record a video with your device's camera</div>
         </div>
+      </div>
+    
+    -->
       </div>
     </div>
   </div>

@@ -5,8 +5,9 @@
             <Button class="p-button-plain p-button-text mr-2" icon="pi pi-bars" label="Options"
                 @click.prevent="toggleMenu(job.id, $event)"></Button>
             <ConfirmPopup></ConfirmPopup>
-            <Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
-            @click="$emit('submit:showoriginal', 1)" />
+            <!--<Button type="button" :class=" showOriginal ? 'p-button-warning' : 'p-button-outlined' " icon="pi pi-image" label="Show Original"
+            @click="$emit('submit:showoriginal', 1)" /> -->
+
             <Button type="button" class="ml-5 p-button-success hidden" icon="pi pi-image" label="Wizard"
             @click="$emit('submit:overlay', 1)" />
 
@@ -17,13 +18,13 @@
         <template v-slot:end>
             <div class="flex flex-column">
                 <div class="d-flex flex-row">
-                    <Button @click="$emit('submit:preview', 1)" icon="pi pi-image" label="Generate Preview Image"
+                    <!--<Button @click="$emit('submit:preview', 1)" icon="pi pi-image" label="Generate Preview Image"
                         :disabled="isVideoProcessing || (formChanged == false && job.status !== 'error')" v-if="!isVideoProcessing"
                         :loading="isPreviewProcessing" class="p-button-outlined p-button-success mb-0 mr-2" />
                     <Button icon="pi pi-video" v-if="!isVideoProcessing && !isJobSketch" label="Generate Preview Animation"
                         @click="$emit('submit:preview', previewFrames)" :loading="isAnimationProcessing"
                         class="p-button-outlined p-button-success mb-0 mr-2"
-                        :disabled="isVideoProcessing ||  (formChanged == false && job.status !== 'error')" />
+                        :disabled="isVideoProcessing ||  (formChanged == false && job.status !== 'error')" /> -->
                     <Button icon="pi pi-download" v-if="!isVideoProcessing && isJobReady" class="bg-gradient-vibrant p-button-success mb-0"
                         @click="downloadItem()" label="Download video"
                          :disabled="isVideoProcessing || !isJobReady" />
