@@ -23,10 +23,10 @@
                         v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
                         class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
-                        <div v-if="(!isJobReady && job.generator == 'deforum'  || (!hasPreviewAnimation && !hasPreviewImage))" class="preview-100 mt-1">
+                        <div v-if="(!isJobReady && job.generator == 'deforum' || (!hasPreviewAnimation))" class="preview-100 mt-1">
                     <label class="form-label">Original image</label>
                     <div class="preview-100 mt-1">
-                        <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
+                        <Image crossorigin="anonymous" :src="job.original_url" v-if="!hasPreviewAnimation && !hasPreviewImage" @error="imageLoadOnError"
                             v-bind:alt="pic" class="preview-100" preview />
                     </div>
                     </div>
@@ -34,7 +34,7 @@
                 </div>
                 <!-- preview box end-->
 
-
+ <!--
                 <div class="text-center position-relative w-100 mt-1" v-if="isJobReady">
                     <vue-plyr :options="options">
                         <video controls crossorigin="anonymous" playsinline :data-poster="job.preview_img">
@@ -42,9 +42,9 @@
                         </video>
                     </vue-plyr>
 
-                    <!-- Original video -->
+                    Original video
                 </div>
-
+ -->
                 <div v-if="job.status == 'pending' || showOriginal == true"
                     class="video-preview-container mb-3">
                     <div v-if="job.generator == 'vid2vid'">
@@ -137,7 +137,7 @@ export default {
             return (this.$props.job.status != 'pending' && url && url.length > 0 && (url.includes('.png') || url.includes('.gif')));
         },
         getPreviewUrl() {
-            return this.$props.job.original_url.replace("https://api.dudeisland.eu", "");
+            return this.$props.job.original_url.replace("https://api.vimage.ai", "");
         },
         getPreviewImage() {
             if (this.hasPreviewImage) {
