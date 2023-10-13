@@ -3,7 +3,7 @@ import requestService from '@/services/request-service/ApiRequestService';
 const AuthService = {
   async registerUser(registerData) {
     const response = await requestService.post('/auth/register', registerData);
-    return response?.data?.data;
+    return response?.data;
   },
   async verifiedEmail(verifiedEmailData) {
     const response = await requestService.post(

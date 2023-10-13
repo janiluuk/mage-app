@@ -8,6 +8,7 @@ import VideoEdit from "@/components/video/VideoEdit.vue";
 import VideoEditDeforum from "@/components/video/VideoEditDeforum.vue";
 import Deforum from "@/views/dev/Deforum.vue";
 import Signup from "@/views/pages/auth/Signup.vue";
+import Verification from "@/views/pages/auth/Verification.vue";
 import ForgotPassword from "@/views/pages/auth/ForgotPassword.vue";
 import PasswordReset from "@/views/api/PasswordReset.vue";
 import { ConnectableObservable } from "rxjs";
@@ -246,6 +247,12 @@ const router = createRouter({
       name: "Signup",
 
       component: Signup,
+    },
+    {
+      path: "/verification",
+      name: "verification",
+
+      component: Verification,
     },
     {
         path: "/signout",

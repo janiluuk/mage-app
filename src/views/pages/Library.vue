@@ -328,7 +328,7 @@ const onStatusFilterChange = (event) => {
 
                             <span class="card-thumbnail-image">
                                 <img crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
-                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.original_url || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                                 <img  crossorigin="anonymous" class="top" v-if="slotProps.data.id == 1171" lazy="loading" width="100" />
 
