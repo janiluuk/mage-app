@@ -98,7 +98,6 @@ const sortOptions = ref([
 ]);
 const generatorOptions = ref([
     { label: 'All', value: '' },
-    { label: 'Video to video', value: 'vid2vid' },
     { label: 'Text to image', value: 'deforum' }
 
 ]);

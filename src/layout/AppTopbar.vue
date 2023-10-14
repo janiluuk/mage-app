@@ -31,6 +31,10 @@ const logoUrl = computed(() => {
     return `/public/img/vimage-logo.png`;
 });
 
+const birdUrl = computed(() => {
+    return `/public/img/bird.png`;
+});
+
 const onTopBarActionButton = (route) => {
     activeRoute.value = route;
     router.push(route);
@@ -80,12 +84,12 @@ const isOutsideClicked = (event) => {
 
 <template>
     <div class="layout-topbar">
-        <button class="p-link layout-menu-button layout-topbar-button ml-0 mr-2" @click="onMenuToggle()">
+<!--        <button class="p-link layout-menu-button layout-topbar-button ml-0 mr-2" @click="onMenuToggle()">
             <i class="pi pi-bars"></i>
-        </button>
+        </button> -->
         <router-link to="/" class="layout-topbar-logo">
-            <img :src="logoUrl" alt="logo" />
-            <span>Vimage:stable</span>
+            <img :src="birdUrl" alt="logo" style="height:4.0rem"/>
+            <img :src="logoUrl" height=180 alt="logo" style="height:2.4rem" />
         </router-link>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
