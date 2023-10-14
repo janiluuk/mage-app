@@ -101,7 +101,7 @@ export default {
         async exit() {
             try {
                 await this.signOut();
-                alert("signed out");
+                this.$router.push("/login");
             } catch (error) {
                 this.setErrorNotification(error);
             }
