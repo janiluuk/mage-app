@@ -20,11 +20,10 @@
                         @error="imageLoadOnError" v-bind:alt="animation" preview />
                     <Image crossorigin="anonymous"
                         :style="{ filter: isVideoProcessing ? 'blur(' + (50 - ((1 + job.progress))) + 'px)' : '' }"
-                        v-if="hasPreviewImage || ((job.operation != 'animation' && hasPreviewImage))"
+                        v-if="job.generator != 'deforum' && (job.operation != 'animation' && hasPreviewImage)"
                         class="w-100 preview-100 img-with-blur" :src="getPreviewImage" @error="imageLoadOnError"
                         v-bind:alt="pic" preview />
                         <div v-if="(!isJobReady && job.generator == 'deforum'  || (!hasPreviewAnimation && !hasPreviewImage))" class="preview-100 mt-1">
-                    <label class="form-label">Original image</label>
                     <div class="preview-100 mt-1">
                         <Image crossorigin="anonymous" :src="job.original_url" @error="imageLoadOnError"
                             v-bind:alt="pic" class="preview-100" preview />
