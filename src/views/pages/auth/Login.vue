@@ -11,7 +11,7 @@
             <span class="text-600 font-medium">Sign in to continue</span><p></p>
             <span class="text-600 font-medium">No account? <router-link to="/signup" custom v-slot="{ navigate }">
                 <a class="font-medium no-underline ml-2 text-right cursor-pointer" @click="navigate"
-                  style="color: var(--primary-color)">Sign up here</a></router-link></span>
+                  style="color: var(--primary-color); font-size: 1.5em">Sign up here</a></router-link></span>
           </div>
           <Form role="form" class="text-start mt-3" @submit.prevent="login">
             <div>

@@ -29,7 +29,7 @@
                         @click="downloadItem()" label="Download video"
                          :disabled="isVideoProcessing || !isJobReady" />
                         <Button v-if="!isVideoProcessing && !isJobReady" class="bg-gradient-vibrant p-button-primary mb-0"
-                        @click="$emit('submit:finalize')" label="Finalize Video"
+                        @click="$emit('submit:finalize')" label="Generate Video"
                         :loading="isVideoProcessing && job.operation == 'finalize'" :disabled="isVideoProcessing || isJobReady" />
                     <Button icon="pi pi-times-circle" v-if="isVideoProcessing"
                         class="p-button-outlined p-button-warning mb-0" :label="cancelButtonValue"
@@ -137,7 +137,7 @@ export default {
                 return "Cancel animation generation";
             }
             if (this.$props.job.operation == "finalize") {
-                return "Cancel finalization";
+                return "Cancel job";
             }
             return "Cancel job";
         }

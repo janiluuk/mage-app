@@ -19,9 +19,8 @@
             <p v-if="isJobApproved" class="mt-2 mb-0 text-xs text-primary text-center">
                 Waiting
                 for
-                a worker to pick the job up....  {{  job.queue }}</p>
-        
-
+                a worker to pick the job up. Next slot in <b>{{  getFormattedDuration(job.queue.your_estimated_time) }} </b>..</p>
+    
         </div>
         <p v-if="(hasPreviewImage || hasPreviewAnimation) || progressAmount > 0"
             class="mt-1 mb-0 text-xs text-primary text-center"><span class="text-xs">{{

@@ -181,13 +181,6 @@ const menuClick = (id, type="vid2vid", event) => {
 const getMenu = (id, type, status) => {
     return [
         {
-            label: 'Edit',
-            icon: 'pi pi-pencil',
-            command: (target) => {
-                router.push(`/edit/${type}/${id}`);
-            }
-        },
-        {
             label: 'Delete',
             icon: 'pi pi-times',
             command: (target) => {
@@ -310,7 +303,7 @@ const onStatusFilterChange = (event) => {
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
-                    <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
+                    <div  class="grid-item m-1">
                         <div :class="{ 'has-preview': slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif')) }"
                             class="card-thumbnail-container position-relative mb-2">
                             <div class="card-thumbnail-info flex align-items-end justify-content-between m-2">
@@ -326,15 +319,15 @@ const onStatusFilterChange = (event) => {
                             </div>
 
                             <span class="card-thumbnail-image">
-                                <img crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
-                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.original_url || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                
+                                <Image crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
+                                    v-lazy="{ src: slotProps.data.original_url || 'https://api.vimage./images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                                 <img  crossorigin="anonymous" class="top" v-if="slotProps.data.id == 1171" lazy="loading" width="100" />
 
-                                <img crossorigin="anonymous" class="bottom"
+                                <Image crossorigin="anonymous" class="bottom"
                                         v-if="slotProps.data.id != 1171 && slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
-                                    v-lazy="{ src: slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img, lifecycle: lazyOptions.lifecycle }"
-                                    width="100" />
+                                    :src="slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img" width="100" preview />
                             </span>
 
                             <span class="card-thumbnail-image-fill">
@@ -349,7 +342,6 @@ const onStatusFilterChange = (event) => {
                                 :value="slotProps.data.progress" class="text-xs overlay-progress-bar mb-1"></ProgressBar>
                             <div class="flex align-items-start justify-content-between">
                                 <div>
-                                    <div class="text-sm font-semibold mb-1">{{ slotProps.data.prompt }}</div>
                                     <div class="text-xs text-light mb-1">
                                         <i class="text-xs pi pi-history mr-1"></i>
                                         <span>{{ moment(slotProps.data.updated_at).fromNow()

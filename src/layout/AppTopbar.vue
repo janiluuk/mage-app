@@ -89,7 +89,7 @@ const isOutsideClicked = (event) => {
         </button> -->
         <router-link to="/" class="layout-topbar-logo">
             <img :src="birdUrl" alt="logo" style="height:4.0rem"/>
-            <img :src="logoUrl" height=180 alt="logo" style="height:2.4rem" />
+            <img :src="logoUrl" height=180 alt="logo" style="height:2.4rem;margin-top:14px;" />
         </router-link>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>

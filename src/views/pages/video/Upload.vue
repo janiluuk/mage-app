@@ -1,15 +1,13 @@
 <template>
   <div class="home-banner">
     <div class="text-center">
-      <div class="hero-banner">What do you like to create today?</div>
+      <div class="hero-banner">Upload your image below to start!</div>
       <div class="banner-item-row">
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
-          <img src="/public/img/mona.gif" class="banner-media-main"/>
-          <div class="banner-media-secondary">
-            <img src="/public/img/mona2.gif" />
-          </div>
+          <img src="/public/img/mona.gif" class="banner-media-main" style="max-width:960px;"/>
+
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
               <i class="pi pi-upload"></i>
