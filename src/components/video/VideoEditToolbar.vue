@@ -1,5 +1,5 @@
 <template>
-    <Toolbar class="video-edit-toolbar p-toolbar p-2 mb-3">
+    <Toolbar class="video-edit-toolbar p-toolbar p-2 ml-3 mb-3">
         <template v-slot:start>
             <!-- <Menu :popup="true" :model="getMenu()" ref="menu" />
             <Button class="p-button-plain p-button-text mr-2" icon="pi pi-bars" label="Options"

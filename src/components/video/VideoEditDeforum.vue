@@ -104,7 +104,10 @@
           @submit:finalize="handleFinalizeJob" />
         </SplitterPanel>
       </Splitter>
-
+      <InlineMessage
+        severity="info" class="border-primary w-full justify-content-start">
+    <div class="p-2">Your content will be available in your <a href="/library">library</a> after it's completed! </div>
+</InlineMessage>
       <OverlayPanel ref="op">
       </OverlayPanel>
     </div>

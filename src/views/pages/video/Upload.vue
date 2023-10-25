@@ -159,10 +159,10 @@ export default {
 
 .banner-item-row {
   width: 100%;
-  max-width: 576px;
+  max-width: 700px;
   margin: 3rem auto 5rem auto;
   display: grid;
-  grid-template: 1fr / fit-content(100%);
+  grid-template-columns: 1fr;
   align-items: self-start;
   justify-content: center;
   flex-flow: column;
@@ -172,6 +172,7 @@ export default {
 
 .banner-item {
   position: relative;
+  cursor: pointer;
 
   &.coming-soon {
     display: flex;
@@ -278,7 +279,7 @@ export default {
 }
 
 .banner-overlay-desc {
-  opacity: 0.5;
+  opacity: 0.7;
 }
 
 @keyframes slide {
@@ -310,11 +311,6 @@ export default {
   }
   .home-banner {
     padding-top: 1.5rem;
-  }
-  .banner-item-row {
-    grid-template: auto auto / 1fr 1fr;
-    max-width: 960px;
-    row-gap: 5rem;
   }
 }
 
