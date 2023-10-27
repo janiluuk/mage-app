@@ -15,7 +15,7 @@
         </SplitterPanel>
         <SplitterPanel :size="70" :minSize="40" class="mw-0">
           <form v-on:submit.prevent="">
-               <!--
+            <!--
             <div class="col-12 md:mb-2 mb-3 mt-2">
               <label class="form-label mb-1 ms-0 mt-2">Selected Model: <strong>{{ job.model_name }}</strong></label>
           
@@ -32,7 +32,10 @@
                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                 </div>
                 <div class="field col-12 md:mb-2 mb-3">
-                  <div class="message p-error p-danger">{{ validation.firstError('job.prompt') }}</div>
+                  <h5 class="mb-2" style="font-weight: bold; color:#89610b; line-height: 1.2;">
+                    Click the 'Generate Video' button to produce a Halloween-themed horror animation, or craft your own prompt. The animation will have a duration of 2 seconds.
+                  </h5>
+                  <div class="zoom p-error p-danger">{{ validation.firstError('job.prompt') }}</div>
                   <label class="mb-1 ms-0">Prompt</label>
                   <Textarea rows="4" autoResize placeholder="Type your prompt here" v-model="job.prompt"
                     :disabled="isVideoProcessing"></Textarea>
@@ -81,7 +84,7 @@
                   </ScrollPanel>
                   </div>
                 </div>
-                 -->  
+                 -->
                 <!--
                  <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
@@ -100,14 +103,25 @@
             </div>
           </form>
           <VideoEditToolbar :job="job" :formChanged="formChanged" @submit:cancel="handleCancelJob"
-          @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit"
-          @submit:finalize="handleFinalizeJob" />
+            @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit"
+            @submit:finalize="handleFinalizeJob" />
+          
+      <div >
+        <div class="soft-message ml-3">
+          <div class="p-3">
+            <div class="mb-1">
+              Due to high demand, there may be extended wait times. Feel free to leave this page and return later; your content will be available in your library once completed.
+            </div>
+
+<div class="field-checkbox mb-0">
+                <Checkbox id="checkOption1" name="option" value="Chicago" v-model="checkboxValue" />
+                <label for="checkOption1">Alternatively, check this box if you'd like to receive a notification via email.</label>
+            </div>
+          </div>
+        </div>
+      </div>
         </SplitterPanel>
       </Splitter>
-      <InlineMessage
-        severity="info" class="border-primary w-full justify-content-start">
-    <div class="p-2">Your content will be available in your <a href="/library">library</a> after it's completed! </div>
-</InlineMessage>
       <OverlayPanel ref="op">
       </OverlayPanel>
     </div>
@@ -339,7 +353,7 @@ export default {
     handleItemSelect(itemIndex) {
 
       const currentItem = this.selectableItems[itemIndex].label;
-      if (this.selectedItems[itemIndex] && this.selectedItems[itemIndex] != null  ) {
+      if (this.selectedItems[itemIndex] && this.selectedItems[itemIndex] != null) {
         this.selectedItems[itemIndex] = null;
         return;
       }
@@ -436,14 +450,25 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  @import '@/assets/vimage.scss';
-  .item-selector {
-    display: flex;
-    flex-flow: row;
-    width: max-content;
-    margin: 0.5rem auto 0 auto;
+@import '@/assets/vimage.scss';
+.custom-link {
+    color: var(--blue-900);
+    text-decoration: underline;
   }
-  .selectable-item {
+
+.item-selector {
+  display: flex;
+  flex-flow: row;
+  width: max-content;
+  margin: 0.5rem auto 0 auto;
+}
+
+.soft-message {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+}
+
+.selectable-item {
   padding: 1px;
   border: none;
   color: #ccc;
@@ -467,18 +492,21 @@ export default {
 
   &:hover {
     color: #ccc;
+
     .selectable-item-content {
-    outline-color: #ccc;
+      outline-color: #ccc;
     }
   }
 
   &.selected {
     color: #ccc;
     @include bg-gradient-vibrant();
+
     .selectable-item-content {
       outline-color: transparent;
       background-color: rgba(0, 0, 0, 0.8);
     }
+
   }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <Toolbar class="video-edit-toolbar p-toolbar p-2 ml-3 mb-3">
+    <Toolbar class="video-edit-toolbar p-toolbar p-0 ml-3 mb-3">
         <template v-slot:start>
             <!-- <Menu :popup="true" :model="getMenu()" ref="menu" />
             <Button class="p-button-plain p-button-text mr-2" icon="pi pi-bars" label="Options"
@@ -25,10 +25,10 @@
                         @click="$emit('submit:preview', previewFrames)" :loading="isAnimationProcessing"
                         class="p-button-outlined p-button-success mb-0 mr-2"
                         :disabled="isVideoProcessing ||  (formChanged == false && job.status !== 'error')" /> -->
-                    <Button icon="pi pi-download" v-if="!isVideoProcessing && isJobReady" class="bg-gradient-vibrant p-button-success mb-0"
+                    <Button icon="pi pi-download" v-if="!isVideoProcessing && isJobReady" class="vimage-yellow p-button-lg p-button-warning mb-0"
                         @click="downloadItem()" label="Download video"
                          :disabled="isVideoProcessing || !isJobReady" />
-                        <Button v-if="!isVideoProcessing && !isJobReady" class="bg-gradient-vibrant p-button-primary mb-0"
+                        <Button v-if="!isVideoProcessing && !isJobReady" class="vimage-yellow p-button-lg p-button-warning mb-0"
                         @click="$emit('submit:finalize')" label="Generate Video"
                         :loading="isVideoProcessing && job.operation == 'finalize'" :disabled="isVideoProcessing || isJobReady" />
                     <Button icon="pi pi-times-circle" v-if="isVideoProcessing"
@@ -58,10 +58,6 @@ export default {
                 if (v == 'error') {
                     s = 'error';
                     detail = 'Oopsy, there was a doopsy! ' + this.errorMessage;
-                }
-                if (v == 'finished') {
-                    s = 'info';
-                    detail = 'Job is finished!';
                 }
 
                 if (s != '') {
@@ -232,5 +228,13 @@ export default {
     position: sticky;
     top: 5rem;
     z-index: 2;
+
+    button {
+        font-weight: bold;
+    }
+}
+
+.vimage-yellow {
+    background-color: #fdc500;
 }
 </style>

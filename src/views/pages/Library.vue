@@ -266,40 +266,6 @@ const onStatusFilterChange = (event) => {
         <h3>My Library</h3>
         <DataView :value="dataviewValue" :layout="layout" :paginator="layout =='grid'" :rows="12" :sortOrder="sortOrder"
             :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
-            <template #header>
-                <Menubar :model="menuOptions">
-                    <template #start>
-                      <div class="menu-list">
-                        <div>
-                          <Dropdown v-model="sortKey" :options="sortOptions" optionLabel="label"
-                            placeholder="Sort By Activity" @change="onSortChange($event)" />
-                        </div>
-                        <div>
-                          <Dropdown v-model="generatorFilterKey" :options="generatorOptions" optionLabel="label"
-                            placeholder="Show all generators" @change="onGeneratorFilterChange($event)" />
-                        </div>
-                        <div>
-                          <Dropdown v-model="statusFilterKey" :options="statusOptions" optionLabel="label"
-                            placeholder="All states" @change="onStatusFilterChange($event)" />
-                        </div>
-                      </div>
-                    </template>
-                    <template #end>
-                      <div class="menu-list">
-                        <div>
-                          <DataViewLayoutOptions v-model="layout" />
-                        </div>
-                        <span class="p-input-icon-left">
-                          <i class="pi pi-search" />
-                          <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
-                        </span>
-                      </div>
-                    </template>
-
-                </Menubar>
-
-            </template>
-
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
@@ -354,8 +320,8 @@ const onStatusFilterChange = (event) => {
                                     <Menu :popup="true" :model="getMenu(slotProps.data.id,  slotProps.data.generator, slotProps.data.status)"
                                         :ref="(el) => { return addInputRef(el, slotProps.data.id); }" />
 
-                                    <Button icon="pi pi-bars" @click.prevent="toggleMenu(slotProps.data.id, $event,)"
-                                        class="p-button-icon-only p-button-rounded p-button-secondary p-button-text p-button-sm"></Button>
+                                    <Button icon="pi pi-download" label="Download" @click.prevent="download(slotProps.data.id)"
+                                        class="p-button-secondary p-button-text p-button-sm"></Button>
 
 
                                     <ConfirmPopup></ConfirmPopup>

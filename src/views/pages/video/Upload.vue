@@ -1,13 +1,12 @@
 <template>
   <div class="home-banner">
     <div class="text-center">
-      <div class="hero-banner">Upload your image below to start!</div>
+      <div class="hero-banner">Upload your video for a Halloween-themed zoom animation</div>
       <div class="banner-item-row">
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
-          <img src="/public/img/mona.gif" class="banner-media-main" style="max-width:960px;"/>
-
+          <img src="/public/img/mona.gif" class="banner-media-main"/>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
               <i class="pi pi-upload"></i>
@@ -21,10 +20,6 @@
         </div>
 
         <ProgressBar :value="getProgress" v-if="getProgress > 0"></ProgressBar>
-        <div class="banner-content-container">
-          <div class="banner-header">Animation </div>
-          <div class="banner-description">Turn images into gorgeous animated clips</div>
-        </div>
       </div>
     <!--
       <div class="banner-item" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
@@ -188,6 +183,7 @@ export default {
 
 .file-input {
   position: absolute;
+  width: 100%;
   top: 0;
   bottom: 0;
   left: 0;
@@ -237,7 +233,7 @@ export default {
   z-index: 1;
   overflow: hidden;
   border-right: 2px solid rgba(18, 18, 18, 0.4);
-  animation: slide 20s infinite ease-in-out;
+  animation: slide 18s infinite ease-in-out;
 }
 .banner-media-secondary img {
   display: block;
@@ -285,12 +281,15 @@ export default {
 @keyframes slide {
   0%, 10% {
     right: 0;
+    opacity: 0.8;
   }
   50%, 60% {
     right: 100%;
+    opacity: 1;
   }
   90%, 100% {
     right: 0;
+    opacity: 0.8;
   }
 }
 

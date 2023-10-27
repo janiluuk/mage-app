@@ -99,7 +99,7 @@ export const videojobs = {
     },
 
     download({ commit, dispatch }, item) {
-      return VideoJobService.downloadJob(item.url, item.original_filename);
+      return VideoJobService.downloadJob(item.url, item.original_filename+".mp4");
     },
   },
   mutations: {
