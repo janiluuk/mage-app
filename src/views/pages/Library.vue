@@ -5,8 +5,21 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { ImageViewer } from 'vue-previewable-image'
+import { CustomViewerTitle, ViewerSwitchEvent } from 'vue-previewable-image'
 
+const viewerTitle = (img, { index, total }) => {
+  console.log('img:', img)
+  return `${img.alt} (${index + 1}/${total})`
+}
 
+const handleSwitch = (index, viewer) => {
+  console.log('on switch:', index, viewer)
+}
+
+const currentIndex = ref(0);
+
+const showViewer = ref(false);
 const toast = useToast();
 const confirmPopup = useConfirm();
 const destroy = (id) => {
@@ -291,6 +304,16 @@ const onStatusFilterChange = (event) => {
                                     :src="slotProps.data.media ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail " width="100" preview />
                             </span>
                             <span class="card-thumbnail-image-fill">
+                                    :src="slotProps.data.media ? slotProps.data.media.finished.images.backdrop : slotProps.data.thumbnail " width="100" preview />
+                            </span>
+                            <span class="card-thumbnail-image-fill">
+                                <ImageViewer
+      v-model="showViewer"
+      v-model:current-preview-index="currentIndex"
+      :preview-src-list="[slotProps.data.media.finished.images.backdrop]"
+      :viewer-title="viewerTitle"
+      @switch="handleSwitch"
+    />
                                 <img  crossorigin="anonymous" v-lazy="{ src:slotProps.data.media.finished ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                             </span>

@@ -4,7 +4,7 @@
       <div class="hero-banner">Upload your video for a Halloween-themed zoom animation</div>
       <div class="banner-item-row">
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
-        <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
+        <input class="file-input" type="file" accept="image/*, video/*" @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
           <img src="/public/img/mona.gif" class="banner-media-main"/>
           <div class="banner-overlay">
@@ -13,8 +13,7 @@
             </div>
             <div class="banner-overlay-body">
               <div class="banner-overlay-title">Upload an image</div>
-              <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif, size less than 2MB</div>
-
+              <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif, size less than 2MB or MP4 less than 100mb and 15sec</div>
             </div>
           </div>
         </div>
