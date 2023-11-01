@@ -5,21 +5,17 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
-import { ImageViewer } from 'vue-previewable-image'
-import { CustomViewerTitle, ViewerSwitchEvent } from 'vue-previewable-image'
 
-const viewerTitle = (img, { index, total }) => {
-  console.log('img:', img)
-  return `${img.alt} (${index + 1}/${total})`
-}
 
-const handleSwitch = (index, viewer) => {
-  console.log('on switch:', index, viewer)
-}
+const animationRef = ref(false);
 
-const currentIndex = ref(0);
+const display = ref(false);
 
-const showViewer = ref(false);
+const open = (animation) => {
+    display.value = true;
+    animationRef.value = animation;
+};
+
 const toast = useToast();
 const confirmPopup = useConfirm();
 const destroy = (id) => {
@@ -65,7 +61,7 @@ onMounted(() => {
 
     intervalId = setInterval(() => {
         getJobList();
-    }, 2000);
+    }, 4000);
 
 })
 
@@ -94,6 +90,8 @@ const layout = ref('grid');
 const query = ref(null);
 const sortKey = ref(null);
 const store = useStore();
+const dialogRefs = ref([]);
+
 const menuRefs = ref([]);
 const sortOrder = ref('-updated_at');
 const sortField = ref(null);
@@ -117,11 +115,28 @@ const generatorOptions = ref([
 const statusOptions = ref([
     { label: 'All', value: false },
     { label: 'Finished', value: 'finished' },
-    { label: 'In the works', value: 'intheworks'},
-    { label: 'Failed', value: 'error'}
+    { label: 'In the works', value: 'intheworks' },
+    { label: 'Failed', value: 'error' }
 
 ]);
-
+const galleriaResponsiveOptions = ref([
+    {
+        breakpoint: '1024px',
+        numVisible: 5
+    },
+    {
+        breakpoint: '960px',
+        numVisible: 4
+    },
+    {
+        breakpoint: '768px',
+        numVisible: 3
+    },
+    {
+        breakpoint: '560px',
+        numVisible: 1
+    }
+]);
 sortField.value = '-updated_at';
 
 const getFormattedDuration = (seconds) => {
@@ -149,7 +164,7 @@ const getJobList = () => {
             dataviewValue.value = store.getters["videojobs/filterList"](queryFilter.value, statusFilter.value, generatorFilter.value);
 
         } else {
-        dataviewValue.value = store.getters["videojobs/listWithoutPending"]();
+            dataviewValue.value = store.getters["videojobs/listWithoutPending"]();
         }
         total.total = store.getters["videojobs/listTotal"];
     });
@@ -164,8 +179,26 @@ function addInputRef(el, id) {
 const toggleMenu = (id, event) => {
     var refitem = "menu-" + id;
     var refmenu = menuRefs[refitem];
-    if (refmenu) refmenu.toggle(event);
+    if (refmenu) refmenu.value = !refmenu.value;
     event.stopPropagation();
+    return false;
+};
+
+function addDialogRef(id) {
+    var elementId = id;
+    display[elementId].value = false;
+    return elementId;
+}
+function checkDialog(id) {
+    var elementId = "dialog-" + id;
+    console.log(dialogRefs[elementId].value);
+    return dialogRefs[elementId];
+}
+
+const toggleDialog = (id, event) => {
+    var refitem = "dialog-" + id;
+    dialogRefs[refitem] = dialogRefs[refitem] == true ? false : true;
+    event.stopPropagation;
     return false;
 };
 
@@ -187,7 +220,7 @@ const mapGetters = () => {
         )
     )
 }
-const menuClick = (id, type="vid2vid", event) => {
+const menuClick = (id, type = "vid2vid", event) => {
     router.push(`/edit/${type}/${id}`);
 }
 
@@ -225,6 +258,9 @@ const getMenu = (id, type, status) => {
             }
         }
     ]
+};
+const close = () => {
+    display.value = false;
 };
 
 const onSortChange = (event) => {
@@ -277,13 +313,13 @@ const onStatusFilterChange = (event) => {
     </div>
     <div class="library">
         <h3>My Library</h3>
-        <DataView :value="dataviewValue" :layout="layout" :paginator="layout =='grid'" :rows="12" :sortOrder="sortOrder"
+        <DataView :value="dataviewValue" :layout="layout" :paginator="layout == 'grid'" :rows="12" :sortOrder="sortOrder"
             :sortField="sortField" :statusFilter="statusFilter" :generatorFilter="generatorFilter">
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3">
-                    <div  class="grid-item m-1">
-                        <div :class="{ 'has-preview': slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif')) }"
+                    <div class="grid-item m-1">
+                        <div :class="{ 'has-preview': slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') || slotProps.data.preview_animation.includes('gif')) }"
                             class="card-thumbnail-container position-relative mb-2">
                             <div class="card-thumbnail-info flex align-items-end justify-content-between m-2">
                                 <div class="flex align-items-center">
@@ -298,23 +334,15 @@ const onStatusFilterChange = (event) => {
                             </div>
 
                             <span class="card-thumbnail-image">
-           
-                                <Image crossorigin="anonymous" class="bottom"
-                                        v-if=" slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
-                                    :src="slotProps.data.media ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail " width="100" preview />
+                                <img @click.prevent="open(slotProps.data.preview_animation)" crossorigin="anonymous"
+                                    v-lazy="{ src: slotProps.data.media.finished ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                    width="250" preview />
+
+
                             </span>
                             <span class="card-thumbnail-image-fill">
-                                    :src="slotProps.data.media ? slotProps.data.media.finished.images.backdrop : slotProps.data.thumbnail " width="100" preview />
-                            </span>
-                            <span class="card-thumbnail-image-fill">
-                                <ImageViewer
-      v-model="showViewer"
-      v-model:current-preview-index="currentIndex"
-      :preview-src-list="[slotProps.data.media.finished.images.backdrop]"
-      :viewer-title="viewerTitle"
-      @switch="handleSwitch"
-    />
-                                <img  crossorigin="anonymous" v-lazy="{ src:slotProps.data.media.finished ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                <img crossorigin="anonymous"
+                                    v-lazy="{ src: slotProps.data.media.finished ? slotProps.data.media?.finished?.images?.backdrop : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                             </span>
 
@@ -334,10 +362,12 @@ const onStatusFilterChange = (event) => {
                                 </div>
                                 <div class="flex align-items-center justify-content-between">
 
-                                    <Menu :popup="true" :model="getMenu(slotProps.data.id,  slotProps.data.generator, slotProps.data.status)"
+                                    <Menu :popup="true"
+                                        :model="getMenu(slotProps.data.id, slotProps.data.generator, slotProps.data.status)"
                                         :ref="(el) => { return addInputRef(el, slotProps.data.id); }" />
 
-                                    <Button icon="pi pi-download" label="Download" @click.prevent="download(slotProps.data.id)"
+                                    <Button icon="pi pi-download" label="Download"
+                                        @click.prevent="download(slotProps.data.id)"
                                         class="p-button-secondary p-button-text p-button-sm"></Button>
 
 
@@ -349,35 +379,85 @@ const onStatusFilterChange = (event) => {
                         </div>
                     </div>
                 </div>
+
+
             </template>
         </DataView>
-        <ListView v-if="layout !='grid'" :jobs="dataviewValue" :queryFilter="queryFilter" :statusFilter="statusFilter" :generatorFilter="generatorFilter"></ListView>
+        <ListView v-if="layout != 'grid'" :jobs="dataviewValue" :queryFilter="queryFilter" :statusFilter="statusFilter"
+            :generatorFilter="generatorFilter"></ListView>
     </div>
+    <Dialog header="Finished image" v-model:visible="display" class="completed-img-view" :modal="true">
+        <div class="text-center">
+            <img crossorigin="anonymous" v-lazy="{ src: animationRef, lifecycle: lazyOptions.lifecycle }"
+                class="completed-img" preview />
+
+        </div>
+        <template #footer>
+            <div class="completed-img-footer">
+                <div class="left">
+                    <Button label="Close" @click="close()" icon="pi pi-times" class="p-button-outlined p-button-secondary" />
+                </div>
+                <div class="right">
+                    <Button label="Download" @click="close()" icon="pi pi-download" class="p-button-primary" />
+                </div>
+            </div>
+
+
+        </template>
+    </Dialog>
 </template>
 
 
-<style scoped lang="scss">@import '@/assets/vimage.scss';</style>
 <style scoped lang="scss">
-  img[lazy=loading] {
-  min-width: 100%;
-  min-height: 100%;
-  background-color: #ededed;
-  background: linear-gradient(
-    100deg,
-    rgba(255, 255, 255, 0) 40%,
-    rgba(255, 255, 255, .2) 50%,
-    rgba(255, 255, 255, 0) 60%
-  ) transparent;
-  background-size: 200% 100%;
-  background-position-x: 180%;
-  animation: 1.5s loading ease-in-out infinite;
-  }
-  img[lazy=error] {
-    opacity:0.4;
+@import '@/assets/vimage.scss';
+</style>
+<style scoped lang="scss">
+.completed-img-dialog {
+    width: auto;
+    min-width: 70vw !important;
+    max-width: 98vw;
+}
+
+.completed-img {
+    width: auto;
+    max-width: 100%;
+    max-height: 58vh;
+    margin: auto;
+}
+
+.completed-img-footer {
+    display: flex;
+    flex-flow: row;
+    column-gap: 10px;
+    align-items: center;
+    .right {
+        flex: 1 1 auto;
+        display: flex;
+        flex-flow: row;
+        justify-content: flex-end;
+        column-gap: 10px;
+    }
+}
+
+img[lazy=loading] {
+    min-width: 100%;
+    min-height: 100%;
+    background-color: #ededed;
+    background: linear-gradient(100deg,
+            rgba(255, 255, 255, 0) 40%,
+            rgba(255, 255, 255, .2) 50%,
+            rgba(255, 255, 255, 0) 60%) transparent;
+    background-size: 200% 100%;
+    background-position-x: 180%;
+    animation: 1.5s loading ease-in-out infinite;
+}
+
+img[lazy=error] {
+    opacity: 0.4;
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
     transform: scale(1);
     animation: pulse 2s infinite;
-  }
+}
 
 
 span::before>img[lazy=error] {
@@ -395,60 +475,61 @@ span>img[lazy=error] {
     min-width: 300px;
     content: "ERROR";
     box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
-	animation: pulse 0.5s infinite;
-  }
+    animation: pulse 0.5s infinite;
+}
 
-  img[lazy=loaded] {
-  }
+img[lazy=loaded] {}
+
 .library {
-  :deep .p-dataview-header {
-    border-width: 0;
-    border-radius: 0;
-    padding: 0;
-    position: sticky;
-    top: 5rem;
-    z-index: 2;
-    background: rgb(18 18 18 / 20%);
-    backdrop-filter: blur(30px);
-  }
+    :deep .p-dataview-header {
+        border-width: 0;
+        border-radius: 0;
+        padding: 0;
+        position: sticky;
+        top: 5rem;
+        z-index: 2;
+        background: rgb(18 18 18 / 20%);
+        backdrop-filter: blur(30px);
+    }
 
-  :deep .p-dataview-content {
-    border: none;
-    background: transparent;
-    border-radius: 0;
-  }
+    :deep .p-dataview-content {
+        border: none;
+        background: transparent;
+        border-radius: 0;
+    }
 
-  :deep .p-paginator-bottom {
-    margin-bottom: 5rem;
-    margin-top: 1rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+    :deep .p-paginator-bottom {
+        margin-bottom: 5rem;
+        margin-top: 1rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-  :deep .p-menubar {
-    background: transparent;
-  }
+    :deep .p-menubar {
+        background: transparent;
+    }
 }
 
 .menu-list {
-  display: flex;
-  flex-flow: row;
-  column-gap: 0.5rem;
+    display: flex;
+    flex-flow: row;
+    column-gap: 0.5rem;
 }
 
 .grid-item {
-  border-radius: 6px;
-  padding: 4px;
-  border: 1px solid transparent;
-  cursor: pointer;
-  transition: background-color 0.2s linear, border-color 0.2s linear;
+    border-radius: 6px;
+    padding: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background-color 0.2s linear, border-color 0.2s linear;
 
-  &:hover {
-    border-color: var(--surface-border);
-    background-color: var(--surface-card);
-  }
+    &:hover {
+        border-color: var(--surface-border);
+        background-color: var(--surface-card);
+    }
 }
+
 .card-thumbnail-container {
     position: relative;
     height: 100%;
@@ -458,17 +539,17 @@ span>img[lazy=error] {
 }
 
 .card-thumbnail-container.has-preview .card-thumbnail-image img {
-  position:absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  top: 0;
-  margin: auto;
-  width: auto;
-  height: 100%;
-  -webkit-transition: opacity 1s linear;
-  -moz-transition: opacity 1s linear;
-  transition: opacity 1s linear;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: 0;
+    margin: auto;
+    width: auto;
+    height: 100%;
+    -webkit-transition: opacity 1s linear;
+    -moz-transition: opacity 1s linear;
+    transition: opacity 1s linear;
 }
 
 .card-thumbnail-container.has-preview img.bottom {
@@ -484,19 +565,32 @@ span>img[lazy=error] {
 }
 
 @keyframes loading {
-  to {
-    background-position-x: -20%;
-  }
+    to {
+        background-position-x: -20%;
+    }
 }
 
 @media (max-width: 860px) {
-  .library {
-    :deep .p-menubar {
-      flex-flow: column-reverse;
-      row-gap: 0.5rem;
-      align-items: flex-start;
+    .library {
+        :deep .p-menubar {
+            flex-flow: column-reverse;
+            row-gap: 0.5rem;
+            align-items: flex-start;
+        }
     }
-  }
 }
 
+@media (min-width: 768px) {
+    .completed-img-dialog {
+        width: auto !important;
+        max-width: 90vw;
+    }
+}
+
+@media (min-width: 1199px) {
+    .completed-img-dialog {
+        width: auto !important;
+        max-width: 70vw;
+    }
+}
 </style>

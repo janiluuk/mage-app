@@ -77,7 +77,7 @@ export default {
   padding-top: 1rem;
 }
 .hero-banner {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   line-height: 1.2;
 }
@@ -220,7 +220,7 @@ export default {
 
 @media (min-width: 768px) {
   .hero-banner {
-    font-size: 2.5rem;
+    font-size: 1.75rem;
   }
   .home-banner {
     padding-top: 1.5rem;
@@ -237,7 +237,7 @@ export default {
     padding-top: 3rem;
   }
   .hero-banner {
-    font-size: 3.5rem;
+    font-size: 2.25rem;
   }
   .banner-description {
     font-size: 1.4rem;

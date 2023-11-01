@@ -1,8 +1,6 @@
 import { createApp } from "vue";
 import App from "./App.vue";
 import VueLazyLoad from 'vue3-lazyload'
-import PreviewableImage from 'vue-previewable-image'
-import { PreviewableImageOptions } from 'vue-previewable-image'
 
 import store from "./store";
 import router from "./router";
@@ -129,12 +127,6 @@ app.use(ToastService);
 app.use(DialogService);
 app.use(ConfirmationService);
 app.use(AVPlugin);
-app.use(PerfectScrollbar);
-app.use(VueSilentbox);
-app.use(PreviewableImage, {
-  // set global component name
-  componentName: 'PreviewableImage',
-});
 
 app.directive('tooltip', Tooltip);
 app.directive('badge', BadgeDirective);

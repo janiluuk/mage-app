@@ -201,8 +201,8 @@ export default {
 .preview-100>img,
 .preview-100>video,
 img.preview-100 {
-    width: 100%;
-    max-width: 400px;
+    width: auto;
+    max-width: 100%;
     max-height: 60vh;
     margin: auto;
 }
