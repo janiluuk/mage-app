@@ -21,18 +21,27 @@
       <button @click="generate">Generate</button>
     </div>
 
-    <audio v-if="audioSrc" :src="audioSrc" controls loop />
+    <AudioVisualizer v-if="audioSrc" :audio="audioPlayer" />
+    <audio
+      v-if="audioSrc"
+      :src="audioSrc"
+      controls
+      loop
+      ref="audioPlayer"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import AudioVisualizer from '@/components/AudioVisualizer.vue'
 
 const prompt = ref('')
 const selectedMood = ref('')
 const moods = ['Relaxing', 'Energizing']
 const recording = ref(false)
 const audioSrc = ref('')
+const audioPlayer = ref(null)
 
 function generate() {
   const params = new URLSearchParams({
