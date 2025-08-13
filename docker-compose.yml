@@ -11,6 +11,14 @@ services:
       - "8080:8080"
     networks:
       - vue-network
+
+  ffmpeg-worker:
+    image: jrottenberg/ffmpeg:5.1-ubuntu
+    command: ["sleep", "infinity"]
+    networks:
+      - vue-network
+    deploy:
+      replicas: 6
 networks:
   vue-network:
     driver: bridge

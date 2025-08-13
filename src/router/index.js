@@ -31,6 +31,11 @@ const router = createRouter({
           name: 'Frontpage',
           component: () => import('@/views/FrontPage.vue')
         },
+        {
+          path: '/soundscape',
+          name: 'SoundscapeCreator',
+          component: () => import('@/views/SoundscapeCreator.vue')
+        },
 
         {
           path: "/uikit/formlayout",

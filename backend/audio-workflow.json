@@ -1,0 +1,16 @@
+{
+  "1": {
+    "class_type": "TextToAudio",
+    "inputs": {
+      "text": "",
+      "duration": 45
+    }
+  },
+  "2": {
+    "class_type": "SaveAudio",
+    "inputs": {
+      "audio": ["1", 0],
+      "filename_prefix": "soundscape"
+    }
+  }
+}

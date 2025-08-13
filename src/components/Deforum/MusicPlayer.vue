@@ -10,8 +10,13 @@
       </div>
     </div>
 
-    <audio style="display:none" ref="audioplayer" class="w-full shadow rounded-md" controls @timeupdate="handleTimeUpdate"
-          :src="audioSource"></audio>
+    <audio
+      style="display:none"
+      ref="audioplayer"
+      class="w-full shadow rounded-md"
+      controls
+      :src="audioSource"
+    ></audio>
     <div class="col-12 md:col-12">
       <div class="field p-fluid items-left card">
         <label class=" mb-2 md:col-1 md:mb-0 items-left" for="music-upload" style="display:inline"><h4>Upload</h4></label>
@@ -52,7 +57,7 @@
 </template>
 
 <script>
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted, onUnmounted, nextTick } from "vue";
 import { AVWaveform, useAVBars } from 'vue-audio-visual';
 
 export default {
@@ -74,6 +79,7 @@ export default {
     const speeds = [0.25, 0.5, 1, 2, 4];
     const audioplayer = ref(null);
     const canvas = ref(null);
+    const audioEventHandlers = new Map();
 
     const handleFileChange = e => {
 
@@ -118,9 +124,22 @@ export default {
 
     const handleTimeUpdate = () => {
       if (audioplayer.value) {
-
         time.value = audioplayer.value.currentTime;
       }
+    };
+
+    const attachAudioHandlers = () => {
+      if (!audioplayer.value || audioEventHandlers.size) return;
+      audioEventHandlers.set('timeupdate', handleTimeUpdate);
+      audioplayer.value.addEventListener('timeupdate', handleTimeUpdate);
+    };
+
+    const removeAudioHandlers = () => {
+      if (!audioplayer.value) return;
+      audioEventHandlers.forEach((handler, event) => {
+        audioplayer.value.removeEventListener(event, handler);
+      });
+      audioEventHandlers.clear();
     };
 
     const handleAddFrameBetween = () => {
@@ -144,6 +163,20 @@ export default {
       }
     );
 
+    watch(audioSource, async () => {
+      removeAudioHandlers();
+      await nextTick();
+      attachAudioHandlers();
+    });
+
+    onMounted(() => {
+      attachAudioHandlers();
+    });
+
+    onUnmounted(() => {
+      removeAudioHandlers();
+    });
+
     return {
       file,
       audioplayer,
@@ -156,7 +189,6 @@ export default {
       handlePlayPause,
       playPauseLabel,
       currentFrame,
-      handleTimeUpdate,
       handleAddFrameBetween,
       getButtonColors
     };

@@ -17,7 +17,8 @@
     "serve": "vite --cors --port 8080 --host --cors",
     "build": "vite build",
     "lint": "vite optimize --force",
-    "dev": "vite --cors --host --port 8080 --debug trace"
+    "dev": "vite --cors --host --port 8080 --debug trace",
+    "api": "node backend/server.js"
   },
   "dependencies": {
     "@cloudgeek/vue3-video-player": "^0.3.10",
@@ -32,6 +33,8 @@
     "@vueuse/core": "^9.3.0",
     "@vueuse/rxjs": "^9.11.0",
     "axios": "^1.4.0",
+    "ffmpeg-static": "^5.1.0",
+    "fluent-ffmpeg": "^2.1.2",
     "bootstrap": "5.1.3",
     "chart.js": "3.6.0",
     "cli-plugin-eslint": "^0.1.0",
@@ -72,10 +75,13 @@
     "vue3-lazyload": "^0.3.8",
     "vue3-perfect-scrollbar": "^1.6.1",
     "vue3-video-player": "^1.0.0",
+    "three": "^0.156.1",
     "vuelidate": "^0.7.7",
     "vuex": "4.0.2",
+    "ws": "^8.13.0",
     "yup": "^1.0.0",
-    "zlib": "^1.0.5"
+    "zlib": "^1.0.5",
+    "express": "^4.18.2"
   },
   "devDependencies": {
     "@ffmpeg/core": "^0.11.0",

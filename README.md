@@ -15,6 +15,18 @@ Uses PrimeVue UI: https://primevue.org/
 2. Make sure you have docker command available and are in bash or powershell
 3. run scripts/docker.sh to start the env
 
+### FFmpeg worker pool
+
+`docker-compose.yml` defines an `ffmpeg-worker` service. Scale it to six
+instances so concurrent audio streams each get their own encoder:
+
+```bash
+docker compose up --build --scale ffmpeg-worker=6
+```
+
+Each worker provides an FFmpeg binary used to transcode and stream audio in
+AAC at 128 kbps.
+
 ## Installation
 
 1. Navigate in your repo folder: cd `vimage-app`
@@ -23,7 +35,8 @@ Uses PrimeVue UI: https://primevue.org/
 4. `VUE_APP_BASE_URL` should contain the URL of your App
  (eg. http://localhost:8080/)
 5. `VUE_APP_API_BASE_URL` should contain the URL of JSON-API server (eg. http://localhost:3000/api/v1)
-6. Run `npm run dev` to start the application in a local development environment or npm run build to build release distributables.
+6. Run `npm run dev` to start the application in a local development environment or `npm run build` to build release distributables.
+7. In another terminal, launch the audio backend with `npm run api`.
 
 # Usage
 
@@ -83,3 +96,14 @@ vimage-app
     ├── docker-compose.yml
     ├── package.json
     └── README.md
+
+### Backend
+
+An experimental Node.js helper lives in `backend/` and demonstrates how to
+call a local [ComfyUI](https://github.com/comfyanonymous/ComfyUI) server to
+generate audio and stream it through an FFmpeg filter chain. The helper now
+outputs AAC at 128 kbps and is served by `backend/server.js` on `/api/stream`.
+
+Visit [http://localhost:8080/soundscape](http://localhost:8080/soundscape) and
+click **Generate** to hear the streaming result in the built‑in audio player.
+Adjust `backend/audio-workflow.json` to match your ComfyUI workflow.
