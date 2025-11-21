@@ -483,7 +483,7 @@ export default {
 
             var options = _.clone(this.formAttributes);
             options.frameCount = frameCount;
-            let response = await axios.post('https://api.dudeisland.eu/api/submit', options)
+            let response = await axios.post('https://api.dudeisland.eu/api/generate', options)
               .finally(() => {
                 this.isFetching = false;
               });

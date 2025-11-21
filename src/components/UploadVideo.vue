@@ -104,7 +104,7 @@ export default {
 
       // Send the form data to the Laravel API
       // Adjust the API endpoint URL as per your configuration
-      fetch('http://api.example.com/submit-form', {
+      fetch('http://localhost/api/generate', {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {

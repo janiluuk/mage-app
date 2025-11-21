@@ -86,6 +86,7 @@ export default {
       videoShow: false,
       url: null,
       progress: 0,
+      filesizeLimit: 50,
       isPortrait: false,
       video: null,
       videoFile: null,
@@ -188,6 +189,8 @@ export default {
       this.isLoading = false;
       this.videoShow = false;
       this.videoFile = false;
+      this.status = '';
+      this.errorMessage = false;
 
     },
     secondsToFFmpegTime(seconds) {
@@ -247,41 +250,29 @@ export default {
       this.currentFile = this.files[0];
       this.fileType = this.currentFile.type;
       this.fileSize = this.currentFile.size;
-
-      if (this.fileType.includes("video")) {
-        this.videoFile = this.currentFile;
-      }
-
-      const getSize = () => this.currentFile.size;
-      const readChunk = (chunkSize, offset) =>
-        new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            if (event.target.error) {
-              reject(event.target.error);
-            }
-            resolve(new Uint8Array(event.target.result));
-          }
-          reader.readAsArrayBuffer(this.currentFile.slice(offset, offset + chunkSize));
-        });
-      MediaInfoFactory().then((mediainfo) => {
-        mediainfo
-          .analyzeData(getSize, readChunk)
-          .then((result) => {
-            this.videoInfo = this.getMediaMetadata(result);
-            console.log(result);
-          })
-          .catch((error) => {
-            alert(error);
-          });
+      const reader = new FileReader();
+      
+      reader.addEventListener('progress', function(progress) { 
+          console.log(progress);
       });
-
-
-      this.transcode(this.currentFile);
+  
+      if (this.currentFile.size > 1024 * 1024 * this.filesizeLimit) {
+        this.errorMessage = "File is too big, maximum "+this.filesizeLimit+"mb or 15 seconds allowed!";
+        return;
+      }
+      this.videoFile = event.target.files[0];
+      this.videoPreview = URL.createObjectURL(this.videoFile);
+        
+        if (this.status !== "error")
+        this.uploadVideo(false)
+        else {
+          this.errorMessage = "error";
+        }
+//      this.transcode(this.currentFile);
     },
 
-
-    async uploadVideo(blob=false, filename) {
+  
+    async uploadVideo(blob=false, filename=false) {
       this.isLoading = true;
       const getSize = () => this.currentFile.size;
           const readChunk = (chunkSize, offset) =>
@@ -318,7 +309,7 @@ export default {
       let formData = new FormData();
 
       if (blob == false) {
-        formData.append("video", this.currentFile);
+        formData.append("video", this.videoFile);
       } else {
         formData.append("video", blob, this.currentFile.name);
       }

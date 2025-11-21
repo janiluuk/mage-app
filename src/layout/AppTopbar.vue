@@ -1,10 +1,10 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import store from '../store';
 import AuthMenu from './AuthMenu.vue';
 import VisitorMenu from './VisitorMenu.vue';
-import store from '../store';
 
 const menu = ref(null);
 
@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
 });
 
 const logoUrl = computed(() => {
-    return `/layout/images/${layoutConfig.darkTheme ? 'logo-white' : 'logo-dark'}.svg`;
+    return `/public/img/vimage-logo.png`;
 });
 
 const onTopBarActionButton = (route) => {
@@ -76,25 +76,6 @@ const isOutsideClicked = (event) => {
     return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
 };
 
-const overlayMenuItems = ref([
-    {
-        label: 'View profile',
-        icon: 'pi pi-save',
-        to: '/profile'
-    },
-
-    {
-        label: 'My account',
-        icon: 'pi pi-refresh',
-        to: '/account'
-    },
-    {
-        label: 'Logout',
-        icon: 'pi pi-trash',
-        to: '/signout'
-    }
-
-]);
 </script>
 
 <template>
@@ -104,11 +85,12 @@ const overlayMenuItems = ref([
         </button>
         <router-link to="/" class="layout-topbar-logo">
             <img :src="logoUrl" alt="logo" />
-            <span>VMG</span>
+            <span>Vimage:stable</span>
         </router-link>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
         </button>
+
         <div class="layout-topbar-logo"></div>
         <AuthMenu
             v-if="loggedInUser"
@@ -120,4 +102,15 @@ const overlayMenuItems = ref([
 
     </div>
 </template>
-
+<style scoped lang="scss">
+@import '@/assets/vimage.scss';
+.layout-topbar .layout-topbar-logo {
+  border-radius: 0;
+  img {
+    height: 5rem;
+  }
+  &:focus {
+    box-shadow: none;
+  }
+}
+</style>

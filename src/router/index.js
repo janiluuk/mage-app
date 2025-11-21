@@ -7,7 +7,6 @@ import UserProfile from "@/views/api/profile/UserProfile.vue";
 import VideoEdit from "@/components/video/VideoEdit.vue";
 import VideoEditDeforum from "@/components/video/VideoEditDeforum.vue";
 import Deforum from "@/views/dev/Deforum.vue";
-import PromptTool from "@/components/prompt/PromptTool.vue";
 import Signup from "@/views/pages/auth/Signup.vue";
 import ForgotPassword from "@/views/pages/auth/ForgotPassword.vue";
 import PasswordReset from "@/views/api/PasswordReset.vue";
@@ -195,12 +194,6 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
-          path: "/prompt",
-          name: "promptTool",
-          component: PromptTool,
-          meta: { requiresAuth: true },
-        },
-        {
           path: "/dev",
           component: () => import("@/views/dev/DevBoard.vue"),
           children: [
@@ -237,7 +230,7 @@ const router = createRouter({
         {
           path: "/edit/deforum/:id", // :id is a dynamic route parameter for the video ID
           name: "Deforum Editor",
-          requiresAuth: true,
+          meta: { requiresAuth: true },
           component: VideoEditDeforum,
         },
       ],

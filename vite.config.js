@@ -44,7 +44,7 @@ export default ({ mode }) => {
     server: {
       proxy: {
         // with options: http://localhost:5173/api/bar-> http://jsonplaceholder.typicode.com/bar
-        '/processed': {
+  /*      '/processed': {
           target: 'https://api.dudeisland.eu',
           changeOrigin: true,
         },
@@ -60,20 +60,16 @@ export default ({ mode }) => {
           target: 'https://api.dudeisland.eu',
           changeOrigin: true,
         },
-        '/files': {
-          target: 'https://api.dudeisland.eu',
-          changeOrigin: true,
-        },
-
+	*/
       },
       cors: { origin: "*" },
 
       //    		open: true,
       //    		origin: 'http://localhost:8080/',
       headers: {
-        "Cross-Origin-Embedder-Policy": "require-corp",
-        "Cross-Origin-Opener-Policy": "same-origin",
-        "Cross-Origin-Resource-Policy": "cross-origin",
+//        "Cross-Origin-Embedder-Policy": "require-corp",
+//        "Cross-Origin-Opener-Policy": "same-origin",
+//        "Cross-Origin-Resource-Policy": "cross-origin",
         "Access-Control-Allow-Origin": "*",
       },
     },

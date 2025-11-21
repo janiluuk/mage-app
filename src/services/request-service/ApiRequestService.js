@@ -21,8 +21,7 @@ apiClient.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    config.headers['Accept'] = "application/vnd.api+json"
-    
+
     return config;
   },
   (error) => Promise.reject(error)

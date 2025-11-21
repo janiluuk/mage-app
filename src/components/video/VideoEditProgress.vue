@@ -1,6 +1,5 @@
 <template>
-        <label v-if="!isJobReady" class="form-label mb-1">Preview</label>
-                <label v-if="isJobReady" class="form-label mb-1">Ready video</label>
+
     <div class="progress-overlay" v-if="isVideoProcessing">
   
       <ProgressSpinner style="width: 70px; height: 70px" strokeWidth="3"></ProgressSpinner>

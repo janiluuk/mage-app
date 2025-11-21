@@ -134,13 +134,17 @@ export default {
   },
 
   async preview(params) {
-    return await requestService.post("/submit", params);
+    return await requestService.post("/generate", { ...params, type: "vid2vid" });
   },
   async previewDeforum(params) {
-    return await requestService.post("/submitDeforum", params);
+    return await requestService.post("/generate", { ...params, type: "deforum" });
   },
   async finalizeDeforum(params) {
-    return await requestService.post("/finalizeDeforum", params);
+    return await requestService.post("/finalize", params);
+  },
+
+  async queue() {
+    return await requestService.get("/queue");
   },
 
 };
