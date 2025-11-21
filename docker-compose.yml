@@ -1,24 +1,111 @@
-version: "3.7"
+version: "3.9"
 
 services:
-  vue-app:
+  app:
     build:
       context: .
       dockerfile: docker/Dockerfile
     container_name: vimage-app
-    restart: always
+    hostname: app
+    env_file:
+      - .env.docker
+    depends_on:
+      - api
+      - vimage-api
     ports:
-      - "8080:8080"
+      - "${FRONTEND_PORT:-8080}:8080"
     networks:
-      - vue-network
+      vimage:
+        aliases:
+          - app.localhost
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    container_name: vimage-api-helper
+    hostname: api
+    env_file:
+      - .env.docker
+    environment:
+      PORT: ${API_PORT:-3000}
+      COMFY_HOST: ${COMFY_HOST:-ffmpeg-worker}
+    depends_on:
+      - ffmpeg-worker
+    expose:
+      - "3000"
+    networks:
+      vimage:
+        aliases:
+          - api.localhost
+
+  vimage-api:
+    image: ${VIMAGE_API_IMAGE:-ghcr.io/vimage-ai/vimage-api:latest}
+    container_name: vimage-api
+    hostname: vimage-api
+    env_file:
+      - .env.docker
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE:-vimage}
+      DB_USERNAME: ${MYSQL_USER:-vimage}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+    depends_on:
+      - mysql
+    expose:
+      - "47860"
+    networks:
+      vimage:
+        aliases:
+          - vimage-api.localhost
+
+  mysql:
+    image: mysql:8.0
+    container_name: vimage-mysql
+    hostname: mysql
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-vimage}
+      MYSQL_USER: ${MYSQL_USER:-vimage}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      vimage:
+        aliases:
+          - mysql.localhost
+
+  nginx:
+    image: nginx:1.25
+    container_name: vimage-nginx
+    hostname: gateway
+    depends_on:
+      - app
+      - api
+      - vimage-api
+    ports:
+      - "${NGINX_PORT:-80}:80"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      vimage:
+        aliases:
+          - gateway.localhost
 
   ffmpeg-worker:
     image: jrottenberg/ffmpeg:5.1-ubuntu
     command: ["sleep", "infinity"]
     networks:
-      - vue-network
-    deploy:
-      replicas: 6
+      vimage:
+        aliases:
+          - ffmpeg.localhost
+
 networks:
-  vue-network:
+  vimage:
     driver: bridge
+
+volumes:
+  mysql_data:

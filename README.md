@@ -68,10 +68,12 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
 
 ### Docker workflow
 1. Ensure Docker is running.
-2. Build and start the environment (frontend + helpers):
+2. Bootstrap the full stack (frontend, helper API, Vimage API, MySQL, nginx, and FFmpeg workers):
    ```bash
-   docker compose up --build
+   script/setup.sh --detach
    ```
+   The script will copy `.env.docker.example` into `.env`/`.env.docker` on first run so the containers pick up matching hostnames
+   inside the shared Docker network (`app.localhost`, `api.localhost`, `vimage-api.localhost`, and `gateway.localhost`).
 3. The `ffmpeg-worker` service can be scaled to handle concurrent audio streams:
    ```bash
    docker compose up --build --scale ffmpeg-worker=6

@@ -1,12 +1,10 @@
 #!/bin/sh
+set -e
 
-# navigate to the application directory
 cd /app
 
-# Load the environment variables
-export $(egrep -v '^#' .env | xargs)
+if [ -f .env ]; then
+  export $(grep -v '^#' .env | xargs)
+fi
 
-# start the application in development mode
-npm run dev
-
-
+exec npm run dev
