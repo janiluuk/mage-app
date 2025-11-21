@@ -1,49 +1,53 @@
 import AuthService from '@/services/auth.service';
 
-const user = JSON.parse(localStorage.getItem('user_free'));
-const initialState = user ? { loggedIn: true } : { loggedIn: false };
+const accessToken = localStorage.getItem('auth.accessToken');
+const initialState = {
+  loggedIn: Boolean(accessToken),
+  accessToken,
+};
 
 export const auth = {
   namespaced: true,
   state: initialState,
   actions: {
-    async login({ commit }, user) {
-     
+    async login({ commit }, credentials) {
+      const data = await AuthService.login(credentials);
+      commit('setAuthState', data?.access_token || null);
+      return data;
     },
     async logout({ commit }) {
-      try {
-        await AuthService.logout();
-        commit('isLoggedIn', false);
-      }catch(error){
-        commit('isLoggedIn', true);
-      }
+      await AuthService.logout();
+      commit('setAuthState', null);
     },
     async register({ commit }, user) {
       try {
-        await AuthService.register(user);
-        commit('isLoggedIn', true);
+        const data = await AuthService.register(user);
+        commit('setAuthState', data?.access_token || null);
+        return data;
       } catch (error) {
-        commit('isLoggedIn', false);
-        throw(error)
+        commit('setAuthState', null);
+        throw error;
       }
     },
-    // eslint-disable-next-line no-unused-vars
-    async passwordForgot({commit}, userEmail){
+    async passwordForgot(_, userEmail) {
       await AuthService.passwordForgot(userEmail);
     },
-    // eslint-disable-next-line no-unused-vars
-    async passwordReset({commit}, passwordDTO){
+    async passwordReset(_, passwordDTO) {
       await AuthService.passwordReset(passwordDTO);
     },
   },
   mutations: {
-    isLoggedIn(state, loggedIn) {
-      state.loggedIn = loggedIn
-    }
+    setAuthState(state, token) {
+      state.accessToken = token;
+      state.loggedIn = Boolean(token);
+    },
   },
   getters: {
-    isLoggedIn(state){
+    isLoggedIn(state) {
       return state.loggedIn;
-    }
-  }
+    },
+    accessToken(state) {
+      return state.accessToken;
+    },
+  },
 };

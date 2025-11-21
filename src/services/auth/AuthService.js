@@ -1,10 +1,16 @@
 import requestService from '@/services/request-service/ApiRequestService';
 
 const AuthService = {
+  /**
+   * Register a new user and return the hydrated payload.
+   */
   async registerUser(registerData) {
     const response = await requestService.post('/auth/register', registerData);
     return response?.data?.data;
   },
+  /**
+   * Confirm an email verification token.
+   */
   async verifiedEmail(verifiedEmailData) {
     const response = await requestService.post(
       '/auth/verified-email',
@@ -61,7 +67,7 @@ const AuthService = {
     localStorage.setItem('auth.accessToken', token);
   },
   removeToken() {
-    localStorage.setItem('auth.accessToken', '');
+    localStorage.removeItem('auth.accessToken');
   },
   getToken() {
     return localStorage.getItem('auth.accessToken');

@@ -3,68 +3,89 @@ import authHeader from './auth-header';
 
 const API_URL = process.env.VUE_APP_API_V2_BASE_URL;
 const BASE_URL = process.env.VUE_APP_BASE_URL;
+const jsonApiHeaders = {
+  Accept: 'application/vnd.api+json',
+  'Content-Type': 'application/vnd.api+json',
+};
 
-export default {
-
-   async login(user) {
-    var response = await axios.post(API_URL + '/login', {
-      email: user.email,
-      password: user.password
-    }, 
+/**
+ * Authenticate the user and persist the returned access token.
+ */
+async function login(user) {
+  const { data } = await axios.post(
+    `${API_URL}/login`,
     {
-      headers: {
-        Accept: "application/vnd.api+json",
-        "Content-Type": "application/vnd.api+json",
-      }
-    });
- 
-    return response.then(function (data) {
-        return 
-        commit('loginSuccess', user);
-        return Promise.resolve(user);
-    }).error(function(error) {
-
-        commit('loginFailure');
-        return Promise.reject(error);        
-    });
-
-  },
-
-  async logout() {
-    await axios.post(API_URL + "/logout", {}, { headers: authHeader() })
-    localStorage.removeItem('auth.accessToken');
-  },
-
-  async register(user) {
-    var response = await axios.post(API_URL + '/register', {
-      name: user.name,
       email: user.email,
       password: user.password,
-      password_confirmation: user.confirmPassword
-    });
-    if (response.data.access_token) {
-      localStorage.setItem('auth.accessToken', response.data.access_token);
-    }
-    return response.data;
-  },
+    },
+    { headers: jsonApiHeaders }
+  );
 
-  async passwordForgot(userEmail) {
+  if (data?.access_token) {
+    localStorage.setItem('auth.accessToken', data.access_token);
+  }
 
-    var response = await axios.post(API_URL + '/password-forgot', {
-      redirect_url: BASE_URL + "/password-reset",
-      email: userEmail
-    })
-    return response.status;
-  },
+  return data;
+}
 
-  async passwordReset(passwordDTO) {
+/**
+ * Terminate the active session on the server and clear the local token.
+ */
+async function logout() {
+  await axios.post(`${API_URL}/logout`, {}, { headers: authHeader() });
+  localStorage.removeItem('auth.accessToken');
+}
 
-    var response = await axios.post(API_URL + '/password-reset', {
+/**
+ * Register a new account and store the issued token when present.
+ */
+async function register(user) {
+  const { data } = await axios.post(`${API_URL}/register`, {
+    name: user.name,
+    email: user.email,
+    password: user.password,
+    password_confirmation: user.confirmPassword,
+  });
+
+  if (data?.access_token) {
+    localStorage.setItem('auth.accessToken', data.access_token);
+  }
+
+  return data;
+}
+
+/**
+ * Request a password reset email for the supplied address.
+ */
+async function passwordForgot(userEmail) {
+  const response = await axios.post(
+    `${API_URL}/password-forgot`,
+    {
+      redirect_url: `${BASE_URL}/password-reset`,
+      email: userEmail,
+    },
+    { headers: jsonApiHeaders }
+  );
+
+  return response.status;
+}
+
+/**
+ * Complete a password reset with the provided token and new credentials.
+ */
+async function passwordReset(passwordDTO) {
+  const response = await axios.post(
+    `${API_URL}/password-reset`,
+    {
       password: passwordDTO.newPassword,
       password_confirmation: passwordDTO.confirmPassword,
       email: passwordDTO.email,
-      token: passwordDTO.token
-    })
-    return response.status;
-  }
+      token: passwordDTO.token,
+    },
+    { headers: jsonApiHeaders }
+  );
+
+  return response.status;
 }
+
+export default { login, logout, register, passwordForgot, passwordReset };

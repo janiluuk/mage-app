@@ -1,42 +1,43 @@
-import ProfileService from "@/services/profile.service"
+import ProfileService from "@/services/profile.service";
 
 const initialState = { userProfile: null };
 
 export const profile = {
-    namespaced: true,
-    state: initialState,
-    actions: {
-        async getProfile({ commit }) {
-            const userProfile = await ProfileService.getProfile();
-            commit('success', userProfile);
-        },
-
-        async editProfile({ commit }, modifiedProfile) {
-            const userProfile = await ProfileService.editProfile(modifiedProfile);
-            commit('success', userProfile);
-        },
-
-        //eslint-disable-next-line no-unused-vars
-        async uploadPic({ commit }, file) {
-           const picURL = (await ProfileService.uploadPic(file, this.state.profile.userProfile.id)).url;
-           commit('successUpload', picURL);
-        },
-
+  namespaced: true,
+  state: initialState,
+  actions: {
+    async getProfile({ commit }) {
+      const userProfile = await ProfileService.getProfile();
+      commit('setProfile', userProfile);
     },
-    mutations: {
-        success(state, userProfile) {
-            state.userProfile = userProfile;
-        },
-        successUpload(state, picURL){
-            state.userProfile.profile_image = picURL;
-        }
+
+    async editProfile({ commit }, modifiedProfile) {
+      const userProfile = await ProfileService.editProfile(modifiedProfile);
+      commit('setProfile', userProfile);
     },
-    getters: {
-        getUserProfile(state){
-            return state.userProfile
-        },
-        getUserProfileImage(state){
-            return state.userProfile.profile_image
-        }
-    }
-}
+
+    async uploadPic({ commit, state }, file) {
+      const userId = state?.userProfile?.id;
+      if (!userId) return;
+      const picURL = (await ProfileService.uploadPic(file, userId)).url;
+      commit('setProfileImage', picURL);
+    },
+  },
+  mutations: {
+    setProfile(state, userProfile) {
+      state.userProfile = userProfile;
+    },
+    setProfileImage(state, picURL) {
+      if (!state.userProfile) return;
+      state.userProfile.profile_image = picURL;
+    },
+  },
+  getters: {
+    getUserProfile(state) {
+      return state.userProfile;
+    },
+    getUserProfileImage(state) {
+      return state.userProfile?.profile_image || null;
+    },
+  },
+};
