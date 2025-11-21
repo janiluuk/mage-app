@@ -138,6 +138,7 @@
 <script>
 import { formatDistanceToNow } from 'date-fns';
 import axios from 'axios';
+import { API_BASE_URL } from '@/utils/domains';
 export default {
     name: 'VideoEntry',
     props: ['job'],
@@ -177,7 +178,7 @@ export default {
 
             this.isFetching = true;
             try {
-                const response = await axios.post('https://api.dudeisland.eu/finalize', {
+                const response = await axios.post(`${API_BASE_URL}/finalize`, {
                     modelId: this.job.model_id,
                     cfgScale: this.job.cfg_scale,
                     seed: this.job.seed,

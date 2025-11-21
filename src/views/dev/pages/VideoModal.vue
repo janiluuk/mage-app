@@ -13,6 +13,7 @@
   <script>
   import { mapActions, mapGetters } from 'vuex';
   import VideoModal from '@/components/video/VideoModal.vue'
+  import { SAMPLE_PROCESSED_VIDEO_URL } from '@/utils/domains';
   export default {
     components: {
       VideoModal
@@ -20,7 +21,7 @@
     data: () => {
       return {
         videoIsOpen: false,
-        url: 'https://api.dudeisland.eu/processed/tuba_new.mp4'
+        url: SAMPLE_PROCESSED_VIDEO_URL
       }
     },
     setup() {

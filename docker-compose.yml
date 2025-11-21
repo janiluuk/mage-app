@@ -4,7 +4,7 @@ services:
   vue-app:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     container_name: vimage-app
     restart: always
     ports:

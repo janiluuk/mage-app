@@ -158,6 +158,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import moment from 'moment';
 import VideoPlayer from '@/components/video/VideoPlayer.vue';
+import { API_BASE_URL, API_V1_URL, VIDEO_PREVIEW_URL } from '@/utils/domains';
 
 import ModelfileSelector from '@/components/Modelfile/ModelfileSelector.vue';
 import showSwal from "@/mixins/showSwal.js";
@@ -326,8 +327,7 @@ export default {
       return filename.substring(1, filename.lastIndexOf('.')) || filename;
     },
     getPreviewUrl() {
-      const url = process.env.VUE_APP_VIDEO_PREVIEW_URL;
-      return url + this.job.filename;
+      return `${VIDEO_PREVIEW_URL}${this.job.filename}`;
     },
     getFormattedDuration(seconds) {
       if (!seconds) {
@@ -352,7 +352,7 @@ export default {
 
         try {
           let token = this.getToken();
-          const response = await axios.get('https://api.dudeisland.eu/api/v1/video-jobs/' + this.videoId + "?include=modelfile", {
+          const response = await axios.get(`${API_V1_URL}/video-jobs/${this.videoId}?include=modelfile`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.api+json',
@@ -402,7 +402,7 @@ export default {
         this.errorMessage = '';
         this.isFetching = true;
         try {
-          const response = await axios.post('https://api.dudeisland.eu/api/finalize', this.formAttributes).finally(() => { this.isFetching = false; });
+          const response = await axios.post(`${API_BASE_URL}/finalize`, this.formAttributes).finally(() => { this.isFetching = false; });
           this.resetProgress();
           this.operation = 'finalize';
 
@@ -419,7 +419,7 @@ export default {
         this.job.status = 'cancelled';
         this.isFetching = true;
         try {
-          const response = await axios.post('https://api.dudeisland.eu/api/cancelJob/' + this.videoId, {
+          const response = await axios.post(`${API_BASE_URL}/cancelJob/${this.videoId}`, {
 
             videoId: this.videoId
           },
@@ -451,7 +451,7 @@ export default {
 
         try {
           let token = this.getToken();
-          await axios.delete('https://api.dudeisland.eu/api/v1/video-jobs/' + id + '?sort=-updated_at', {
+          await axios.delete(`${API_V1_URL}/video-jobs/${id}?sort=-updated_at`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.api+json',
@@ -483,7 +483,7 @@ export default {
 
             var options = _.clone(this.formAttributes);
             options.frameCount = frameCount;
-            let response = await axios.post('https://api.dudeisland.eu/api/generate', options)
+            let response = await axios.post(`${API_BASE_URL}/generate`, options)
               .finally(() => {
                 this.isFetching = false;
               });

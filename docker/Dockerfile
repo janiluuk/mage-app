@@ -13,7 +13,8 @@ RUN npm install --include=dev --legacy-peer-deps
 # copy project files and folders to the current working directory (i.e. 'app' folder)
 COPY . .
 
-COPY .env .env
+# move the container entrypoint into a predictable location
+COPY docker/entrypoint.sh /app/entrypoint.sh
 
 EXPOSE 8080
 
@@ -21,5 +22,3 @@ RUN chmod +x /app/entrypoint.sh
 
 # Set the entrypoint script as the entrypoint for this Docker image
 ENTRYPOINT ["/app/entrypoint.sh"]
-
-

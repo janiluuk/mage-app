@@ -55,6 +55,7 @@
 <script>
 import VideoEditProgress from '@/components/video/VideoEditProgress.vue';
 import moment from 'moment';
+import { API_URL } from '@/utils/domains';
 export default {
     name: 'VideoEditPreview',
     components: {
@@ -110,7 +111,7 @@ export default {
             return (!this.isJobSketch && this.$props.job.preview_img && this.$props.job.preview_img.length > 0 && (this.$props.job.preview_img.includes('.png') || this.$props.job.preview_img.includes('.gif')));
         },
         getPreviewUrl() {
-            return this.$props.job.original_url.replace("https://api.dudeisland.eu", "");
+            return this.$props.job.original_url.replace(API_URL, "");
         },
         hasPreviewAnimation() {
             return (!this.isJobSketch && this.$props.job.preview_animation && this.$props.job.preview_animation.length > 0);

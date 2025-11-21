@@ -5,6 +5,7 @@ import { useToast } from 'primevue/usetoast';
 import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
+import { FALLBACK_IMAGE_URL } from '@/utils/domains';
 
 
 const toast = useToast();
@@ -58,8 +59,10 @@ onMounted(() => {
 
 onUnmounted(() => clearInterval(intervalId))
 
+const fallbackImage = FALLBACK_IMAGE_URL;
+
 const lazyOptions = reactive({
-    error: 'https://api.dudeisland.eu/images/notfound.jpg',
+    error: fallbackImage,
     lifecycle: {
         loading: (el) => {
             //    console.log('image loading', el)
@@ -328,7 +331,7 @@ const onStatusFilterChange = (event) => {
 
                             <span class="card-thumbnail-image">
                                 <img crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
-                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                    v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.thumbnail || fallbackImage, lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                                 <img  crossorigin="anonymous" class="top" v-if="slotProps.data.id == 1171" lazy="loading" width="100" />
 
@@ -339,7 +342,7 @@ const onStatusFilterChange = (event) => {
                             </span>
 
                             <span class="card-thumbnail-image-fill">
-                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img :  slotProps.data.thumbnail || 'https://api.dudeisland.eu/images/notfound.jpg', lifecycle: lazyOptions.lifecycle }"
+                                <img  crossorigin="anonymous" v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img :  slotProps.data.thumbnail || fallbackImage, lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
                             </span>
 
@@ -414,7 +417,7 @@ span::before>img[lazy=error] {
 
 span>img[lazy=error] {
     opacity: 1.0;
-    background-image: url(https://api.dudeisland.eu/images/notfound.jpg);
+    background-image: url(v-bind(fallbackImage));
     content: "Error, add cool style to dis";
     color: red;
     min-height: 150px;

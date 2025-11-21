@@ -45,6 +45,7 @@
 
 <script>
 import '@/assets/scss/material-dashboard.scss';
+import { APP_BASE_URL, API_BASE_URL } from '@/utils/domains';
 export default {
   data() {
     return {
@@ -68,7 +69,7 @@ export default {
 
       // Send video file to Laravel API
       // Adjust the API endpoint URL as per your configuration
-      fetch('http://app.dudeisland.eu/upload', {
+      fetch(`${APP_BASE_URL}/upload`, {
         method: 'POST',
         body: formData
       })
@@ -104,7 +105,7 @@ export default {
 
       // Send the form data to the Laravel API
       // Adjust the API endpoint URL as per your configuration
-      fetch('http://localhost/api/generate', {
+      fetch(`${API_BASE_URL}/generate`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {

@@ -9,6 +9,7 @@ import axios from 'axios';
 import moment from 'moment';
 import VideoJob from '@/models/VideoJob';
 import { mapActions } from 'vuex';
+import { API_V1_URL } from '@/utils/domains';
 
 export default {
   name: 'Editor',
@@ -33,7 +34,7 @@ export default {
     async fetchVideoJobs() {
       try {
         let token = this.getToken();
-        const response = await axios.get('https://api.dudeisland.eu/api/v1/video-jobs?sort=-updated_at', {
+        const response = await axios.get(`${API_V1_URL}/video-jobs?sort=-updated_at`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/vnd.api+json',
@@ -54,7 +55,7 @@ export default {
 
       try {
         let token = this.getToken();
-        const response = await axios.get('https://api.dudeisland.eu/api/v1/model-files', {
+        const response = await axios.get(`${API_V1_URL}/model-files`, {
           headers: {
             Authorization: `Bearer ${token}`
           }

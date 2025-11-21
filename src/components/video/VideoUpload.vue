@@ -55,6 +55,7 @@ import { mapActions } from 'vuex';
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import MediaInfoFactory from 'mediainfo.js'
 import VideoClipper from '@/components/video/VideoClipper.vue';
+import { API_BASE_URL } from '@/utils/domains';
 
 export default {
   name: 'VideoUpload',
@@ -318,11 +319,11 @@ export default {
 
       try {
         const response = await
-          axios.post('https://api.dudeisland.eu/upload', formData, {
+          axios.post(`${API_BASE_URL}/upload`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': 'Bearer ' + this.getToken()
-            }r
+            }
           });
         this.videoUrl = response.data.url;
 

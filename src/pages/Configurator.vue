@@ -120,14 +120,14 @@
         <div class="text-center w-100">
           <h6 class="mt-3">Sumting here</h6>
           <a
-            href="https://twitter.com/intent/tweet?text=Check%20Vimage%20app&amp;url=https://app.dudeisland.eu"
+            :href="twitterShareUrl"
             class="mb-0 btn btn-dark me-2"
             target="_blank"
           >
             <i class="fab fa-twitter me-1" aria-hidden="true"></i> Tweet
           </a>
           <a
-            href="https://www.facebook.com/sharer/sharer.php?u=https://app.dudeisland.eu"
+            :href="facebookShareUrl"
             class="mb-0 btn btn-dark me-2"
             target="_blank"
           >
@@ -142,6 +142,7 @@
 <script>
 import { mapMutations, mapState, mapActions } from "vuex";
 import { activateDarkMode, deactivateDarkMode } from "@/assets/js/dark-mode";
+import { APP_BASE_URL } from "@/utils/domains";
 
 export default {
   name: "configurator",
@@ -193,6 +194,15 @@ export default {
   },
   computed: {
     ...mapState(["isRTL", "sidebarType"]),
+    appShareUrl() {
+      return APP_BASE_URL;
+    },
+    twitterShareUrl() {
+      return `https://twitter.com/intent/tweet?text=Check%20Vimage%20app&url=${this.appShareUrl}`;
+    },
+    facebookShareUrl() {
+      return `https://www.facebook.com/sharer/sharer.php?u=${this.appShareUrl}`;
+    },
     sidenavResponsive() {
       return this.sidenavTypeOnResize;
     },

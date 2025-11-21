@@ -34,7 +34,13 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
    ```
 3. Set the URLs in `.env`:
    - `VUE_APP_BASE_URL`: public URL where the frontend is served (e.g. `http://localhost:8080/`).
+   - `VUE_APP_APP_URL`: canonical public hostname for sharing links (e.g. `https://app.example.com`).
    - `VUE_APP_API_BASE_URL`: base URL of the JSON API (e.g. `http://localhost:3000/api/v1`).
+   - `VUE_APP_API_V1_BASE_URL`: API v1 root (e.g. `http://localhost:3000/api/v1`).
+   - `VUE_APP_STABLE_URL`: URL used by the Studio iframe (e.g. `https://stable.example.com`).
+   - `VUE_APP_VIMAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
+   - `VUE_APP_FALLBACK_IMAGE_URL`: fallback image used across media listings.
+   - `VUE_APP_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
 
 ### Running the app
 - Development server with debug logging:

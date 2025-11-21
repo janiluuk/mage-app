@@ -1,5 +1,6 @@
 <script setup>
 import { useToast } from 'primevue/usetoast';
+import { STABLE_URL } from '@/utils/domains';
 
 const toast = useToast();
 
@@ -18,7 +19,7 @@ const onUpload = () => {
                 style="margin-top:90px;"
               width="100%"
               height="100%"
-              src="https://stable.dudeisland.eu"
+              :src="STABLE_URL"
               frameBorder='0'
               tabIndex='-1'
               />
