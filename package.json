@@ -1,17 +1,17 @@
 {
-  "name": "vue-image-upload-app",
+  "name": "mage-app",
   "version": "1.0.0",
   "private": true,
   "author": "Yani",
   "license": "",
-  "description": "Image AI app",
-  "homepage": "",
+  "description": "Mage AI Studio - Image and Video AI app",
+  "homepage": "https://github.com/janiluuk/mage-app",
   "bugs": {
-    "url": "https://github.com/janiluuk/vimage/issues"
+    "url": "https://github.com/janiluuk/mage-app/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/janiluuk/vimage-app.git"
+    "url": "git+https://github.com/janiluuk/mage-app.git"
   },
   "scripts": {
     "serve": "vite --cors --port 8080 --host --cors",

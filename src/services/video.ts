@@ -1,9 +1,6 @@
-import Vue from 'vue';
-import Vuex from 'vuex';
+import { createStore } from 'vuex';
 import { convertBase64ToUint8Array } from '@/utils/base64';
 import { DEBUG_MODE } from '@/constants';
-
-Vue.use(Vuex);
 
 interface FFmpegProgress {
   ratio: number;
@@ -31,7 +28,7 @@ const initGenerationData = () => ({
   est: Infinity,
 });
 
-export default new Vuex.Store({
+export default createStore({
   state: {
     initFramerate: 1,
     maxInitFramerate: 10,
@@ -137,8 +134,6 @@ export default new Vuex.Store({
           }
         };
       });
-    }
-
     },
     cancelGeneration({ state, commit }) {
       commit('setGeneratingVideo', false);

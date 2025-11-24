@@ -1,7 +1,9 @@
 export const useDebounce = () => {
-    let timeout:any = null;
+    let timeout: NodeJS.Timeout | null = null;
     return function (fn: Function, delayMs: number = 500) {
-        clearTimeout(timeout);
+        if (timeout) {
+            clearTimeout(timeout);
+        }
         timeout = setTimeout(() => {
             fn();
         }, delayMs);
