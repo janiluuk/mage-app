@@ -1,6 +1,6 @@
-# Vimage AI Studio Frontend
+# Mage AI Studio Frontend
 
-An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app bundles media tooling, PrimeVue components, and audio/video workflows into a single dashboard that talks to a JSON API backend and an experimental FFmpeg/ComfyUI helper.
+An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bundles media tooling, PrimeVue components, and audio/video workflows into a single dashboard that talks to a JSON API backend and an experimental FFmpeg/ComfyUI helper.
 
 ## Features
 - **Authentication & profile management** with JWT-based session handling and guarded routes.
@@ -81,7 +81,7 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
 
 ## Project Structure
 ```
-vimage-app/
+mage-app/
 ├── src/
 │   ├── assets/               # Global styles, fonts, and static media
 │   ├── components/           # Reusable UI components
