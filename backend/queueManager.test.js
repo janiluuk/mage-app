@@ -41,6 +41,27 @@ test('markFailed stores error and keeps history trimmed', () => {
   assert.equal(history[0].error, 'boom');
 });
 
+test('history length respects the configured limit', () => {
+  manager = new QueueManager(2);
+
+  const jobA = manager.enqueue({ text: 'a' });
+  manager.markProcessing(jobA.id);
+  manager.markComplete(jobA.id);
+
+  const jobB = manager.enqueue({ text: 'b' });
+  manager.markProcessing(jobB.id);
+  manager.markComplete(jobB.id);
+
+  const jobC = manager.enqueue({ text: 'c' });
+  manager.markProcessing(jobC.id);
+  manager.markComplete(jobC.id);
+
+  const { history } = manager.getQueue();
+  assert.equal(history.length, 2);
+  assert.equal(history[0].metadata.text, 'c');
+  assert.equal(history[1].metadata.text, 'b');
+});
+
 test('status summarizes current work', () => {
   const job = manager.enqueue({ text: 'status' });
   manager.markProcessing(job.id);
