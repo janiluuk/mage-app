@@ -61,9 +61,29 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
   ```bash
   npm run api
   ```
-- Run the backend/test suite for the helper API:
+- Run all tests (backend + frontend):
   ```bash
   npm test
+  ```
+- Run only backend tests:
+  ```bash
+  npm run test:backend
+  ```
+- Run only frontend tests:
+  ```bash
+  npm run test:frontend
+  ```
+- Run frontend tests in watch mode:
+  ```bash
+  npm run test:frontend:watch
+  ```
+- Run frontend tests with UI:
+  ```bash
+  npm run test:frontend:ui
+  ```
+- Generate frontend test coverage report:
+  ```bash
+  npm run test:frontend:coverage
   ```
 
 ### Docker workflow
@@ -108,11 +128,51 @@ vimage-app/
 - `/mage`: Mage helper dashboard that polls `/api/status` and `/api/queue` to surface backlog warnings.
 - `/dev/deforumation-qt`: JavaScript port of Deforumation QT for real-time Deforum parameter steering.
 
+## Testing
+### Test Structure
+The project includes comprehensive test coverage for both backend and frontend:
+
+**Backend Tests** (Node.js built-in test runner)
+- `backend/app.test.js` - API endpoint tests
+- `backend/queueManager.test.js` - Queue management tests
+
+**Frontend Tests** (Vitest + Vue Test Utils)
+- `src/components/*.spec.js` - Component unit tests
+- `src/router/*.spec.js` - Router configuration tests
+- `src/utils/*.spec.js` - Utility function tests
+
+### Writing Tests
+Frontend tests use [Vitest](https://vitest.dev/) and [@vue/test-utils](https://test-utils.vuejs.org/):
+
+```javascript
+import { describe, it, expect } from 'vitest'
+import { mount } from '@vue/test-utils'
+import MyComponent from './MyComponent.vue'
+
+describe('MyComponent', () => {
+  it('renders properly', () => {
+    const wrapper = mount(MyComponent, {
+      props: { msg: 'Hello' }
+    })
+    expect(wrapper.text()).toContain('Hello')
+  })
+})
+```
+
+### Test Configuration
+- **Vitest config**: `vitest.config.js` - test environment, setup files, coverage settings
+- **Test setup**: `src/test/setup.js` - global mocks and configuration
+- **CI/CD**: `.github/workflows/ci.yml` - automated testing on each PR
+
+### Coverage
+Run `npm run test:frontend:coverage` to generate a coverage report for frontend tests. Coverage reports are generated in the `coverage/` directory and include HTML, JSON, and text formats.
+
 ## Development Notes
 - Auth-protected routes use `meta.requiresAuth`; unauthenticated users are redirected to `/login`.
 - Auth pages (`/login`, `/signup`, password reset) are guarded with `meta.handleAuth` to redirect authenticated users to the library.
 - PrimeVue components and directives are registered globally in `src/main.js` so they are available throughout the app.
 - When using the audio streaming page (`/soundscape`), ensure the backend helper and ComfyUI workflow defined in `backend/audio-workflow.json` are running.
+- **All code changes should include tests** - write unit tests for components, utilities, and services to maintain code quality.
 
 ## Contributing
 Feel free to open issues or pull requests with bug fixes or enhancements. Please keep new components consistent with the existing PrimeVue/PrimeFlex patterns and prefer the services in `src/services` when talking to the API.
