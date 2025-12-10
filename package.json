@@ -24,7 +24,7 @@
     "test:frontend": "vitest run",
     "test:frontend:watch": "vitest",
     "test:frontend:ui": "vitest --ui",
-    "test:coverage": "vitest run --coverage"
+    "test:frontend:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@cloudgeek/vue3-video-player": "^0.3.10",

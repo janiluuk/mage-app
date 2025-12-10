@@ -21,6 +21,8 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        # Using --legacy-peer-deps due to @types/node version conflict between vitest (requires 18+) and existing dependencies (requires 16)
+        # TODO: Update @types/node to version 20+ to resolve peer dependency conflicts
         run: npm ci --no-progress --legacy-peer-deps
 
       - name: Run backend tests
