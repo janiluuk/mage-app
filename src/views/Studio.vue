@@ -5,6 +5,7 @@ import { fetchStableUrl } from '@/utils/domains';
 
 const toast = useToast();
 const stableUrl = ref('');
+const isLoading = ref(true);
 
 const onUpload = () => {
     toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
@@ -12,6 +13,7 @@ const onUpload = () => {
 
 onMounted(async () => {
     stableUrl.value = await fetchStableUrl();
+    isLoading.value = false;
 });
 </script>
 
@@ -21,7 +23,11 @@ onMounted(async () => {
         <div class="col-12">
 
             <div class="card">
+                <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+                    <ProgressSpinner />
+                </div>
                 <iframe
+                v-else
                 style="margin-top:90px;"
               width="100%"
               height="100%"
