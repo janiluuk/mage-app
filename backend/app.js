@@ -52,6 +52,12 @@ function createApp({ audioClient = defaultAudioClient, queueManager = defaultQue
     res.json(queueManager.getQueue());
   });
 
+  app.get('/api/config', (req, res) => {
+    res.json({
+      stableUrl: process.env.STABLE_URL || '',
+    });
+  });
+
   return app;
 }
 

@@ -88,3 +88,24 @@ test('stream endpoint marks failures and records errors in history', async () =>
   assert.equal(queueBody.history[0].metadata.text, 'oops');
   assert.match(queueBody.history[0].error, /synthetic failure/);
 });
+
+test('config endpoint returns stable URL from environment', async () => {
+  const response = await fetch(`${baseUrl}/api/config`);
+  assert.equal(response.status, 200);
+  const body = await response.json();
+  assert.ok('stableUrl' in body);
+  assert.equal(typeof body.stableUrl, 'string');
+});
+
+test('config endpoint returns empty string when STABLE_URL not set', async () => {
+  const originalStableUrl = process.env.STABLE_URL;
+  delete process.env.STABLE_URL;
+  
+  const response = await fetch(`${baseUrl}/api/config`);
+  const body = await response.json();
+  assert.equal(body.stableUrl, '');
+  
+  if (originalStableUrl) {
+    process.env.STABLE_URL = originalStableUrl;
+  }
+});

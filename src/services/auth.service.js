@@ -1,8 +1,9 @@
 import axios from 'axios';
 import authHeader from './auth-header';
+import { API_V2_URL, APP_BASE_URL } from '@/utils/domains';
 
-const API_URL = process.env.VUE_APP_API_V2_BASE_URL;
-const BASE_URL = process.env.VUE_APP_BASE_URL;
+const API_URL = API_V2_URL;
+const BASE_URL = APP_BASE_URL;
 const jsonApiHeaders = {
   Accept: 'application/vnd.api+json',
   'Content-Type': 'application/vnd.api+json',

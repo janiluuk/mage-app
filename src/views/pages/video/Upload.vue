@@ -52,6 +52,27 @@
           <div class="banner-description">Enhance videos with stunning visual effects</div>
         </div>
       </div>
+      <div class="banner-item" @click="showAudioJobDialog = true">
+        <div class="banner-media-container">
+          <img src="/public/img/mona.gif" class="banner-media-main"/>
+          <div class="banner-media-secondary">
+            <img src="/public/img/mona2.gif" />
+          </div>
+          <div class="banner-overlay">
+            <div class="banner-overlay-icon">
+              <i class="pi pi-cloud-upload"></i>
+            </div>
+            <div class="banner-overlay-body">
+              <div class="banner-overlay-title">Upload audio file</div>
+              <div class="banner-overlay-desc">Create animation synced with audio</div>
+            </div>
+          </div>
+        </div>
+        <div class="banner-content-container">
+          <div class="banner-header">Audio Animation</div>
+          <div class="banner-description">Create animations synchronized with audio</div>
+        </div>
+      </div>
       <div class="banner-item coming-soon hidden">
         <div class="banner-icon"><i class="pi pi-camera"></i></div>
         <div class="banner-content-container">
@@ -60,16 +81,36 @@
         </div>
       </div>
     </div>
+
+    <!-- Audio Job Creation Dialog -->
+    <Dialog 
+      v-model:visible="showAudioJobDialog" 
+      :modal="true" 
+      header="Create Audio Animation Job"
+      :style="{ width: '50vw' }"
+      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+    >
+      <JobCreationForm
+        @job-created="handleJobCreated"
+        @form-cancelled="showAudioJobDialog = false"
+      />
+    </Dialog>
   </div>
 </template>
 
 <script>
 import * as notificationActions from '@/store/modules/notification/types/actions';
 import { mapActions, mapGetters } from 'vuex';
+import JobCreationForm from '@/components/job/JobCreationForm.vue';
+import Dialog from 'primevue/dialog';
 
 
 export default {
   name: 'Upload',
+  components: {
+    JobCreationForm,
+    Dialog
+  },
   data() {
     return {
       generatorType: 'vid2vid',
@@ -77,6 +118,7 @@ export default {
       isLoading: false,
       status: '',
       errorMessage: false,
+      showAudioJobDialog: false
       fileSizeLimit: {'video/mp4': 50, 'image/jpeg': 2, 'image/png': 2, 'image/gif': 2 },
       supportedFormats: {
         deforum: ['image/jpeg', 'image/png', 'image/gif'],

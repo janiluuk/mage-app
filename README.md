@@ -79,14 +79,14 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
    cp .env.example .env
    ```
 3. Set the URLs in `.env`:
-   - `VUE_APP_BASE_URL`: public URL where the frontend is served (e.g. `http://localhost:8080/`).
-   - `VUE_APP_APP_URL`: canonical public hostname for sharing links (e.g. `https://app.example.com`).
-   - `VUE_APP_API_BASE_URL`: base URL of the JSON API (e.g. `http://localhost:3000/api/v1`).
-   - `VUE_APP_API_V1_BASE_URL`: API v1 root (e.g. `http://localhost:3000/api/v1`).
-   - `VUE_APP_STABLE_URL`: URL used by the Studio iframe (e.g. `https://stable.example.com`).
-   - `VUE_APP_MAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
-   - `VUE_APP_FALLBACK_IMAGE_URL`: fallback image used across media listings.
-   - `VUE_APP_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
+   - **Required:**
+     - `VUE_APP_API_URL`: single source of truth for API base URL (e.g. `http://localhost:3000`). All API endpoints are derived from this.
+   - **Optional:**
+     - `VUE_APP_APP_URL`: canonical public hostname for sharing links (defaults to `VUE_APP_API_URL` if not set).
+     - `VUE_APP_MAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
+     - `VUE_APP_FALLBACK_IMAGE_URL`: fallback image URL (defaults to `{API_URL}/images/notfound.jpg`).
+     - `VUE_APP_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
+     - `STABLE_URL`: stable URL for the Studio iframe (fetched from backend `/api/config` endpoint at runtime).
 
 ### Running the app
 - Development server with debug logging:
@@ -167,6 +167,7 @@ mage-app/
 - `GET /api/stream?text=`: stream generated AAC audio for the provided text prompt.
 - `GET /api/status`: summarize current processing job, queue length, and recent history for quick health checks.
 - `GET /api/queue`: list queued jobs, active processing entries, and the latest completed/failed work items.
+- `GET /api/config`: returns instance configuration including the stable URL for the Studio iframe.
 
 ## UI additions
 - `/mage`: Mage helper dashboard that polls `/api/status` and `/api/queue` to surface backlog warnings.
