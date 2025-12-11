@@ -102,12 +102,14 @@
 import * as notificationActions from '@/store/modules/notification/types/actions';
 import { mapActions, mapGetters } from 'vuex';
 import JobCreationForm from '@/components/job/JobCreationForm.vue';
+import Dialog from 'primevue/dialog';
 
 
 export default {
   name: 'Upload',
   components: {
-    JobCreationForm
+    JobCreationForm,
+    Dialog
   },
   data() {
     return {
@@ -181,19 +183,6 @@ export default {
       try {
         this.showAudioJobDialog = false;
         this.setSuccessNotification('Creating audio animation job...');
-        
-        // Create FormData to upload audio file along with job settings
-        const formData = new FormData();
-        formData.append('audio', jobData.audioFile);
-        formData.append('motionStyle', jobData.motionStyle);
-        
-        if (jobData.preset) {
-          formData.append('preset', JSON.stringify(jobData.preset));
-        }
-        
-        if (jobData.bpm) {
-          formData.append('bpm', jobData.bpm);
-        }
         
         // Upload and create job
         const response = await this.upload({ 
