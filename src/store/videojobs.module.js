@@ -56,10 +56,17 @@ export const videojobs = {
         );
       }.bind(this);
 
+      const extraData = {
+        motionStyle: item.motionStyle,
+        preset: item.preset,
+        bpm: item.bpm
+      };
+
       return VideoJobService.upload(
         item.attachment,
         item.type,
-        updateProgress
+        updateProgress,
+        extraData
       ).then((result) => {
         commit("SET_URL", result.data.url);
         commit("SET_PROGRESS", result.data.url);

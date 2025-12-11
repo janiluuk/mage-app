@@ -52,6 +52,27 @@
           <div class="banner-description">Enhance videos with stunning visual effects</div>
         </div>
       </div>
+      <div class="banner-item" @click="showAudioJobDialog = true">
+        <div class="banner-media-container">
+          <img src="/public/img/mona.gif" class="banner-media-main"/>
+          <div class="banner-media-secondary">
+            <img src="/public/img/mona2.gif" />
+          </div>
+          <div class="banner-overlay">
+            <div class="banner-overlay-icon">
+              <i class="pi pi-cloud-upload"></i>
+            </div>
+            <div class="banner-overlay-body">
+              <div class="banner-overlay-title">Upload audio file</div>
+              <div class="banner-overlay-desc">Create animation synced with audio</div>
+            </div>
+          </div>
+        </div>
+        <div class="banner-content-container">
+          <div class="banner-header">Audio Animation</div>
+          <div class="banner-description">Create animations synchronized with audio</div>
+        </div>
+      </div>
       <div class="banner-item coming-soon hidden">
         <div class="banner-icon"><i class="pi pi-camera"></i></div>
         <div class="banner-content-container">
@@ -60,16 +81,34 @@
         </div>
       </div>
     </div>
+
+    <!-- Audio Job Creation Dialog -->
+    <Dialog 
+      v-model:visible="showAudioJobDialog" 
+      :modal="true" 
+      header="Create Audio Animation Job"
+      :style="{ width: '50vw' }"
+      :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
+    >
+      <JobCreationForm
+        @job-created="handleJobCreated"
+        @form-cancelled="showAudioJobDialog = false"
+      />
+    </Dialog>
   </div>
 </template>
 
 <script>
 import * as notificationActions from '@/store/modules/notification/types/actions';
 import { mapActions, mapGetters } from 'vuex';
+import JobCreationForm from '@/components/job/JobCreationForm.vue';
 
 
 export default {
   name: 'Upload',
+  components: {
+    JobCreationForm
+  },
   data() {
     return {
       generatorType: 'vid2vid',
@@ -77,7 +116,8 @@ export default {
       isLoading: false,
       status: '',
       errorMessage: false,
-      fileSizeLimit: {'video/mp4': 50, 'image': 2 }
+      fileSizeLimit: {'video/mp4': 50, 'image': 2 },
+      showAudioJobDialog: false
     };
   },
   watch: {
@@ -136,6 +176,42 @@ export default {
     },
     async uploadFile(file, type) {
       const response = this.upload({attachment: file, type: type }).then((result) => { this.status = result.status; this.videoId = result.id; return result;} );
+    },
+    async handleJobCreated(jobData) {
+      try {
+        this.showAudioJobDialog = false;
+        this.setSuccessNotification('Creating audio animation job...');
+        
+        // Create FormData to upload audio file along with job settings
+        const formData = new FormData();
+        formData.append('audio', jobData.audioFile);
+        formData.append('motionStyle', jobData.motionStyle);
+        
+        if (jobData.preset) {
+          formData.append('preset', JSON.stringify(jobData.preset));
+        }
+        
+        if (jobData.bpm) {
+          formData.append('bpm', jobData.bpm);
+        }
+        
+        // Upload and create job
+        const response = await this.upload({ 
+          attachment: jobData.audioFile, 
+          type: 'deforum',
+          motionStyle: jobData.motionStyle,
+          preset: jobData.preset,
+          bpm: jobData.bpm
+        });
+        
+        this.status = response.status;
+        this.videoId = response.id;
+        
+        this.setSuccessNotification('Audio animation job created successfully!');
+      } catch (error) {
+        console.error('Failed to create job:', error);
+        this.setErrorNotification('Failed to create audio animation job');
+      }
     }
   }};
 
