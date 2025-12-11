@@ -1,32 +1,29 @@
+/**
+ * @deprecated This file is deprecated. Use src/services/customers/CustomerService.js instead.
+ * This file is kept for backward compatibility with existing imports.
+ */
+import CustomerServiceImpl from '../services/customers/CustomerService';
+
+const customerServiceInstance = new CustomerServiceImpl();
+
 export default class CustomerService {
     getCustomersSmall() {
-        return fetch('demo/data/customers-small.json')
-            .then((res) => res.json())
-            .then((d) => d.data);
+        return customerServiceInstance.getCustomersSmall();
     }
 
     getCustomersMedium() {
-        return fetch('demo/data/customers-medium.json')
-            .then((res) => res.json())
-            .then((d) => d.data);
+        return customerServiceInstance.getCustomersMedium();
     }
 
     getCustomersLarge() {
-        return fetch('demo/data/customers-large.json')
-            .then((res) => res.json())
-            .then((d) => d.data);
+        return customerServiceInstance.getCustomersLarge();
     }
 
     getCustomersXLarge() {
-        return fetch('demo/data/customers-xlarge.json')
-            .then((res) => res.json())
-            .then((d) => d.data);
+        return customerServiceInstance.getCustomersXLarge();
     }
 
     getCustomers(params) {
-        const queryParams = Object.keys(params)
-            .map((k) => encodeURIComponent(k) + '=' + encodeURIComponent(params[k]))
-            .join('&');
-        return fetch('https://www.primefaces.org/demo/data/customers?' + queryParams).then((res) => res.json());
+        return customerServiceInstance.getCustomers(params);
     }
 }
