@@ -153,7 +153,7 @@ This document provides a comprehensive analysis of the current state of the Mage
 - **Location:** `src/views/Tables.vue`
 - **Mock Data:**
   ```html
-  <h6>Authors motherfucking table</h6>
+  <h6>Authors table</h6>
   <!-- Hardcoded rows with team photos -->
   ```
 - **Action Required:**
