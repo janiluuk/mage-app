@@ -1,13 +1,17 @@
+/**
+ * @deprecated This file is deprecated. Use src/services/nodes/NodeService.js instead.
+ * This file is kept for backward compatibility with existing imports.
+ */
+import NodeServiceImpl from '../services/nodes/NodeService';
+
+const nodeServiceInstance = new NodeServiceImpl();
+
 export default class NodeService {
     getTreeTableNodes() {
-        return fetch('demo/data/treetablenodes.json')
-            .then((res) => res.json())
-            .then((d) => d.root);
+        return nodeServiceInstance.getTreeTableNodes();
     }
 
     getTreeNodes() {
-        return fetch('demo/data/treenodes.json')
-            .then((res) => res.json())
-            .then((d) => d.root);
+        return nodeServiceInstance.getTreeNodes();
     }
 }
