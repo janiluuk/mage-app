@@ -20,19 +20,20 @@ describe('Routes Configuration', () => {
   })
 
   describe('Specific Routes', () => {
-    it('has a tables route', () => {
-      const tablesRoute = routes.find(r => r.path === '/tables')
-      expect(tablesRoute).toBeDefined()
-      expect(tablesRoute.name).toBe('Tables')
-      expect(tablesRoute.component).toBeDefined()
-    })
+    // Tables and Billing routes have been removed as demo pages
+    // it('has a tables route', () => {
+    //   const tablesRoute = routes.find(r => r.path === '/tables')
+    //   expect(tablesRoute).toBeDefined()
+    //   expect(tablesRoute.name).toBe('Tables')
+    //   expect(tablesRoute.component).toBeDefined()
+    // })
 
-    it('has a billing route', () => {
-      const billingRoute = routes.find(r => r.path === '/billing')
-      expect(billingRoute).toBeDefined()
-      expect(billingRoute.name).toBe('Billing')
-      expect(billingRoute.component).toBeDefined()
-    })
+    // it('has a billing route', () => {
+    //   const billingRoute = routes.find(r => r.path === '/billing')
+    //   expect(billingRoute).toBeDefined()
+    //   expect(billingRoute.name).toBe('Billing')
+    //   expect(billingRoute.component).toBeDefined()
+    // })
 
     it('has a jobs route', () => {
       const jobsRoute = routes.find(r => r.path === '/jobs')
@@ -75,12 +76,11 @@ describe('Routes Configuration', () => {
       expect(usersRoute.meta.requiresAuth).toBe(true)
     })
 
-    it('public routes do not require authentication', () => {
-      const publicPaths = ['/tables', '/billing', '/jobs']
-      publicPaths.forEach(path => {
-        const route = routes.find(r => r.path === path)
-        expect(route.meta?.requiresAuth).not.toBe(true)
-      })
+    it('jobs route does not require authentication', () => {
+      // Tables and Billing routes removed, only testing jobs now
+      const jobsRoute = routes.find(r => r.path === '/jobs')
+      expect(jobsRoute).toBeDefined()
+      expect(jobsRoute.meta?.requiresAuth).not.toBe(true)
     })
   })
 
