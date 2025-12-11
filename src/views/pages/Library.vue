@@ -19,7 +19,7 @@ const destroy = (id) => {
         });
     } catch (e) {
         let errorMessage = 'Oops, something went wrong!';
-        if (e.response && e.response.data && e.response.data.errors[0]) {
+        if (e?.response?.data?.errors?.[0]?.title) {
             errorMessage = e.response.data.errors[0].title;
         }
         toast.add({ severity: 'error', summary: 'Error', detail: errorMessage, life: 3000 });
@@ -53,7 +53,7 @@ onMounted(() => {
 
     intervalId = setInterval(() => {
         getJobList();
-    }, 2000);
+    }, 10000); // Increased from 2 seconds to 10 seconds to reduce API load
 
 })
 
@@ -136,12 +136,9 @@ const getJobList = () => {
         ...(sortField.value ? { sort: sortField.value } : {}),
     };
     store.dispatch("videojobs/list", params).then(() => {
-        if (generatorFilter.value && generatorFilter.value != "" || statusFilter.value != "" || queryFilter.value != "") {
-            dataviewValue.value = store.getters["videojobs/filterList"](queryFilter.value, statusFilter.value, generatorFilter.value);
-
-        } else {
-        dataviewValue.value = store.getters["videojobs/listWithoutPending"]();
-        }
+        dataviewValue.value = (generatorFilter.value || statusFilter.value || queryFilter.value)
+            ? store.getters["videojobs/filterList"](queryFilter.value, statusFilter.value, generatorFilter.value)
+            : store.getters["videojobs/listWithoutPending"]();
         total.total = store.getters["videojobs/listTotal"];
     });
 };
@@ -313,7 +310,7 @@ const onStatusFilterChange = (event) => {
 
 
             <template #grid="slotProps">
-                <div class="grid-item-container col-12 md:col-6 xl:col-3">
+                <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">
                     <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
                         <div :class="{ 'has-preview': slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif')) }"
                             class="card-thumbnail-container position-relative mb-2">

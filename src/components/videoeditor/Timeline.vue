@@ -56,7 +56,9 @@ export default {
     mounted() {
         this.windowResize();
         window.addEventListener('resize', this.windowResize, false);
-        this.renderAudioInterval = setInterval(() => this.windowResize(), 500);
+        // Increased interval from 500ms to 2000ms to reduce CPU usage
+        // Audio rendering doesn't need to be updated as frequently
+        this.renderAudioInterval = setInterval(() => this.windowResize(), 2000);
         document.addEventListener('mousemove', this.move, false);
         document.addEventListener('mouseup', this.moveEnd, false);
     },

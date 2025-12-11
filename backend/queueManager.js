@@ -63,7 +63,7 @@ class QueueManager {
    * @returns {Object|null} The failed job or null if not found
    */
   markFailed(id, error) {
-    const job = this.removeJob(id) || this.findJob(id);
+    const job = this.removeJob(id);
     if (!job) return null;
     job.status = 'failed';
     job.completedAt = new Date().toISOString();
