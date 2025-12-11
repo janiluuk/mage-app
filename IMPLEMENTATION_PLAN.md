@@ -573,25 +573,25 @@ This document provides a comprehensive analysis of the current state of the Mage
 
 ## Environment Variables Required
 
-### Current
-```bash
-VUE_APP_BASE_URL - Frontend URL
-VUE_APP_APP_URL - Public app URL
-VUE_APP_API_BASE_URL - API base URL
-VUE_APP_API_V1_BASE_URL - API v1 URL
-VUE_APP_STABLE_URL - Stable diffusion URL
-VUE_APP_MAGE_API_URL - Mage API URL
-VUE_APP_FALLBACK_IMAGE_URL - Fallback image
-VUE_APP_SAMPLE_PROCESSED_VIDEO_URL - Sample video
-```
+### Current Configuration
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `VUE_APP_BASE_URL` | Frontend public URL | `http://localhost:8080/` |
+| `VUE_APP_APP_URL` | Canonical public hostname for sharing | `https://app.example.com` |
+| `VUE_APP_API_BASE_URL` | API base URL | `https://api.example.com/api` |
+| `VUE_APP_API_V1_BASE_URL` | API v1 root endpoint | `https://api.example.com/v1` |
+| `VUE_APP_STABLE_URL` | Stable Diffusion service URL | `https://stable.example.com` |
+| `VUE_APP_MAGE_API_URL` | Mage profile/user service endpoint | `http://localhost:47860` |
+| `VUE_APP_FALLBACK_IMAGE_URL` | Default image for missing thumbnails | `https://api.example.com/images/notfound.jpg` |
+| `VUE_APP_SAMPLE_PROCESSED_VIDEO_URL` | Sample video for dev/demo | `https://api.example.com/processed/sample.mp4` |
 
-### May Need
-```bash
-VUE_APP_UPLOAD_MAX_SIZE - Max upload size
-VUE_APP_STRIPE_KEY - Stripe public key (if billing)
-VUE_APP_WS_URL - WebSocket URL (for real-time)
-VUE_APP_CDN_URL - CDN for videos
-```
+### Additional Variables (May Need)
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `VUE_APP_UPLOAD_MAX_SIZE` | Max file upload size in MB | `50` |
+| `VUE_APP_STRIPE_KEY` | Stripe publishable key (if billing) | `pk_test_...` |
+| `VUE_APP_WS_URL` | WebSocket URL for real-time updates | `wss://api.example.com/ws` |
+| `VUE_APP_CDN_URL` | CDN base URL for video assets | `https://cdn.example.com/videos/` |
 
 ## Success Metrics
 

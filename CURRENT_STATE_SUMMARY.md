@@ -256,6 +256,6 @@ Before starting implementation, answer these:
 4. Complete security review
 5. Add comprehensive tests
 
-**Estimated Effort:** 15-28 days depending on billing decision
+**Estimated Effort:** 15-22 days (removing billing) or 23-33 days (implementing billing)
 
 **Recommended First Step:** Update the navigation menu (AppMenu.vue) - quick win that improves UX immediately.
