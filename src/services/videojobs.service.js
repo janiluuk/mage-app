@@ -1,10 +1,10 @@
 import axios from "axios";
 import Jsona from "jsona";
+import qs from "qs";
 import requestService from "@/services/request-service/ApiRequestService";
+import authHeader from "@/services/auth-header";
 
 const jsona = new Jsona();
-
-import qs from "qs";
 const url = process.env.VUE_APP_API_V1_BASE_URL;
 const includeParams = "modelfile,user";
 
@@ -22,12 +22,13 @@ export default {
       {},
       true
     );
-    if (undefined === response.data.meta) {
-      var meta = { page: { total: 1 } };
-    }
+    const meta = response.data.meta === undefined 
+      ? { page: { total: 1 } } 
+      : response.data.meta;
+    
     return {
       list: jsona.deserialize(response.data),
-      meta: meta ? meta : response.data.meta,
+      meta: meta,
     };
   },
 
@@ -58,20 +59,25 @@ export default {
       });
   },
   async downloadJob(url, title) {
-    await axios({
-      method: "get",
-      url,
-      responseType: "arraybuffer",
-    })
-      .then((response) => {
-        const new_url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement("a");
-        link.href = new_url;
-        link.setAttribute("download", title);
-        document.body.appendChild(link);
-        link.click();
-      })
-      .catch((e) => console.log("error occured:" + e.message));
+    try {
+      const response = await axios({
+        method: "get",
+        url,
+        responseType: "arraybuffer",
+      });
+      
+      const blobUrl = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.setAttribute("download", title);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download error:", error.message);
+      throw error;
+    }
   },
   async update(item) {
     const payload = jsona.serialize({

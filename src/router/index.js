@@ -305,9 +305,13 @@ router.beforeEach((to, from, next) => {
   const token = AuthService.getToken();
   if (token) {
     const jwtPayload = AuthService.getJwtData();
-    if (jwtPayload.exp < Date.now() / 1000) {
+    // Check if token is valid and not expired
+    if (jwtPayload && jwtPayload.exp && jwtPayload.exp < Date.now() / 1000) {
       AuthService.removeToken();
       // token expired
+    } else if (!jwtPayload) {
+      // Invalid token format
+      AuthService.removeToken();
     }
   }
   const isAuthenticatedRoute = to.matched.some(
@@ -336,7 +340,6 @@ router.beforeEach((to, from, next) => {
     return;
   }
   next();
-  return;
 });
 
 export default router;
