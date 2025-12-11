@@ -163,18 +163,18 @@ This document provides a comprehensive analysis of the current state of the Mage
 #### Profile Page
 - **Status:** Static Mock Data
 - **Issues:**
-  - Hardcoded placeholder user data (needs to be replaced)
+  - Hardcoded unprofessional placeholder text (contains culturally insensitive content)
   - Static profile image
   - Not pulling from user API
 - **Location:** `src/views/Profile.vue`
 - **Mock Data:**
   ```html
-  <!-- Current code contains inappropriate placeholder text -->
+  <!-- Current code contains unprofessional placeholder text that should be replaced -->
   <h5 class="mb-1">[Placeholder Name]</h5>
   <p class="mb-0">Master of disaster</p>
   ```
 - **Action Required:**
-  1. Replace inappropriate placeholder with proper example
+  1. Replace unprofessional placeholder with proper example (e.g., "John Doe")
   2. Connect to user profile API
   3. Pull real user data from JWT or API
   4. Add edit functionality

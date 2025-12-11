@@ -33,7 +33,7 @@ This document provides a high-level summary of what's working, what's mock data,
 | Dashboard | Hardcoded chart data, using ProductService | `src/views/Dashboard.vue` | Replace with real video stats |
 | Billing Page | 100% mock data | `src/views/Billing.vue` | Implement real billing OR remove |
 | Tables Page | Static demo table | `src/views/Tables.vue` | Remove or repurpose |
-| Profile Page | Inappropriate placeholder text | `src/views/Profile.vue` | Replace placeholder, connect to user API |
+| Profile Page | Unprofessional placeholder text (culturally insensitive) | `src/views/Profile.vue` | Replace with proper example, connect to user API |
 | UI Kit Pages | PrimeVue demos | `src/views/uikit/*` | Move to docs section |
 | App Menu | PrimeVue template menu | `src/layout/AppMenu.vue` | Replace with app menu |
 | Product Service | May not be needed | `src/services/products/` | Verify or remove |
@@ -52,7 +52,7 @@ This document provides a high-level summary of what's working, what's mock data,
 src/views/Dashboard.vue           - Hardcoded line chart data
 src/views/Billing.vue              - All components are mock
 src/views/Tables.vue               - Static author table
-src/views/Profile.vue              - Hardcoded inappropriate placeholder
+src/views/Profile.vue              - Unprofessional placeholder text
 src/views/FrontPage.vue            - "Coming soon" sections
 src/layout/AppMenu.vue             - PrimeVue demo menu
 src/pages/Cards/MasterCard.vue     - Fake credit card
@@ -171,7 +171,7 @@ These can be done quickly and have immediate impact:
    - Keep files for reference
 
 3. **Fix Profile Data** (30 mins)
-   - Replace inappropriate placeholder text
+   - Replace unprofessional placeholder text with proper example
    - Pull from JWT or user API
 
 4. **Update Dashboard Title** (15 mins)
