@@ -104,10 +104,21 @@ export default {
     return await requestService.delete(`/v1/video-jobs/${id}`);
   },
 
-  async upload(item, type, onProgress) {
+  async upload(item, type, onProgress, extraData = {}) {
     const bodyFormData = new FormData();
     bodyFormData.append("attachment", item);
     bodyFormData.append("type", type);
+    
+    // Add motion style and related data if provided
+    if (extraData.motionStyle) {
+      bodyFormData.append("motionStyle", extraData.motionStyle);
+    }
+    if (extraData.preset) {
+      bodyFormData.append("preset", JSON.stringify(extraData.preset));
+    }
+    if (extraData.bpm) {
+      bodyFormData.append("bpm", extraData.bpm);
+    }
     
     return await requestService.post("/upload", bodyFormData, {
       headers: {
