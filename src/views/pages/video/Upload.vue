@@ -118,7 +118,7 @@ export default {
       isLoading: false,
       status: '',
       errorMessage: false,
-      showAudioJobDialog: false
+      showAudioJobDialog: false,
       fileSizeLimit: {'video/mp4': 50, 'image/jpeg': 2, 'image/png': 2, 'image/gif': 2 },
       supportedFormats: {
         deforum: ['image/jpeg', 'image/png', 'image/gif'],
