@@ -26,7 +26,7 @@ describe('Domains Utility', () => {
       expect(domains.FALLBACK_IMAGE_URL).toBeDefined()
       expect(domains.APP_BASE_URL).toBeDefined()
       expect(domains.STABLE_URL).toBeDefined()
-      expect(domains.VIMAGE_API_URL).toBeDefined()
+      expect(domains.MAGE_API_URL).toBeDefined()
       expect(domains.SAMPLE_PROCESSED_VIDEO_URL).toBeDefined()
     })
 
@@ -127,14 +127,14 @@ describe('Domains Utility', () => {
       delete process.env.VUE_APP_API_URL
       delete process.env.VUE_APP_API_BASE_URL
       delete process.env.VUE_APP_STABLE_URL
-      delete process.env.VUE_APP_VIMAGE_API_URL
+      delete process.env.VUE_APP_MAGE_API_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')
       expect(domains.API_URL).toBe('')
       expect(domains.API_BASE_URL).toBe('')
       expect(domains.STABLE_URL).toBe('')
-      expect(domains.VIMAGE_API_URL).toBe('')
+      expect(domains.MAGE_API_URL).toBe('')
     })
   })
 
@@ -149,7 +149,7 @@ describe('Domains Utility', () => {
       expect(typeof domains.FALLBACK_IMAGE_URL).toBe('string')
       expect(typeof domains.APP_BASE_URL).toBe('string')
       expect(typeof domains.STABLE_URL).toBe('string')
-      expect(typeof domains.VIMAGE_API_URL).toBe('string')
+      expect(typeof domains.MAGE_API_URL).toBe('string')
       expect(typeof domains.SAMPLE_PROCESSED_VIDEO_URL).toBe('string')
     })
   })

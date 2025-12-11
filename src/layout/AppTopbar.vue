@@ -28,7 +28,7 @@ onBeforeUnmount(() => {
 });
 
 const logoUrl = computed(() => {
-    return `/public/img/vimage-logo.png`;
+    return `/public/img/mage-logo.png`;
 });
 
 const onTopBarActionButton = (route) => {
@@ -85,7 +85,7 @@ const isOutsideClicked = (event) => {
         </button>
         <router-link to="/" class="layout-topbar-logo">
             <img :src="logoUrl" alt="logo" />
-            <span>Vimage:stable</span>
+            <span>Mage:stable</span>
         </router-link>
         <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
             <i class="pi pi-ellipsis-v"></i>
@@ -103,7 +103,7 @@ const isOutsideClicked = (event) => {
     </div>
 </template>
 <style scoped lang="scss">
-@import '@/assets/vimage.scss';
+@import '@/assets/mage.scss';
 .layout-topbar .layout-topbar-logo {
   border-radius: 0;
   img {

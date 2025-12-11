@@ -1,6 +1,6 @@
 <template>
 
-      <div class="vimage-container px-0">
+      <div class="mage-container px-0">
         <div>
           <div class="main-container w-100 position-relative">
             <div class="row">

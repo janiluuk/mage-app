@@ -6,7 +6,7 @@ const MODEL_PREVIEW_URL = process.env.VUE_APP_MODEL_PREVIEW_URL || (API_URL ? `$
 const FALLBACK_IMAGE_URL = process.env.VUE_APP_FALLBACK_IMAGE_URL || (API_URL ? `${API_URL}/images/notfound.jpg` : '');
 const APP_BASE_URL = process.env.VUE_APP_APP_URL || process.env.VUE_APP_BASE_URL || '';
 const STABLE_URL = process.env.VUE_APP_STABLE_URL || '';
-const VIMAGE_API_URL = process.env.VUE_APP_VIMAGE_API_URL || '';
+const MAGE_API_URL = process.env.VUE_APP_MAGE_API_URL || '';
 const SAMPLE_PROCESSED_VIDEO_URL = process.env.VUE_APP_SAMPLE_PROCESSED_VIDEO_URL || '';
 
 export {
@@ -18,6 +18,6 @@ export {
   FALLBACK_IMAGE_URL,
   APP_BASE_URL,
   STABLE_URL,
-  VIMAGE_API_URL,
+  MAGE_API_URL,
   SAMPLE_PROCESSED_VIDEO_URL,
 };

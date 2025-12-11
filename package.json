@@ -7,11 +7,11 @@
   "description": "Image AI app",
   "homepage": "",
   "bugs": {
-    "url": "https://github.com/janiluuk/vimage/issues"
+    "url": "https://github.com/janiluuk/mage/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://bitbucket.org/janiluuk/vimage-app.git"
+    "url": "git+https://bitbucket.org/janiluuk/mage-app.git"
   },
   "scripts": {
     "serve": "vite --cors --port 8080 --host --cors",

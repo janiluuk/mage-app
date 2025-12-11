@@ -111,7 +111,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/vimage.scss';
+@import '@/assets/mage.scss';
 button.p-link.topbar-button {
   font-size: 1.2rem;
   display: flex;

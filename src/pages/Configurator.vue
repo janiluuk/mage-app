@@ -198,7 +198,7 @@ export default {
       return APP_BASE_URL;
     },
     twitterShareUrl() {
-      return `https://twitter.com/intent/tweet?text=Check%20Vimage%20app&url=${this.appShareUrl}`;
+      return `https://twitter.com/intent/tweet?text=Check%20Mage%20app&url=${this.appShareUrl}`;
     },
     facebookShareUrl() {
       return `https://www.facebook.com/sharer/sharer.php?u=${this.appShareUrl}`;

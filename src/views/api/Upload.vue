@@ -8,7 +8,7 @@
 
         <div class="container px-md-0">
 
-                <div class="vimage-container px-0">
+                <div class="mage-container px-0">
                     <div><VideoUpload></VideoUpload></div>
             </div>
         </div>

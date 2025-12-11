@@ -1,8 +1,8 @@
 <template>
   <div class="flex w-100 gap-3">
     <img
-      src="../../public/img/vimage-logo.png"
-      alt="vimage-logo"
+      src="../../public/img/mage-logo.png"
+      alt="mage-logo"
       height="100"
       width="100"
     />
