@@ -163,18 +163,18 @@ This document provides a comprehensive analysis of the current state of the Mage
 #### Profile Page
 - **Status:** Static Mock Data
 - **Issues:**
-  - Hardcoded unprofessional placeholder text (contains culturally insensitive content)
+  - Hardcoded unprofessional placeholder text (contains a name that appears to mock Asian names/accents)
   - Static profile image
   - Not pulling from user API
-- **Location:** `src/views/Profile.vue`
-- **Mock Data:**
+- **Location:** `src/views/Profile.vue` (line 24)
+- **Mock Data Example (sanitized for documentation):**
   ```html
-  <!-- Current code contains unprofessional placeholder text that should be replaced -->
-  <h5 class="mb-1">[Placeholder Name]</h5>
+  <!-- Note: Actual code contains culturally insensitive placeholder -->
+  <h5 class="mb-1">[Placeholder Name - needs replacement]</h5>
   <p class="mb-0">Master of disaster</p>
   ```
 - **Action Required:**
-  1. Replace unprofessional placeholder with proper example (e.g., "John Doe")
+  1. Replace unprofessional placeholder with proper example (e.g., "John Doe", "Jane Smith")
   2. Connect to user profile API
   3. Pull real user data from JWT or API
   4. Add edit functionality
@@ -514,8 +514,8 @@ This document provides a comprehensive analysis of the current state of the Mage
 7. ✅ Phase 4: Billing (3-5 days or 1 day for removal)
 
 ### Estimated Total Time
-- **Minimum (removing billing):** 15-22 days
-- **Maximum (implementing billing):** 18-28 days
+- **Minimum (removing billing):** 15-22 days (sum of minimum estimates for all phases except billing)
+- **Maximum (implementing billing):** 23-33 days (sum of maximum estimates for all phases including billing)
 
 ## Technical Debt Identified
 

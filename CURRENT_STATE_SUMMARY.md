@@ -33,7 +33,7 @@ This document provides a high-level summary of what's working, what's mock data,
 | Dashboard | Hardcoded chart data, using ProductService | `src/views/Dashboard.vue` | Replace with real video stats |
 | Billing Page | 100% mock data | `src/views/Billing.vue` | Implement real billing OR remove |
 | Tables Page | Static demo table | `src/views/Tables.vue` | Remove or repurpose |
-| Profile Page | Unprofessional placeholder text (culturally insensitive) | `src/views/Profile.vue` | Replace with proper example, connect to user API |
+| Profile Page | Unprofessional placeholder (name mocks Asian names/accents) | `src/views/Profile.vue` | Replace with proper example (e.g., "John Doe"), connect to user API |
 | UI Kit Pages | PrimeVue demos | `src/views/uikit/*` | Move to docs section |
 | App Menu | PrimeVue template menu | `src/layout/AppMenu.vue` | Replace with app menu |
 | Product Service | May not be needed | `src/services/products/` | Verify or remove |
