@@ -35,6 +35,7 @@ function waitForResult(host, clientId) {
     
     ws.on('error', (error) => {
       clearTimeout(timeout);
+      ws.close();
       reject(new Error(`WebSocket connection error: ${error.message}`));
     });
 

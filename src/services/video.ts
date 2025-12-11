@@ -115,10 +115,12 @@ export default new Vuex.Store({
     
             if (progress.duration) newGenerationData.duration = progress.duration;
             if (progress.time) newGenerationData.time = progress.time;
-            newGenerationData.ratio = (newGenerationData.time ?? 0) / (newGenerationData.duration ?? 0);
+            newGenerationData.ratio = (newGenerationData.time ?? 0) / (newGenerationData.duration || 1);
     
-            const remainingTime = (newGenerationData.duration ?? 0) / (newGenerationData.time ?? 0);
-            newGenerationData.est = Math.round(remainingTime / newGenerationData.ratio);
+            const remainingTime = (newGenerationData.duration ?? 0) / (newGenerationData.time || 1);
+            newGenerationData.est = newGenerationData.ratio > 0 
+              ? Math.round(remainingTime / newGenerationData.ratio) 
+              : Infinity;
     
             if (DEBUG_MODE) console.log("Video progress:", newGenerationData);
             commit('setGenerationData', newGenerationData);
