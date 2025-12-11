@@ -35,12 +35,12 @@ async function queuePrompt(prompt, host, clientId) {
 
 function waitForResult(host, clientId) {
   return new Promise((resolve, reject) => {
+    const ws = new WebSocket(`ws://${host}/ws?clientId=${clientId}`);
+    
     const timeout = setTimeout(() => {
       ws.close();
       reject(new Error('Timeout waiting for ComfyUI result (60s)'));
     }, 60000); // 60 second timeout
-
-    const ws = new WebSocket(`ws://${host}/ws?clientId=${clientId}`);
     
     ws.on('message', (msg) => {
       try {
