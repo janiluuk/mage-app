@@ -1,12 +1,23 @@
 const { randomUUID } = require('crypto');
 
+/**
+ * Manages a queue of audio generation jobs with status tracking and history.
+ */
 class QueueManager {
+  /**
+   * @param {number} historyLimit - Maximum number of completed jobs to keep in history
+   */
   constructor(historyLimit = 25) {
     this.historyLimit = historyLimit;
     this.activeJobs = [];
     this.history = [];
   }
 
+  /**
+   * Add a new job to the queue.
+   * @param {Object} metadata - Additional metadata for the job
+   * @returns {Object} The created job with id, status, createdAt, and metadata
+   */
   enqueue(metadata = {}) {
     const job = {
       id: randomUUID(),
@@ -18,6 +29,11 @@ class QueueManager {
     return job;
   }
 
+  /**
+   * Mark a job as processing.
+   * @param {string} id - Job ID
+   * @returns {Object|null} The updated job or null if not found
+   */
   markProcessing(id) {
     const job = this.findJob(id);
     if (!job) return null;
@@ -26,6 +42,11 @@ class QueueManager {
     return job;
   }
 
+  /**
+   * Mark a job as completed and move it to history.
+   * @param {string} id - Job ID
+   * @returns {Object|null} The completed job or null if not found
+   */
   markComplete(id) {
     const job = this.removeJob(id);
     if (!job) return null;
@@ -35,6 +56,12 @@ class QueueManager {
     return job;
   }
 
+  /**
+   * Mark a job as failed and move it to history.
+   * @param {string} id - Job ID
+   * @param {Error|string} error - Error object or message
+   * @returns {Object|null} The failed job or null if not found
+   */
   markFailed(id, error) {
     const job = this.removeJob(id) || this.findJob(id);
     if (!job) return null;
@@ -45,6 +72,10 @@ class QueueManager {
     return job;
   }
 
+  /**
+   * Get the current queue state with queued jobs, processing jobs, and history.
+   * @returns {Object} Object containing queued, processing, and history arrays
+   */
   getQueue() {
     const queued = this.activeJobs.filter((job) => job.status === 'queued');
     const processing = this.activeJobs.filter((job) => job.status === 'processing');
@@ -56,6 +87,10 @@ class QueueManager {
     };
   }
 
+  /**
+   * Get a summary of the current queue status.
+   * @returns {Object} Object with current processing job, queue count, and recent history
+   */
   getStatus() {
     const { queued, processing } = this.getQueue();
     return {
@@ -65,6 +100,9 @@ class QueueManager {
     };
   }
 
+  /**
+   * Reset the queue manager, clearing all active jobs and history.
+   */
   reset() {
     this.activeJobs = [];
     this.history = [];

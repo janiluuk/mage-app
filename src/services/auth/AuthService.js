@@ -77,24 +77,33 @@ const AuthService = {
   },
   
   getJwtData() {
-
-    var token = localStorage.getItem('auth.accessToken');
-    if (!token || token == '') {
+    const token = localStorage.getItem('auth.accessToken');
+    if (!token || token === '') {
       return false;
     }
 
-    var base64Url = token.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map(function(c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) {
+        return false;
+      }
+
+      const base64Url = parts[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split('')
+          .map((c) => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          })
+          .join('')
+      );
    
-    return JSON.parse(jsonPayload);
+      return JSON.parse(jsonPayload);
+    } catch (error) {
+      console.error('Failed to parse JWT token:', error);
+      return false;
+    }
   },
   async signInByProvider(providerName) {
     const response = await requestService.get('/' + providerName + '/auth');

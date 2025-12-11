@@ -10,6 +10,11 @@ const { randomUUID } = require('crypto');
 const WORKFLOW_PATH = path.join(__dirname, 'audio-workflow.json');
 const WORKFLOW = JSON.parse(fs.readFileSync(WORKFLOW_PATH, 'utf8'));
 
+/**
+ * Build a ComfyUI prompt from the audio workflow template with the given text.
+ * @param {string} text - Text prompt for audio generation
+ * @returns {Object} ComfyUI workflow prompt object
+ */
 function buildPrompt(text) {
   const prompt = JSON.parse(JSON.stringify(WORKFLOW));
   if (prompt['1'] && prompt['1'].inputs && Object.prototype.hasOwnProperty.call(prompt['1'].inputs, 'text')) {
@@ -19,33 +24,76 @@ function buildPrompt(text) {
 }
 
 async function queuePrompt(prompt, host, clientId) {
-  await axios.post(`http://${host}/prompt`, { prompt, client_id: clientId });
+  try {
+    await axios.post(`http://${host}/prompt`, { prompt, client_id: clientId }, {
+      timeout: 10000, // 10 second timeout
+    });
+  } catch (error) {
+    throw new Error(`Failed to queue prompt to ComfyUI at ${host}: ${error.message}`);
+  }
 }
 
 function waitForResult(host, clientId) {
   return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      ws.close();
+      reject(new Error('Timeout waiting for ComfyUI result (60s)'));
+    }, 60000); // 60 second timeout
+
     const ws = new WebSocket(`ws://${host}/ws?clientId=${clientId}`);
+    
     ws.on('message', (msg) => {
       try {
         const data = JSON.parse(msg.toString());
         if (data.type === 'executed' && data.data?.output?.audio?.length) {
+          clearTimeout(timeout);
           ws.close();
           resolve(data.data.output.audio[0]);
         }
       } catch (err) {
-        reject(err);
+        clearTimeout(timeout);
+        ws.close();
+        reject(new Error(`Failed to parse WebSocket message: ${err.message}`));
       }
     });
-    ws.on('error', reject);
+    
+    ws.on('error', (error) => {
+      clearTimeout(timeout);
+      reject(new Error(`WebSocket connection error: ${error.message}`));
+    });
+
+    ws.on('close', (code, reason) => {
+      clearTimeout(timeout);
+      if (code !== 1000) {
+        reject(new Error(`WebSocket closed unexpectedly: ${code} ${reason}`));
+      }
+    });
   });
 }
 
 async function fetchAudio(host, fileInfo) {
-  const url = `http://${host}/view?filename=${encodeURIComponent(fileInfo.filename)}&subfolder=${fileInfo.subfolder}&type=${fileInfo.type}`;
-  const { data } = await axios.get(url, { responseType: 'arraybuffer' });
-  return Buffer.from(data);
+  if (!fileInfo || !fileInfo.filename) {
+    throw new Error('Invalid file info: missing filename');
+  }
+
+  const url = `http://${host}/view?filename=${encodeURIComponent(fileInfo.filename)}&subfolder=${fileInfo.subfolder || ''}&type=${fileInfo.type || 'output'}`;
+  
+  try {
+    const { data } = await axios.get(url, { 
+      responseType: 'arraybuffer',
+      timeout: 30000, // 30 second timeout
+    });
+    return Buffer.from(data);
+  } catch (error) {
+    throw new Error(`Failed to fetch audio from ComfyUI: ${error.message}`);
+  }
 }
 
+/**
+ * Convert a Buffer to a Readable stream.
+ * @param {Buffer} buffer - Buffer to convert
+ * @returns {Readable} Readable stream
+ */
 function bufferToStream(buffer) {
   const stream = new Readable();
   stream.push(buffer);
@@ -53,6 +101,13 @@ function bufferToStream(buffer) {
   return stream;
 }
 
+/**
+ * Generate audio from text using ComfyUI and stream it as AAC to the response.
+ * @param {string} text - Text prompt for audio generation
+ * @param {Object} res - Express response object to stream audio to
+ * @param {string} host - ComfyUI host and port (e.g., '127.0.0.1:8188')
+ * @returns {Promise<void>} Resolves when streaming is complete
+ */
 async function generateAndStream(text, res, host = '127.0.0.1:8188') {
   const clientId = randomUUID();
   const prompt = buildPrompt(text);
