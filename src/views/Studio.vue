@@ -1,12 +1,18 @@
 <script setup>
+import { ref, onMounted } from 'vue';
 import { useToast } from 'primevue/usetoast';
-import { STABLE_URL } from '@/utils/domains';
+import { fetchStableUrl } from '@/utils/domains';
 
 const toast = useToast();
+const stableUrl = ref('');
 
 const onUpload = () => {
     toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
 };
+
+onMounted(async () => {
+    stableUrl.value = await fetchStableUrl();
+});
 </script>
 
 <template>
@@ -19,7 +25,7 @@ const onUpload = () => {
                 style="margin-top:90px;"
               width="100%"
               height="100%"
-              :src="STABLE_URL"
+              :src="stableUrl"
               frameBorder='0'
               tabIndex='-1'
               />

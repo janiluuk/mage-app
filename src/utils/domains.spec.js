@@ -53,7 +53,15 @@ describe('Domains Utility', () => {
       vi.resetModules()
       
       const domains = await import('./domains.js')
-      expect(domains.API_V1_URL).toBe('https://test-api.example.com/v1')
+      expect(domains.API_V1_URL).toBe('https://test-api.example.com/api/v1')
+    })
+
+    it('constructs API_V2_URL from API_URL', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
+      vi.resetModules()
+      
+      const domains = await import('./domains.js')
+      expect(domains.API_V2_URL).toBe('https://test-api.example.com/api/v2')
     })
 
     it('constructs VIDEO_PREVIEW_URL from API_URL', async () => {
@@ -85,25 +93,8 @@ describe('Domains Utility', () => {
   })
 
   describe('Environment Variable Overrides', () => {
-    it('uses VUE_APP_API_BASE_URL when explicitly set', async () => {
-      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
-      process.env.VUE_APP_API_BASE_URL = 'https://custom-base.example.com'
-      vi.resetModules()
-      
-      const domains = await import('./domains.js')
-      expect(domains.API_BASE_URL).toBe('https://custom-base.example.com')
-    })
-
-    it('uses VUE_APP_API_V1_BASE_URL when explicitly set', async () => {
-      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
-      process.env.VUE_APP_API_V1_BASE_URL = 'https://custom-v1.example.com'
-      vi.resetModules()
-      
-      const domains = await import('./domains.js')
-      expect(domains.API_V1_URL).toBe('https://custom-v1.example.com')
-    })
-
     it('uses VUE_APP_APP_URL when set', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
       process.env.VUE_APP_APP_URL = 'https://app.example.com'
       vi.resetModules()
       
@@ -111,13 +102,22 @@ describe('Domains Utility', () => {
       expect(domains.APP_BASE_URL).toBe('https://app.example.com')
     })
 
-    it('falls back to VUE_APP_BASE_URL for APP_BASE_URL', async () => {
+    it('falls back to VUE_APP_API_URL for APP_BASE_URL when VUE_APP_APP_URL not set', async () => {
       delete process.env.VUE_APP_APP_URL
-      process.env.VUE_APP_BASE_URL = 'https://base.example.com'
+      process.env.VUE_APP_API_URL = 'https://api.example.com'
       vi.resetModules()
       
       const domains = await import('./domains.js')
-      expect(domains.APP_BASE_URL).toBe('https://base.example.com')
+      expect(domains.APP_BASE_URL).toBe('https://api.example.com')
+    })
+
+    it('uses VUE_APP_FALLBACK_IMAGE_URL when explicitly set', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
+      process.env.VUE_APP_FALLBACK_IMAGE_URL = 'https://custom-image.example.com/notfound.jpg'
+      vi.resetModules()
+      
+      const domains = await import('./domains.js')
+      expect(domains.FALLBACK_IMAGE_URL).toBe('https://custom-image.example.com/notfound.jpg')
     })
   })
 
@@ -144,6 +144,7 @@ describe('Domains Utility', () => {
       expect(typeof domains.API_URL).toBe('string')
       expect(typeof domains.API_BASE_URL).toBe('string')
       expect(typeof domains.API_V1_URL).toBe('string')
+      expect(typeof domains.API_V2_URL).toBe('string')
       expect(typeof domains.VIDEO_PREVIEW_URL).toBe('string')
       expect(typeof domains.MODEL_PREVIEW_URL).toBe('string')
       expect(typeof domains.FALLBACK_IMAGE_URL).toBe('string')
@@ -151,6 +152,60 @@ describe('Domains Utility', () => {
       expect(typeof domains.STABLE_URL).toBe('string')
       expect(typeof domains.MAGE_API_URL).toBe('string')
       expect(typeof domains.SAMPLE_PROCESSED_VIDEO_URL).toBe('string')
+    })
+
+    it('exports fetchStableUrl as a function', async () => {
+      const domains = await import('./domains.js')
+      expect(typeof domains.fetchStableUrl).toBe('function')
+    })
+  })
+
+  describe('Stable URL Fetching', () => {
+    it('fetchStableUrl returns stable URL from backend', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
+      vi.resetModules()
+      
+      const domains = await import('./domains.js')
+      
+      // Mock fetch to return a stable URL
+      global.fetch = vi.fn(() => 
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ stableUrl: 'https://stable.example.com' })
+        })
+      )
+      
+      const stableUrl = await domains.fetchStableUrl()
+      expect(stableUrl).toBe('https://stable.example.com')
+      expect(global.fetch).toHaveBeenCalledWith('https://test-api.example.com/api/config')
+    })
+
+    it('fetchStableUrl falls back to STABLE_URL env on fetch failure', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
+      process.env.VUE_APP_STABLE_URL = 'https://fallback-stable.example.com'
+      vi.resetModules()
+      
+      const domains = await import('./domains.js')
+      
+      // Mock fetch to fail
+      global.fetch = vi.fn(() => Promise.resolve({ ok: false }))
+      
+      const stableUrl = await domains.fetchStableUrl()
+      expect(stableUrl).toBe('https://fallback-stable.example.com')
+    })
+
+    it('fetchStableUrl falls back to STABLE_URL env on network error', async () => {
+      process.env.VUE_APP_API_URL = 'https://test-api.example.com'
+      process.env.VUE_APP_STABLE_URL = 'https://fallback-stable.example.com'
+      vi.resetModules()
+      
+      const domains = await import('./domains.js')
+      
+      // Mock fetch to throw error
+      global.fetch = vi.fn(() => Promise.reject(new Error('Network error')))
+      
+      const stableUrl = await domains.fetchStableUrl()
+      expect(stableUrl).toBe('https://fallback-stable.example.com')
     })
   })
 })
