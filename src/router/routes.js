@@ -1,23 +1,9 @@
-// Demo pages - commented out, available in codebase if needed
-// import Tables from "../views/Tables.vue";
-// import Billing from "../views/Billing.vue";
 import Profile from "../views/Profile.vue";
 import Users from "../views/api/users/UsersList.vue";
 import NotFound from "../views/pages/NotFound.vue";
 import ListItemPage from "../views/ListItemPage.vue";
 
 const routes = [
-  // Demo routes commented out - not part of core app functionality
-  // {
-  //   path: "/tables",
-  //   name: "Tables",
-  //   component: Tables,
-  // },
-  // {
-  //   path: "/billing",
-  //   name: "Billing",
-  //   component: Billing,
-  // },
   {
     path: "/jobs",
     name: "Video Jobs",
