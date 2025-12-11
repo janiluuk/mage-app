@@ -605,10 +605,24 @@ VUE_APP_CDN_URL - CDN for videos
 - [ ] Users can edit settings
 - [ ] Changes persist
 
+### Phase 4 Success
+- [ ] Decision made on billing approach
+- [ ] If implementing: Payment integration works
+- [ ] If implementing: Subscription management functional
+- [ ] If removing: All billing code removed
+- [ ] Routes and navigation updated accordingly
+
 ### Phase 5 Success
 - [ ] Upload works end-to-end
 - [ ] Video processing completes
 - [ ] Users can download results
+
+### Phase 6 Success
+- [ ] All demo pages removed or relocated
+- [ ] No console.logs in production code
+- [ ] Documentation updated
+- [ ] Deprecated code removed
+- [ ] Clean build with no warnings
 
 ### Phase 7 Success
 - [ ] CodeQL scan passes
