@@ -57,7 +57,7 @@ export default {
         this.windowResize();
         window.addEventListener('resize', this.windowResize, false);
         // Increased interval from 500ms to 2000ms to reduce CPU usage
-        // Audio rendering doesn't need to be updated as frequently
+        // This triggers layout updates which include audio waveform rendering
         this.renderAudioInterval = setInterval(() => this.windowResize(), 2000);
         document.addEventListener('mousemove', this.move, false);
         document.addEventListener('mouseup', this.moveEnd, false);
