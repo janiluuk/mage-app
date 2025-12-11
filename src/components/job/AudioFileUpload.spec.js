@@ -11,6 +11,21 @@ vi.mock('primevue/button', () => ({
   }
 }));
 
+// Mock URL.createObjectURL and URL.revokeObjectURL
+global.URL.createObjectURL = vi.fn(() => 'mock-url');
+global.URL.revokeObjectURL = vi.fn();
+
+// Mock Audio constructor
+global.Audio = vi.fn().mockImplementation(() => ({
+  addEventListener: vi.fn((event, callback) => {
+    if (event === 'loadedmetadata') {
+      setTimeout(() => callback(), 0);
+    }
+  }),
+  duration: 125,
+  src: ''
+}));
+
 describe('AudioFileUpload', () => {
   let wrapper;
 
