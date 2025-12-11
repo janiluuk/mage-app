@@ -1,14 +1,20 @@
 /**
- * Fetch and parse JSON from a URL with error handling.
+ * Fetch and parse JSON from a URL with error handling and timeout.
  * @param {string} url - URL to fetch from
+ * @param {number} timeoutMs - Timeout in milliseconds (default: 10000)
  * @returns {Promise<Object>} Parsed JSON response
- * @throws {Error} If the request fails
+ * @throws {Error} If the request fails or times out
  */
-async function fetchJson(url) {
+async function fetchJson(url, timeoutMs = 10000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
   try {
     const response = await fetch(url, {
-      timeout: 10000, // 10 second timeout
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       const message = await response.text();
@@ -17,6 +23,10 @@ async function fetchJson(url) {
     
     return await response.json();
   } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request to ${url} timed out after ${timeoutMs}ms`);
+    }
     throw new Error(`Failed to fetch from ${url}: ${error.message}`);
   }
 }

@@ -7,6 +7,11 @@ const ffmpegPath = require('ffmpeg-static');
 const { Readable } = require('stream');
 const { randomUUID } = require('crypto');
 
+// Timeout configuration (in milliseconds)
+const TIMEOUT_QUEUE_PROMPT = process.env.COMFY_QUEUE_TIMEOUT || 10000; // 10 seconds
+const TIMEOUT_WEBSOCKET_RESULT = process.env.COMFY_WS_TIMEOUT || 60000; // 60 seconds
+const TIMEOUT_FETCH_AUDIO = process.env.COMFY_FETCH_TIMEOUT || 30000; // 30 seconds
+
 const WORKFLOW_PATH = path.join(__dirname, 'audio-workflow.json');
 const WORKFLOW = JSON.parse(fs.readFileSync(WORKFLOW_PATH, 'utf8'));
 
@@ -26,7 +31,7 @@ function buildPrompt(text) {
 async function queuePrompt(prompt, host, clientId) {
   try {
     await axios.post(`http://${host}/prompt`, { prompt, client_id: clientId }, {
-      timeout: 10000, // 10 second timeout
+      timeout: TIMEOUT_QUEUE_PROMPT,
     });
   } catch (error) {
     throw new Error(`Failed to queue prompt to ComfyUI at ${host}: ${error.message}`);
@@ -39,8 +44,8 @@ function waitForResult(host, clientId) {
     
     const timeout = setTimeout(() => {
       ws.close();
-      reject(new Error('Timeout waiting for ComfyUI result (60s)'));
-    }, 60000); // 60 second timeout
+      reject(new Error(`Timeout waiting for ComfyUI result (${TIMEOUT_WEBSOCKET_RESULT}ms)`));
+    }, TIMEOUT_WEBSOCKET_RESULT);
     
     ws.on('message', (msg) => {
       try {
@@ -81,7 +86,7 @@ async function fetchAudio(host, fileInfo) {
   try {
     const { data } = await axios.get(url, { 
       responseType: 'arraybuffer',
-      timeout: 30000, // 30 second timeout
+      timeout: TIMEOUT_FETCH_AUDIO,
     });
     return Buffer.from(data);
   } catch (error) {
