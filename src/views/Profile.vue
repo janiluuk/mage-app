@@ -535,7 +535,7 @@ import team4 from "@/assets/img/team-4.jpg";
 
 import setNavPills from "@/assets/js/nav-pills.js";
 import setTooltip from "@/assets/js/tooltip.js";
-import { VIMAGE_API_URL } from "@/utils/domains";
+import { MAGE_API_URL } from "@/utils/domains";
 
 export default {
   name: "profile-overview",
@@ -574,12 +574,12 @@ export default {
   },
   methods: {
     getProfile: async () => {
-      if (!VIMAGE_API_URL) {
-        console.warn('VIMAGE_API_URL is not configured');
+      if (!MAGE_API_URL) {
+        console.warn('MAGE_API_URL is not configured');
         return;
       }
 
-      const res = await fetch(`${VIMAGE_API_URL}/user/`);
+      const res = await fetch(`${MAGE_API_URL}/user/`);
       const data = await res.json();
       console.log(data);
     },

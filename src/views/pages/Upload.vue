@@ -32,7 +32,7 @@ export default {
 
 <template>
 
-            <div class="vimage-container px-0">
+            <div class="mage-container px-0">
                 <div>
                     <VideoUpload></VideoUpload>
                 </div>

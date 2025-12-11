@@ -385,7 +385,7 @@ const onStatusFilterChange = (event) => {
 </template>
 
 
-<style scoped lang="scss">@import '@/assets/vimage.scss';</style>
+<style scoped lang="scss">@import '@/assets/mage.scss';</style>
 <style scoped lang="scss">
   img[lazy=loading] {
   min-width: 100%;

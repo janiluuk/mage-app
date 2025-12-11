@@ -224,7 +224,7 @@ const validation = {
 </script>
 
 <style scoped lang="scss">
-@import '@/assets/vimage.scss';
+@import '@/assets/mage.scss';
 .horizontal-select {
   display: flex;
   overflow-x: auto;

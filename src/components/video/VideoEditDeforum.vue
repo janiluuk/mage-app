@@ -422,7 +422,7 @@ export default {
 </script>
 
 <style scoped lang="scss">
-  @import '@/assets/vimage.scss';
+  @import '@/assets/mage.scss';
   .item-selector {
     display: flex;
     flex-flow: row;

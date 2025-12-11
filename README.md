@@ -1,6 +1,6 @@
-# Vimage AI Studio Frontend
+# Mage AI Studio Frontend
 
-An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app bundles media tooling, PrimeVue components, and audio/video workflows into a single dashboard that talks to a JSON API backend and an experimental FFmpeg/ComfyUI helper.
+An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bundles media tooling, PrimeVue components, and audio/video workflows into a single dashboard that talks to a JSON API backend and an experimental FFmpeg/ComfyUI helper.
 
 ## Features
 
@@ -84,7 +84,7 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
    - `VUE_APP_API_BASE_URL`: base URL of the JSON API (e.g. `http://localhost:3000/api/v1`).
    - `VUE_APP_API_V1_BASE_URL`: API v1 root (e.g. `http://localhost:3000/api/v1`).
    - `VUE_APP_STABLE_URL`: URL used by the Studio iframe (e.g. `https://stable.example.com`).
-   - `VUE_APP_VIMAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
+   - `VUE_APP_MAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
    - `VUE_APP_FALLBACK_IMAGE_URL`: fallback image used across media listings.
    - `VUE_APP_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
 
@@ -132,12 +132,12 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
 
 ### Docker workflow
 1. Ensure Docker is running.
-2. Bootstrap the full stack (frontend, helper API, Vimage API, MySQL, nginx, and FFmpeg workers):
+2. Bootstrap the full stack (frontend, helper API, Mage API, MySQL, nginx, and FFmpeg workers):
    ```bash
    script/setup.sh --detach
    ```
    The script will copy `.env.docker.example` into `.env`/`.env.docker` on first run so the containers pick up matching hostnames
-   inside the shared Docker network (`app.localhost`, `api.localhost`, `vimage-api.localhost`, and `gateway.localhost`).
+   inside the shared Docker network (`app.localhost`, `api.localhost`, `mage-api.localhost`, and `gateway.localhost`).
 3. The `ffmpeg-worker` service can be scaled to handle concurrent audio streams:
    ```bash
    docker compose up --build --scale ffmpeg-worker=6
@@ -145,7 +145,7 @@ An opinionated Vue 3/Vite frontend for the Vimage AI Studio experience. The app 
 
 ## Project Structure
 ```
-vimage-app/
+mage-app/
 ├── src/
 │   ├── assets/               # Global styles, fonts, and static media
 │   ├── components/           # Reusable UI components

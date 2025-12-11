@@ -5,17 +5,17 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    container_name: vimage-app
+    container_name: mage-app
     hostname: app
     env_file:
       - .env.docker
     depends_on:
       - api
-      - vimage-api
+      - mage-api
     ports:
       - "${FRONTEND_PORT:-8080}:8080"
     networks:
-      vimage:
+      mage:
         aliases:
           - app.localhost
 
@@ -23,7 +23,7 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.api
-    container_name: vimage-api-helper
+    container_name: mage-api-helper
     hostname: api
     env_file:
       - .env.docker
@@ -35,38 +35,38 @@ services:
     expose:
       - "3000"
     networks:
-      vimage:
+      mage:
         aliases:
           - api.localhost
 
-  vimage-api:
-    image: ${VIMAGE_API_IMAGE:-ghcr.io/vimage-ai/vimage-api:latest}
-    container_name: vimage-api
-    hostname: vimage-api
+  mage-api:
+    image: ${MAGE_API_IMAGE:-ghcr.io/mage-ai/mage-api:latest}
+    container_name: mage-api
+    hostname: mage-api
     env_file:
       - .env.docker
     environment:
       DB_HOST: mysql
       DB_PORT: 3306
-      DB_DATABASE: ${MYSQL_DATABASE:-vimage}
-      DB_USERNAME: ${MYSQL_USER:-vimage}
+      DB_DATABASE: ${MYSQL_DATABASE:-mage}
+      DB_USERNAME: ${MYSQL_USER:-mage}
       DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
     depends_on:
       - mysql
     expose:
       - "47860"
     networks:
-      vimage:
+      mage:
         aliases:
-          - vimage-api.localhost
+          - mage-api.localhost
 
   mysql:
     image: mysql:8.0
-    container_name: vimage-mysql
+    container_name: mage-mysql
     hostname: mysql
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-vimage}
-      MYSQL_USER: ${MYSQL_USER:-vimage}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mage}
+      MYSQL_USER: ${MYSQL_USER:-mage}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
     ports:
@@ -74,24 +74,24 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      vimage:
+      mage:
         aliases:
           - mysql.localhost
 
   nginx:
     image: nginx:1.25
-    container_name: vimage-nginx
+    container_name: mage-nginx
     hostname: gateway
     depends_on:
       - app
       - api
-      - vimage-api
+      - mage-api
     ports:
       - "${NGINX_PORT:-80}:80"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
     networks:
-      vimage:
+      mage:
         aliases:
           - gateway.localhost
 
@@ -99,12 +99,12 @@ services:
     image: jrottenberg/ffmpeg:5.1-ubuntu
     command: ["sleep", "infinity"]
     networks:
-      vimage:
+      mage:
         aliases:
           - ffmpeg.localhost
 
 networks:
-  vimage:
+  mage:
     driver: bridge
 
 volumes:

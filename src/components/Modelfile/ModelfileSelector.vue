@@ -125,7 +125,7 @@ const carouselResponsiveOptions = ref([
 </template>
 
 <style lang="scss"  crossorigin="anonymous">
-@import '@/assets/vimage.scss';
+@import '@/assets/mage.scss';
 .model-selector-container {
   background: var(--surface-card);
   border: 1px solid var(--surface-border);
