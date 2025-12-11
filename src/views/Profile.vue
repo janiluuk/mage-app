@@ -21,9 +21,9 @@
         </div>
         <div class="col-auto my-auto">
           <div class="h-100">
-            <h5 class="mb-1">Sum Ting Wong</h5>
+            <h5 class="mb-1">Demo User</h5>
 
-            <p class="mb-0 font-weight-normal text-sm">Master of disaster</p>
+            <p class="mb-0 font-weight-normal text-sm">Video AI Creator</p>
           </div>
         </div>
         <div
