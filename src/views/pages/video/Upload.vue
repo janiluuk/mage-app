@@ -118,8 +118,12 @@ export default {
       isLoading: false,
       status: '',
       errorMessage: false,
-      fileSizeLimit: {'video/mp4': 50, 'image': 2 },
-      showAudioJobDialog: false
+      showAudioJobDialog: false,
+      fileSizeLimit: {'video/mp4': 50, 'image/jpeg': 2, 'image/png': 2, 'image/gif': 2 },
+      supportedFormats: {
+        deforum: ['image/jpeg', 'image/png', 'image/gif'],
+        vid2vid: ['video/mp4', 'video/quicktime', 'video/x-msvideo']
+      }
     };
   },
   watch: {
@@ -150,56 +154,58 @@ export default {
 
     },
     uploadHandler(event, type) {
+      // Validate file exists
+      if (!event.target.files || event.target.files.length === 0) {
+        this.setErrorNotification('No file selected');
+        return;
+      }
+
       let currentFile = event.target.files[0];
       let fileType = currentFile.type;
       let fileSize = currentFile.size;
       this.generatorType = type;
-      this.setSuccessNotification('Uploading in progress');
-      const reader = new FileReader();
 
-      reader.addEventListener('progress', function(progress) {
-          console.log(progress);
-      });
-
-      if (!this.fileSizeLimit[fileType]) {
-       // alert("not supported");
-      }
-
-      if (fileSize > 1024 * 1024 * this.fileSizeLimit[fileType]) {
-
-        this.errorMessage = "File is too big, maximum "+this.filesizeLimit+"mb or 15 seconds allowed!";
+      // Validate file type
+      if (!this.supportedFormats[type].includes(fileType)) {
+        const formatList = this.supportedFormats[type].map(f => f.split('/')[1]).join(', ');
+        this.errorMessage = `Unsupported file format. Please upload: ${formatList}`;
         this.setErrorNotification(this.errorMessage);
-
         return;
       }
 
-      this.uploadFile(currentFile, type);
+      // Validate file size
+      const maxSizeMB = this.fileSizeLimit[fileType] || (type === 'deforum' ? 2 : 50);
+      if (fileSize > 1024 * 1024 * maxSizeMB) {
+        this.errorMessage = `File is too large. Maximum size: ${maxSizeMB}MB`;
+        this.setErrorNotification(this.errorMessage);
+        return;
+      }
 
+      // Start upload
+      this.setSuccessNotification('Uploading file...');
+      
+      const reader = new FileReader();
+      reader.addEventListener('progress', function(progress) {
+          console.log('Upload progress:', progress);
+      });
+
+      reader.addEventListener('error', () => {
+        this.setErrorNotification('Error reading file');
+      });
+
+      this.uploadFile(currentFile, type);
     },
     async uploadFile(file, type) {
-      const response = this.upload({attachment: file, type: type }).then((result) => { this.status = result.status; this.videoId = result.id; return result;} );
-    },
-    async handleJobCreated(jobData) {
       try {
-        this.showAudioJobDialog = false;
-        this.setSuccessNotification('Creating audio animation job...');
-        
-        // Upload and create job
-        const response = await this.upload({ 
-          attachment: jobData.audioFile, 
-          type: 'deforum',
-          motionStyle: jobData.motionStyle,
-          preset: jobData.preset,
-          bpm: jobData.bpm
-        });
-        
+        const response = await this.upload({attachment: file, type: type });
         this.status = response.status;
         this.videoId = response.id;
-        
-        this.setSuccessNotification('Audio animation job created successfully!');
+        return response;
       } catch (error) {
-        console.error('Failed to create job:', error);
-        this.setErrorNotification('Failed to create audio animation job');
+        console.error('Upload error:', error);
+        const errorMsg = error.response?.data?.message || error.message || 'Upload failed';
+        this.setErrorNotification(errorMsg);
+        this.isLoading = false;
       }
     }
   }};
