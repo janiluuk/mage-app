@@ -16,8 +16,11 @@
 	name: "UseDropzoneDemo",
 	setup() {
 	  function onDrop(acceptFiles, rejectReasons) {
-		console.log(acceptFiles);
-		console.log(rejectReasons);
+		// Files accepted and rejected by dropzone
+		if (process.env.NODE_ENV === 'development') {
+		  console.log('Accepted files:', acceptFiles);
+		  console.log('Reject reasons:', rejectReasons);
+		}
 	  }
   
 	  const { getRootProps, getInputProps, ...rest } = useDropzone({ onDrop });

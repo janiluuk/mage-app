@@ -69,8 +69,7 @@ export default {
     this.getListDebounced();
   },
   beforeMount() {
-    console.log("toggling display");
-
+    // Component mounting
   },
   beforeUnmount() {
 
