@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useLayout } from '@/layout/composables/layout';
 import RecentJobs from '@/pages/Dashboard/RecentJobs.vue';
 import BalanceAvailable from '@/pages/Dashboard/BalanceAvailable.vue';
@@ -16,17 +16,36 @@ const videoStats = ref({
 
 const loading = ref(true);
 const error = ref(null);
+let refreshInterval = null;
 
-onMounted(async () => {
+const fetchStats = async () => {
     try {
-        loading.value = true;
         videoStats.value = await videoStatsService.getStats();
         error.value = null;
     } catch (err) {
         error.value = 'Failed to load dashboard statistics';
         console.error('Dashboard error:', err);
+    }
+};
+
+onMounted(async () => {
+    try {
+        loading.value = true;
+        await fetchStats();
     } finally {
         loading.value = false;
+    }
+    
+    // Refresh stats every 30 seconds
+    refreshInterval = setInterval(async () => {
+        await fetchStats();
+    }, 30000);
+});
+
+onUnmounted(() => {
+    if (refreshInterval) {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
     }
 });
 </script>

@@ -7,6 +7,7 @@ vi.mock('axios');
 describe('VideoStatsService', () => {
   afterEach(() => {
     vi.clearAllMocks();
+    VideoStatsService.clearCache();
   });
 
   describe('getStats', () => {
@@ -54,6 +55,73 @@ describe('VideoStatsService', () => {
         failedJobs: 0
       });
     });
+
+    it('uses cached data when available and not expired', async () => {
+      const mockData = {
+        totalVideos: 10,
+        processingJobs: 2,
+        completedToday: 5,
+        failedJobs: 1
+      };
+      
+      axios.get.mockResolvedValue({ data: mockData });
+      
+      // First call - should fetch from API
+      await VideoStatsService.getStats();
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      
+      // Second call - should use cache
+      await VideoStatsService.getStats();
+      expect(axios.get).toHaveBeenCalledTimes(1); // Still 1, not 2
+    });
+
+    it('bypasses cache with forceRefresh parameter', async () => {
+      const mockData = {
+        totalVideos: 10,
+        processingJobs: 2,
+        completedToday: 5,
+        failedJobs: 1
+      };
+      
+      axios.get.mockResolvedValue({ data: mockData });
+      
+      // First call
+      await VideoStatsService.getStats();
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      
+      // Second call with forceRefresh
+      await VideoStatsService.getStats(true);
+      expect(axios.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('returns cached data on error if available', async () => {
+      const mockData = {
+        totalVideos: 10,
+        processingJobs: 2,
+        completedToday: 5,
+        failedJobs: 1
+      };
+      
+      // First call succeeds
+      axios.get.mockResolvedValueOnce({ data: mockData });
+      const firstStats = await VideoStatsService.getStats();
+      expect(firstStats).toEqual(mockData);
+      
+      // Clear cache and make it expire
+      VideoStatsService.clearCache();
+      
+      // Second call fails
+      axios.get.mockRejectedValueOnce(new Error('Network error'));
+      const secondStats = await VideoStatsService.getStats();
+      
+      // Should return zeros since cache was cleared
+      expect(secondStats).toEqual({
+        totalVideos: 0,
+        processingJobs: 0,
+        completedToday: 0,
+        failedJobs: 0
+      });
+    });
   });
 
   describe('getRecentActivity', () => {
@@ -80,6 +148,30 @@ describe('VideoStatsService', () => {
       const activity = await VideoStatsService.getRecentActivity();
       
       expect(activity).toEqual([]);
+    });
+  });
+
+  describe('clearCache', () => {
+    it('clears the stats cache', async () => {
+      const mockData = {
+        totalVideos: 10,
+        processingJobs: 2,
+        completedToday: 5,
+        failedJobs: 1
+      };
+      
+      axios.get.mockResolvedValue({ data: mockData });
+      
+      // Populate cache
+      await VideoStatsService.getStats();
+      expect(axios.get).toHaveBeenCalledTimes(1);
+      
+      // Clear cache
+      VideoStatsService.clearCache();
+      
+      // Next call should fetch from API again
+      await VideoStatsService.getStats();
+      expect(axios.get).toHaveBeenCalledTimes(2);
     });
   });
 });

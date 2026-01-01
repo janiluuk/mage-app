@@ -3,25 +3,48 @@ import authHeader from '../auth-header';
 
 const API_V1_BASE_URL = process.env.VUE_APP_API_V1_BASE_URL;
 
+// Cache for stats to reduce API calls
+const statsCache = {
+  data: null,
+  timestamp: 0,
+  maxAge: 30000 // 30 seconds
+};
+
 class VideoStatsService {
   /**
    * Get video statistics for dashboard
+   * @param {boolean} forceRefresh - Skip cache and fetch fresh data
    * @returns {Promise<Object>} Statistics object
    */
-  async getStats() {
+  async getStats(forceRefresh = false) {
+    // Return cached data if available and not expired
+    const now = Date.now();
+    if (!forceRefresh && statsCache.data && (now - statsCache.timestamp) < statsCache.maxAge) {
+      return statsCache.data;
+    }
+
     try {
       const { data } = await axios.get(`${API_V1_BASE_URL}/stats`, {
         headers: authHeader()
       });
-      return {
+      const stats = {
         totalVideos: data.totalVideos || 0,
         processingJobs: data.processingJobs || 0,
         completedToday: data.completedToday || 0,
         failedJobs: data.failedJobs || 0
       };
+      
+      // Update cache
+      statsCache.data = stats;
+      statsCache.timestamp = now;
+      
+      return stats;
     } catch (error) {
       console.error('Error fetching video stats:', error);
-      // Return zeros as fallback
+      // Return cached data if available, otherwise return zeros
+      if (statsCache.data) {
+        return statsCache.data;
+      }
       return {
         totalVideos: 0,
         processingJobs: 0,
@@ -45,6 +68,14 @@ class VideoStatsService {
       console.error('Error fetching recent activity:', error);
       return [];
     }
+  }
+
+  /**
+   * Clear the stats cache
+   */
+  clearCache() {
+    statsCache.data = null;
+    statsCache.timestamp = 0;
   }
 }
 

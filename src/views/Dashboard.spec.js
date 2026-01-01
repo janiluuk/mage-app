@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import Dashboard from './Dashboard.vue';
 import videoStatsService from '@/services/stats/VideoStatsService';
@@ -35,6 +35,11 @@ vi.mock('@/layout/composables/layout', () => ({
 describe('Dashboard.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
   });
 
   it('renders loading state initially', () => {
@@ -117,5 +122,77 @@ describe('Dashboard.vue', () => {
     
     // Loading should be gone
     expect(wrapper.find('.p-progress-spinner').exists()).toBe(false);
+  });
+
+  it('sets up auto-refresh interval on mount', async () => {
+    const mockStats = {
+      totalVideos: 10,
+      processingJobs: 2,
+      completedToday: 5,
+      failedJobs: 1
+    };
+    
+    videoStatsService.getStats.mockResolvedValue(mockStats);
+    
+    const wrapper = mount(Dashboard);
+    await wrapper.vm.$nextTick();
+    
+    // Initial call
+    expect(videoStatsService.getStats).toHaveBeenCalledTimes(1);
+    
+    // Fast-forward 30 seconds
+    vi.advanceTimersByTime(30000);
+    await wrapper.vm.$nextTick();
+    
+    // Should be called again
+    expect(videoStatsService.getStats).toHaveBeenCalledTimes(2);
+    
+    wrapper.unmount();
+  });
+
+  it('clears interval on unmount', async () => {
+    const mockStats = {
+      totalVideos: 10,
+      processingJobs: 2,
+      completedToday: 5,
+      failedJobs: 1
+    };
+    
+    videoStatsService.getStats.mockResolvedValue(mockStats);
+    
+    const wrapper = mount(Dashboard);
+    await wrapper.vm.$nextTick();
+    
+    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
+    
+    wrapper.unmount();
+    
+    expect(clearIntervalSpy).toHaveBeenCalled();
+  });
+
+  it('continues to refresh stats at 30 second intervals', async () => {
+    const mockStats = {
+      totalVideos: 10,
+      processingJobs: 2,
+      completedToday: 5,
+      failedJobs: 1
+    };
+    
+    videoStatsService.getStats.mockResolvedValue(mockStats);
+    
+    const wrapper = mount(Dashboard);
+    await wrapper.vm.$nextTick();
+    
+    // Initial call
+    expect(videoStatsService.getStats).toHaveBeenCalledTimes(1);
+    
+    // Fast-forward 60 seconds (2 intervals)
+    vi.advanceTimersByTime(60000);
+    await wrapper.vm.$nextTick();
+    
+    // Should be called 3 times total (initial + 2 intervals)
+    expect(videoStatsService.getStats).toHaveBeenCalledTimes(3);
+    
+    wrapper.unmount();
   });
 });
