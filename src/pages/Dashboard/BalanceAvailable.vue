@@ -30,9 +30,8 @@ export default {
         try {
             await this.fetchUserProfile();
             await this.fetchPurchases();
-
-
         } catch (error) {
+            console.error('Error loading balance information:', error);
         }
     },
 
@@ -51,11 +50,10 @@ export default {
             purchases: 'GET_PURCHASES'
         }),
         getNextMonthStart() {
-            var now = new Date();
-            var next = new Date(now.getFullYear(), now.getMonth()+1, 1);
-            var timeLeft = next.getSeconds() - now.getSeconds();
-            return moment.duration({ "days": timeLeft }).humanize();
-
+            const now = new Date();
+            const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const timeLeft = next.getTime() - now.getTime();
+            return moment.duration(timeLeft).humanize();
         }
     },
     methods: {
