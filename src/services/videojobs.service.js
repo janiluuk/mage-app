@@ -164,4 +164,20 @@ export default {
     return await requestService.get("/queue");
   },
 
+  async addSoundtrack(videoId, audioFile, options) {
+    const formData = new FormData();
+    formData.append('videoId', videoId);
+    formData.append('audio', audioFile);
+    formData.append('volume', options.volume || 100);
+    formData.append('fadeIn', options.fadeIn || 0);
+    formData.append('fadeOut', options.fadeOut || 0);
+    formData.append('type', 'soundtrack');
+    
+    return await requestService.post('/v1/video-jobs/add-soundtrack', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  },
+
 };

@@ -6,6 +6,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { FALLBACK_IMAGE_URL } from '@/utils/domains';
+import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 
 
 const toast = useToast();
@@ -130,6 +131,30 @@ const getHumanizedDuration = (seconds) => {
     return moment.duration({ "seconds": seconds }).humanize();
 };
 
+// Soundtrack dialog state
+const showSoundtrackDialog = ref(false);
+const selectedVideoForSoundtrack = ref(null);
+
+const openSoundtrackDialog = (videoId) => {
+    const findById = store.getters['videojobs/findById'];
+    const video = findById(videoId);
+    
+    if (video) {
+        selectedVideoForSoundtrack.value = video;
+        showSoundtrackDialog.value = true;
+    }
+};
+
+const onSoundtrackAdded = (data) => {
+    toast.add({ 
+        severity: 'success', 
+        summary: 'Soundtrack Added', 
+        detail: `Creating new video with soundtrack from ${data.audioFile}`,
+        life: 3000 
+    });
+    getJobList();
+};
+
 const getJobList = () => {
     let params = {
         include: "modelfile,user",
@@ -186,6 +211,14 @@ const getMenu = (id, type, status) => {
             icon: 'pi pi-pencil',
             command: (target) => {
                 router.push(`/edit/${type}/${id}`);
+            }
+        },
+        {
+            label: 'Add Soundtrack',
+            icon: 'pi pi-volume-up',
+            visible: status === 'finished',
+            command: () => {
+                openSoundtrackDialog(id);
             }
         },
         {
@@ -379,6 +412,16 @@ const onStatusFilterChange = (event) => {
         </DataView>
         <ListView v-if="layout !='grid'" :jobs="dataviewValue" :queryFilter="queryFilter" :statusFilter="statusFilter" :generatorFilter="generatorFilter"></ListView>
     </div>
+
+    <!-- Soundtrack Dialog -->
+    <SoundtrackDialog 
+        v-if="selectedVideoForSoundtrack"
+        v-model:visible="showSoundtrackDialog"
+        :videoId="selectedVideoForSoundtrack.id"
+        :videoTitle="selectedVideoForSoundtrack.filename || selectedVideoForSoundtrack.prompt"
+        :videoDuration="selectedVideoForSoundtrack.duration"
+        @soundtrack-added="onSoundtrackAdded"
+    />
 </template>
 
 
