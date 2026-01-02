@@ -13,6 +13,7 @@ import PasswordReset from "@/views/api/PasswordReset.vue";
 import DeforumUI from "@/views/dev/DeforumUI.vue";
 import DeforumationQT from "@/views/dev/DeforumationQT.vue";
 import MageAppMain from "@/views/MageAppMain.vue";
+import StoryCreator from "@/views/StoryCreator.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -26,6 +27,11 @@ const router = createRouter({
           path: '/',
           name: 'Dashboard',
           component: () => import('@/views/Dashboard.vue')
+        },
+        {
+          path: '/story',
+          name: 'StoryCreator',
+          component: StoryCreator
         },
         {
           path: '/frontpage',
