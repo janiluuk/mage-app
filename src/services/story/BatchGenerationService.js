@@ -24,7 +24,7 @@ export class BatchGenerationService {
    * @param {Object} options - Generation options
    */
   initialize(config, options = {}) {
-    this.batchId = `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    this.batchId = `batch_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`
     this.totalFrames = config.totalFrames || 0
     this.completedFrames = 0
     this.failedFrames = []

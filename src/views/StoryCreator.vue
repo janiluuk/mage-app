@@ -259,13 +259,17 @@ function handleGenerateStory(storyData) {
 }
 
 function simulateGeneration() {
-  const interval = setInterval(() => {
+  // Simulated generation for demo purposes
+  totalFramesToGenerate.value = currentStory.value?.scenes?.reduce((sum, scene) => 
+    sum + (scene.frames?.length || 0) * 30, 0) || 100
+  
+  let generationInterval = setInterval(() => {
     framesCompleted.value++
     generationProgress.value = Math.floor((framesCompleted.value / totalFramesToGenerate.value) * 100)
     generationStatus.value = `Generating frame ${framesCompleted.value} of ${totalFramesToGenerate.value}...`
     
     if (framesCompleted.value >= totalFramesToGenerate.value) {
-      clearInterval(interval)
+      clearInterval(generationInterval)
       generationStatus.value = 'Generation complete!'
       setTimeout(() => {
         showGenerationDialog.value = false
@@ -495,7 +499,7 @@ function generateShareLink() {
   // In a real implementation, this would upload the config to a server
   // and return a shareable URL
   setTimeout(() => {
-    const shareId = Math.random().toString(36).substr(2, 9)
+    const shareId = Math.random().toString(36).substring(2, 11)
     storyShareUrl.value = `${window.location.origin}/story/share/${shareId}`
     generatingLink.value = false
     

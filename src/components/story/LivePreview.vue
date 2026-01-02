@@ -362,6 +362,14 @@ function handleWebSocketMessage(data) {
   }
 }
 
+function createPlaceholderImage(frameNumber) {
+  const randomColor = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
+  return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">` +
+    `<rect fill="%23${randomColor}" width="512" height="512"/>` +
+    `<text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24">Frame ${frameNumber}</text>` +
+    `</svg>`
+}
+
 function startSimulatedGeneration() {
   // Simulated generation for demo purposes
   totalFrames.value = props.config.frames?.length * 30 || 100
@@ -381,7 +389,7 @@ function startSimulatedGeneration() {
     // Simulate preview image update
     if (currentFrame.value % refreshRate.value === 0) {
       // In real implementation, this would be actual frame data
-      previewImage.value = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><rect fill="%23${Math.floor(Math.random()*16777215).toString(16)}" width="512" height="512"/><text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24">Frame ${currentFrame.value}</text></svg>`
+      previewImage.value = createPlaceholderImage(currentFrame.value)
     }
     
     if (currentFrame.value >= totalFrames.value) {
