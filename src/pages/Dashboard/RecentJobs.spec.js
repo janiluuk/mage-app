@@ -3,15 +3,6 @@ import { mount } from '@vue/test-utils';
 import RecentJobs from './RecentJobs.vue';
 import { createStore } from 'vuex';
 
-// Mock router
-const mockRouter = {
-  push: vi.fn()
-};
-
-vi.mock('vue-router', () => ({
-  useRouter: () => mockRouter
-}));
-
 describe('RecentJobs.vue', () => {
   let store;
   let actions;
@@ -45,6 +36,11 @@ describe('RecentJobs.vue', () => {
     const wrapper = mount(RecentJobs, {
       global: {
         plugins: [store],
+        mocks: {
+          $router: {
+            push: vi.fn()
+          }
+        },
         stubs: {
           DataTable: true,
           Column: true,
@@ -62,6 +58,11 @@ describe('RecentJobs.vue', () => {
     const wrapper = mount(RecentJobs, {
       global: {
         plugins: [store],
+        mocks: {
+          $router: {
+            push: vi.fn()
+          }
+        },
         stubs: {
           DataTable: true,
           Column: true,
@@ -78,7 +79,7 @@ describe('RecentJobs.vue', () => {
     wrapper.unmount();
   });
 
-  it('displays jobs from store', () => {
+  it('displays jobs from store', async () => {
     const mockJobs = [
       {
         id: 1,
@@ -103,6 +104,11 @@ describe('RecentJobs.vue', () => {
     const wrapper = mount(RecentJobs, {
       global: {
         plugins: [store],
+        mocks: {
+          $router: {
+            push: vi.fn()
+          }
+        },
         stubs: {
           DataTable: {
             template: '<div><slot /></div>',
@@ -115,6 +121,9 @@ describe('RecentJobs.vue', () => {
       }
     });
 
+    // Wait for created hook to complete
+    await wrapper.vm.$nextTick();
+    
     expect(wrapper.vm.jobs).toEqual(mockJobs);
     wrapper.unmount();
   });
@@ -123,6 +132,11 @@ describe('RecentJobs.vue', () => {
     const wrapper = mount(RecentJobs, {
       global: {
         plugins: [store],
+        mocks: {
+          $router: {
+            push: vi.fn()
+          }
+        },
         stubs: {
           DataTable: true,
           Column: true,
