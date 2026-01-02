@@ -12,19 +12,22 @@ describe('RecentJobs.vue', () => {
     vi.clearAllMocks();
     
     actions = {
-      'videojobs/list': vi.fn().mockResolvedValue([]),
-      'videojobs/cancel': vi.fn()
+      list: vi.fn().mockResolvedValue([]),
+      cancel: vi.fn()
     };
 
     getters = {
-      'videojobs/listFinished': () => [],
-      'videojobs/progress': () => false
+      listFinished: (state) => [],
+      progress: (state) => false
     };
 
     store = createStore({
       modules: {
         videojobs: {
           namespaced: true,
+          state: {
+            jobs: []
+          },
           actions,
           getters
         }
@@ -73,7 +76,7 @@ describe('RecentJobs.vue', () => {
     });
 
     await vi.waitFor(() => {
-      expect(actions['videojobs/list']).toHaveBeenCalled();
+      expect(actions.list).toHaveBeenCalled();
     });
     
     wrapper.unmount();
@@ -90,11 +93,14 @@ describe('RecentJobs.vue', () => {
       }
     ];
 
-    getters['videojobs/listFinished'] = () => mockJobs;
+    getters.listFinished = (state) => mockJobs;
     store = createStore({
       modules: {
         videojobs: {
           namespaced: true,
+          state: {
+            jobs: mockJobs
+          },
           actions,
           getters
         }
