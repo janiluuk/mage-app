@@ -71,11 +71,12 @@ const errorMessage = ref('')
 let intervalId
 
 function generate() {
+  const API_URL = process.env.VUE_APP_API_URL || ''
   const params = new URLSearchParams({
     text: prompt.value,
     mood: selectedMood.value
   })
-  audioSrc.value = `/api/stream?${params.toString()}`
+  audioSrc.value = `${API_URL}/api/stream?${params.toString()}`
 }
 
 async function refreshQueue() {

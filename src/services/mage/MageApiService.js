@@ -33,10 +33,14 @@ async function fetchJson(url, timeoutMs = 10000) {
 
 const MageApiService = {
   getStatus() {
-    return fetchJson('/api/status');
+    // Use full API URL from environment
+    const API_URL = process.env.VUE_APP_API_URL || '';
+    return fetchJson(`${API_URL}/api/status`);
   },
   getQueue() {
-    return fetchJson('/api/queue');
+    // Use audio-queue endpoint to avoid conflict with video queue
+    const API_URL = process.env.VUE_APP_API_URL || '';
+    return fetchJson(`${API_URL}/api/audio-queue`);
   },
 };
 
