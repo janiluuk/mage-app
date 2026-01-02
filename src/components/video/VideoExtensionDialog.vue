@@ -119,7 +119,7 @@
           </div>
           <div class="info-item full-width">
             <span class="info-label">Estimated Processing Time:</span>
-            <span class="info-value">{{ estimateProcessingTime() }}</span>
+            <span class="info-value">{{ estimatedProcessingTime }}</span>
           </div>
         </div>
       </div>
@@ -160,6 +160,8 @@
 </template>
 
 <script>
+import { formatDuration } from '@/utils/format';
+
 export default {
   name: 'VideoExtensionDialog',
   props: {
@@ -188,8 +190,8 @@ export default {
   data() {
     return {
       selectedMethod: 'mci',
-      targetDuration: this.videoDuration * 1.5,
-      targetFps: this.videoFps || 30,
+      targetDuration: 0,
+      targetFps: 30,
       error: null,
       processing: false,
       methods: [
@@ -246,36 +248,9 @@ export default {
       return this.targetDuration > this.videoDuration && 
              this.targetFps >= 24 && 
              this.targetFps <= 60;
-    }
-  },
-  watch: {
-    videoDuration: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          this.targetDuration = newVal * 1.5;
-        }
-      }
     },
-    videoFps: {
-      immediate: true,
-      handler(newVal) {
-        if (newVal) {
-          this.targetFps = newVal;
-        }
-      }
-    }
-  },
-  methods: {
-    formatDuration(seconds) {
-      if (!seconds || seconds < 0) return '0:00';
-      const mins = Math.floor(seconds / 60);
-      const secs = Math.floor(seconds % 60);
-      return `${mins}:${secs.toString().padStart(2, '0')}`;
-    },
-
-    estimateProcessingTime() {
-      // Rough estimate: 1 second of processing per frame to generate
+    estimatedProcessingTime() {
+      // Rough estimate: based on frames to generate
       // Adjusted by method complexity
       const baseTime = this.framesToGenerate;
       let multiplier = 1;
@@ -303,7 +278,28 @@ export default {
         const hours = Math.ceil(estimatedSeconds / 3600);
         return `~${hours} hour${hours > 1 ? 's' : ''}`;
       }
+    }
+  },
+  watch: {
+    videoDuration: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.targetDuration = newVal * 1.5;
+        }
+      }
     },
+    videoFps: {
+      immediate: true,
+      handler(newVal) {
+        if (newVal) {
+          this.targetFps = newVal;
+        }
+      }
+    }
+  },
+  methods: {
+    formatDuration,
 
     async extendVideo() {
       if (!this.isValid) {
@@ -319,7 +315,7 @@ export default {
           method: this.selectedMethod,
           targetDuration: this.targetDuration,
           targetFps: this.targetFps,
-          interpolationMode: this.selectedMethod === 'mci' ? 'mci' : this.selectedMethod
+          interpolationMode: this.selectedMethod
         };
 
         await this.$store.dispatch('videojobs/extendVideo', {

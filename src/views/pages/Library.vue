@@ -6,6 +6,7 @@ import { computed, onMounted, onUnmounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { FALLBACK_IMAGE_URL } from '@/utils/domains';
+import { formatDuration } from '@/utils/format';
 import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 import VideoExtensionDialog from '@/components/video/VideoExtensionDialog.vue';
 
@@ -178,13 +179,6 @@ const onVideoExtended = (data) => {
         life: 3000 
     });
     getJobList();
-};
-
-const formatDuration = (seconds) => {
-    if (!seconds || seconds < 0) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const getJobList = () => {
