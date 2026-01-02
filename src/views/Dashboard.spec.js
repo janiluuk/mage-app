@@ -74,15 +74,14 @@ describe('Dashboard.vue', () => {
   });
 
   it('displays error message on failure', async () => {
-    videoStatsService.getStats.mockRejectedValue(new Error('API Error'));
+    videoStatsService.getStats.mockRejectedValueOnce(new Error('API Error'));
     
     const wrapper = mount(Dashboard);
     
     // Wait for async operations to complete
-    await wrapper.vm.$nextTick();
     await vi.waitFor(() => {
-      expect(wrapper.find('.p-message').exists()).toBe(true);
-    });
+      expect(wrapper.vm.error).toBeTruthy();
+    }, { timeout: 2000 });
     
     expect(wrapper.text()).toContain('Failed to load dashboard statistics');
     

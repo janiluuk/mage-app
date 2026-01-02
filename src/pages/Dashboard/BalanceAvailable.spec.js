@@ -153,18 +153,21 @@ describe('BalanceAvailable.vue', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const testError = new Error('Profile fetch failed');
     
-    actions['profile/getProfile'] = vi.fn().mockRejectedValue(testError);
+    const errorActions = {
+      getProfile: vi.fn().mockRejectedValue(testError),
+      GET_PURCHASES: vi.fn().mockResolvedValue([])
+    };
     
     store = createStore({
       modules: {
         profile: {
           namespaced: true,
-          actions,
+          actions: errorActions,
           getters
         },
         order: {
           namespaced: true,
-          actions,
+          actions: errorActions,
           getters
         }
       }

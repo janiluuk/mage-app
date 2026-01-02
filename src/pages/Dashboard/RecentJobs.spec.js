@@ -17,7 +17,7 @@ describe('RecentJobs.vue', () => {
     };
 
     getters = {
-      listFinished: (state) => [],
+      listFinished: (state) => state.jobs,
       progress: (state) => false
     };
 
