@@ -43,7 +43,7 @@ export default {
     },
     async created() {
         const jobs = await this.listJobs();
-        this.jobs = this.getJobs();
+        this.jobs = this.getJobs;
         
 
     },

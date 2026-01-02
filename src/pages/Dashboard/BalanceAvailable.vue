@@ -3,7 +3,7 @@
         <div class="flex justify-content-between mb-3">
             <div>
                 <span class="block text-500 font-medium mb-3">Balance</span>
-                <div class="text-900 font-medium text-xl">{{ profile.balance }} credits</div>
+                <div class="text-900 font-medium text-xl">{{ profile?.balance || 0 }} credits</div>
             </div>
             <div class="flex align-items-center justify-content-center bg-blue-100 border-round"
                 style="width: 2.5rem; height: 2.5rem">
@@ -30,17 +30,9 @@ export default {
         try {
             await this.fetchUserProfile();
             await this.fetchPurchases();
-
-
         } catch (error) {
+            console.error('Error loading balance information:', error);
         }
-    },
-
-    data() {
-        return {
-            profile: { balance: 0 }
-        }
-
     },
 
     computed: {
@@ -51,11 +43,10 @@ export default {
             purchases: 'GET_PURCHASES'
         }),
         getNextMonthStart() {
-            var now = new Date();
-            var next = new Date(now.getFullYear(), now.getMonth()+1, 1);
-            var timeLeft = next.getSeconds() - now.getSeconds();
-            return moment.duration({ "days": timeLeft }).humanize();
-
+            const now = new Date();
+            const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+            const timeLeft = next.getTime() - now.getTime();
+            return moment.duration(timeLeft).humanize();
         }
     },
     methods: {
