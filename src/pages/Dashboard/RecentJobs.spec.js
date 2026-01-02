@@ -26,7 +26,8 @@ describe('RecentJobs.vue', () => {
     };
 
     getters = {
-      'videojobs/listFinished': () => []
+      'videojobs/listFinished': () => [],
+      'videojobs/progress': () => false
     };
 
     store = createStore({
@@ -54,10 +55,11 @@ describe('RecentJobs.vue', () => {
     });
 
     expect(wrapper.exists()).toBe(true);
+    wrapper.unmount();
   });
 
   it('calls listJobs action on created', async () => {
-    mount(RecentJobs, {
+    const wrapper = mount(RecentJobs, {
       global: {
         plugins: [store],
         stubs: {
@@ -69,8 +71,11 @@ describe('RecentJobs.vue', () => {
       }
     });
 
-    await new Promise(resolve => setTimeout(resolve, 10));
-    expect(actions['videojobs/list']).toHaveBeenCalled();
+    await vi.waitFor(() => {
+      expect(actions['videojobs/list']).toHaveBeenCalled();
+    });
+    
+    wrapper.unmount();
   });
 
   it('displays jobs from store', () => {
@@ -111,6 +116,7 @@ describe('RecentJobs.vue', () => {
     });
 
     expect(wrapper.vm.jobs).toEqual(mockJobs);
+    wrapper.unmount();
   });
 
   it('clears interval on beforeUnmount', () => {

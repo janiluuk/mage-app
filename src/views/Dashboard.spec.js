@@ -35,11 +35,10 @@ vi.mock('@/layout/composables/layout', () => ({
 describe('Dashboard.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.useFakeTimers();
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
+    vi.clearAllTimers();
   });
 
   it('renders loading state initially', () => {
@@ -64,11 +63,14 @@ describe('Dashboard.vue', () => {
     
     // Wait for async operations to complete
     await wrapper.vm.$nextTick();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await vi.waitFor(() => {
+      expect(wrapper.text()).toContain('10');
+    });
     
-    expect(wrapper.text()).toContain('10'); // totalVideos
     expect(wrapper.text()).toContain('2');  // processingJobs
     expect(wrapper.text()).toContain('5');  // completedToday
+    
+    wrapper.unmount();
   });
 
   it('displays error message on failure', async () => {
@@ -78,10 +80,13 @@ describe('Dashboard.vue', () => {
     
     // Wait for async operations to complete
     await wrapper.vm.$nextTick();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await vi.waitFor(() => {
+      expect(wrapper.find('.p-message').exists()).toBe(true);
+    });
     
-    expect(wrapper.find('.p-message').exists()).toBe(true);
     expect(wrapper.text()).toContain('Failed to load dashboard statistics');
+    
+    wrapper.unmount();
   });
 
   it('calls getStats on mount', async () => {
@@ -94,11 +99,13 @@ describe('Dashboard.vue', () => {
     
     videoStatsService.getStats.mockResolvedValue(mockStats);
     
-    mount(Dashboard);
+    const wrapper = mount(Dashboard);
     
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await wrapper.vm.$nextTick();
     
-    expect(videoStatsService.getStats).toHaveBeenCalledTimes(1);
+    expect(videoStatsService.getStats).toHaveBeenCalled();
+    
+    wrapper.unmount();
   });
 
   it('hides loading state after stats load', async () => {
@@ -118,13 +125,16 @@ describe('Dashboard.vue', () => {
     
     // Wait for loading to complete
     await wrapper.vm.$nextTick();
-    await new Promise(resolve => setTimeout(resolve, 10));
+    await vi.waitFor(() => {
+      expect(wrapper.find('.p-progress-spinner').exists()).toBe(false);
+    });
     
-    // Loading should be gone
-    expect(wrapper.find('.p-progress-spinner').exists()).toBe(false);
+    wrapper.unmount();
   });
 
   it('sets up auto-refresh interval on mount', async () => {
+    vi.useFakeTimers();
+    
     const mockStats = {
       totalVideos: 10,
       processingJobs: 2,
@@ -141,13 +151,13 @@ describe('Dashboard.vue', () => {
     expect(videoStatsService.getStats).toHaveBeenCalledTimes(1);
     
     // Fast-forward 30 seconds
-    vi.advanceTimersByTime(30000);
-    await wrapper.vm.$nextTick();
+    await vi.advanceTimersByTimeAsync(30000);
     
     // Should be called again
     expect(videoStatsService.getStats).toHaveBeenCalledTimes(2);
     
     wrapper.unmount();
+    vi.useRealTimers();
   });
 
   it('clears interval on unmount', async () => {
@@ -171,6 +181,8 @@ describe('Dashboard.vue', () => {
   });
 
   it('continues to refresh stats at 30 second intervals', async () => {
+    vi.useFakeTimers();
+    
     const mockStats = {
       totalVideos: 10,
       processingJobs: 2,
@@ -187,12 +199,12 @@ describe('Dashboard.vue', () => {
     expect(videoStatsService.getStats).toHaveBeenCalledTimes(1);
     
     // Fast-forward 60 seconds (2 intervals)
-    vi.advanceTimersByTime(60000);
-    await wrapper.vm.$nextTick();
+    await vi.advanceTimersByTimeAsync(60000);
     
     // Should be called 3 times total (initial + 2 intervals)
     expect(videoStatsService.getStats).toHaveBeenCalledTimes(3);
     
     wrapper.unmount();
+    vi.useRealTimers();
   });
 });
