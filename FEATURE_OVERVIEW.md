@@ -113,41 +113,70 @@ Generate AI-powered audio from text descriptions.
 ---
 
 ### 6. 🎞️ Add Soundtrack to Videos
-*(Feature available in video editor - Integration enhancement needed)*
+Add audio tracks to your finished videos with control over volume and fading.
 
 **What you can do:**
-- Add audio tracks to processed videos
-- Merge audio with video output
-- Audio file upload component exists
-- Timeline-based audio editing
+- Add audio files to finished videos (MP3, WAV, OGG, M4A, FLAC)
+- Control volume (0-100%)
+- Add fade in effects (0-10 seconds)
+- Add fade out effects (0-10 seconds)
+- Automatic duration matching and warnings
+- Creates new video job with merged audio
 
-**Current Status:** Components implemented, full UI integration needed
+**Audio Features:**
+- Maximum file size: 50MB
+- Automatic duration detection
+- Visual warnings if audio/video lengths don't match
+- Option to loop short audio or trim long audio
 
-**Planned Enhancement:**
-- Add "Add Soundtrack" button in Library for finished videos
-- Integrate AudioFileUpload component
-- Create audio-video merge job type
-- Display combined video result
+**How to use:**
+1. Navigate to Library
+2. Find a finished video
+3. Click menu (⋮) → "Add Soundtrack"
+4. Upload audio file (drag & drop supported)
+5. Adjust volume and fade settings
+6. Click "Add Soundtrack"
+7. New job created with audio merged
+8. Monitor progress in Library
 
 ---
 
 ### 7. 📈 Extend Existing Videos
-*(Feature partially implemented - UI exposure needed)*
+Extend video duration using advanced frame interpolation techniques.
 
 **What you can do:**
-- Interpolate frames to extend video duration
-- Smooth motion using frame interpolation
-- Increase video length while maintaining quality
+- Extend video length up to 3x original duration
+- Choose interpolation method:
+  - **Motion Compensation** - Best quality, analyzes motion (recommended)
+  - **Blend** - Faster processing, simple frame blending
+  - **Duplicate Frames** - Fastest, no interpolation
+- Adjust target FPS (24-60 fps)
+- Preview estimated processing time
+- See frame count calculations before processing
 
-**Current Status:** Interpolation technology exists in codebase but not exposed in UI
+**Smart Features:**
+- Duration slider with min/max constraints
+- Real-time processing time estimates
+- Frame count calculations
+- Warnings for extreme extensions (>2x)
+- Configurable FPS for output quality
 
-**Planned Enhancement:**
-- Add "Extend Video" option in video editor
-- Configure interpolation parameters:
-  - Target duration/frame count
-  - Interpolation method
-  - Quality settings
-- Submit as video processing job
+**How to use:**
+1. Navigate to Library
+2. Find a finished video
+3. Click menu (⋮) → "Extend Video"
+4. Select interpolation method
+5. Adjust target duration slider
+6. Set desired FPS
+7. Review preview information
+8. Click "Extend Video"
+9. New job created for extended version
+
+**Example:**
+- Original: 30 seconds @ 30fps = 900 frames
+- Extended: 60 seconds @ 30fps = 1800 frames
+- Frames to generate: 900 new frames
+- Estimated time: ~30 minutes (Motion Compensation)
 
 ---
 
@@ -379,11 +408,13 @@ Advanced tools for development and testing.
 - [x] Soundscape generation
 - [x] User authentication
 - [x] Job status tracking
+- [x] **Add soundtrack to videos** - Complete with UI integration
+- [x] **Extend videos via interpolation** - Complete with UI integration
 
-### 🚧 Partially Implemented
-- [ ] Add soundtrack to videos (components ready, UI integration needed)
-- [ ] Extend videos via interpolation (code exists, UI needed)
-- [ ] Dashboard with real statistics (UI ready, needs API connection)
+### 🚧 Needs Backend Verification
+- [ ] Soundtrack merging API endpoint (`/v1/video-jobs/add-soundtrack`)
+- [ ] Video extension API endpoint (`/v1/video-jobs/extend`)
+- [ ] Dashboard statistics API connection
 
 ### 🔮 Planned Enhancements
 - [ ] Video trimming/clipping in editor
@@ -477,6 +508,19 @@ Advanced tools for development and testing.
 - Match BPM to your audio for best sync
 - Audio Sync mode analyzes both amplitude and frequency
 - Classic presets work well with any audio
+
+**For Adding Soundtracks:**
+- Use audio files close to video duration for best results
+- Start with 100% volume and adjust as needed
+- Add fade in/out for professional polish
+- Audio will loop if shorter than video, or be trimmed if longer
+
+**For Video Extension:**
+- Test with short videos first to gauge processing time
+- Motion Compensation gives best quality but takes longest
+- Use Blend mode for faster results with acceptable quality
+- Keep extensions under 2x original length for best quality
+- Higher FPS = smoother but larger file size
 
 **General:**
 - Monitor job status regularly

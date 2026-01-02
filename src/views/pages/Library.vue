@@ -7,6 +7,7 @@ import { useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import { FALLBACK_IMAGE_URL } from '@/utils/domains';
 import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
+import VideoExtensionDialog from '@/components/video/VideoExtensionDialog.vue';
 
 
 const toast = useToast();
@@ -135,6 +136,10 @@ const getHumanizedDuration = (seconds) => {
 const showSoundtrackDialog = ref(false);
 const selectedVideoForSoundtrack = ref(null);
 
+// Video extension dialog state
+const showExtensionDialog = ref(false);
+const selectedVideoForExtension = ref(null);
+
 const openSoundtrackDialog = (videoId) => {
     const findById = store.getters['videojobs/findById'];
     const video = findById(videoId);
@@ -142,6 +147,16 @@ const openSoundtrackDialog = (videoId) => {
     if (video) {
         selectedVideoForSoundtrack.value = video;
         showSoundtrackDialog.value = true;
+    }
+};
+
+const openExtensionDialog = (videoId) => {
+    const findById = store.getters['videojobs/findById'];
+    const video = findById(videoId);
+    
+    if (video) {
+        selectedVideoForExtension.value = video;
+        showExtensionDialog.value = true;
     }
 };
 
@@ -153,6 +168,23 @@ const onSoundtrackAdded = (data) => {
         life: 3000 
     });
     getJobList();
+};
+
+const onVideoExtended = (data) => {
+    toast.add({ 
+        severity: 'success', 
+        summary: 'Video Extension Started', 
+        detail: `Extending video from ${formatDuration(data.originalDuration)} to ${formatDuration(data.newDuration)}`,
+        life: 3000 
+    });
+    getJobList();
+};
+
+const formatDuration = (seconds) => {
+    if (!seconds || seconds < 0) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
 };
 
 const getJobList = () => {
@@ -219,6 +251,14 @@ const getMenu = (id, type, status) => {
             visible: status === 'finished',
             command: () => {
                 openSoundtrackDialog(id);
+            }
+        },
+        {
+            label: 'Extend Video',
+            icon: 'pi pi-clock',
+            visible: status === 'finished',
+            command: () => {
+                openExtensionDialog(id);
             }
         },
         {
@@ -421,6 +461,17 @@ const onStatusFilterChange = (event) => {
         :videoTitle="selectedVideoForSoundtrack.filename || selectedVideoForSoundtrack.prompt"
         :videoDuration="selectedVideoForSoundtrack.duration"
         @soundtrack-added="onSoundtrackAdded"
+    />
+
+    <!-- Video Extension Dialog -->
+    <VideoExtensionDialog 
+        v-if="selectedVideoForExtension"
+        v-model:visible="showExtensionDialog"
+        :videoId="selectedVideoForExtension.id"
+        :videoTitle="selectedVideoForExtension.filename || selectedVideoForExtension.prompt"
+        :videoDuration="selectedVideoForExtension.duration || 60"
+        :videoFps="selectedVideoForExtension.fps || 30"
+        @video-extended="onVideoExtended"
     />
 </template>
 

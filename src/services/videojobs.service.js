@@ -180,4 +180,22 @@ export default {
     });
   },
 
+  async extendVideo(videoId, options) {
+    const payload = jsona.serialize({
+      stuff: {
+        videoId: videoId,
+        method: options.method || 'minterpolate',
+        targetDuration: options.targetDuration,
+        targetFps: options.targetFps,
+        interpolationMode: options.interpolationMode || 'mci',
+        type: 'extension'
+      },
+      includeNames: []
+    });
+    
+    return await requestService.post('/v1/video-jobs/extend', payload, {
+      headers: authHeader()
+    });
+  },
+
 };

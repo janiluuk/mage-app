@@ -115,6 +115,13 @@ export const videojobs = {
         return job;
       });
     },
+
+    extendVideo({ commit, dispatch }, { videoId, options }) {
+      return VideoJobService.extendVideo(videoId, options).then((job) => {
+        commit("SET_RESOURCE", job);
+        return job;
+      });
+    },
   },
   mutations: {
     SET_LIST: (state, list) => {
