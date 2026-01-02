@@ -176,8 +176,12 @@ describe('Dashboard.vue', () => {
     const wrapper = mount(Dashboard);
     await wrapper.vm.$nextTick();
     
+    // Wait for onMounted to complete
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
     wrapper.unmount();
     
+    // clearInterval should be called during unmount
     expect(clearIntervalSpy).toHaveBeenCalled();
     
     clearIntervalSpy.mockRestore();

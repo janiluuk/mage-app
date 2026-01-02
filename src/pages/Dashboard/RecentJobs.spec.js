@@ -93,7 +93,6 @@ describe('RecentJobs.vue', () => {
       }
     ];
 
-    getters.listFinished = (state) => mockJobs;
     store = createStore({
       modules: {
         videojobs: {
@@ -102,7 +101,10 @@ describe('RecentJobs.vue', () => {
             jobs: mockJobs
           },
           actions,
-          getters
+          getters: {
+            listFinished: (state) => state.jobs,
+            progress: (state) => false
+          }
         }
       }
     });
@@ -127,10 +129,11 @@ describe('RecentJobs.vue', () => {
       }
     });
 
-    // Wait for created hook to complete
-    await wrapper.vm.$nextTick();
+    // Wait for created hook to complete and jobs to be assigned
+    await vi.waitFor(() => {
+      expect(wrapper.vm.jobs).toEqual(mockJobs);
+    }, { timeout: 1000 });
     
-    expect(wrapper.vm.jobs).toEqual(mockJobs);
     wrapper.unmount();
   });
 

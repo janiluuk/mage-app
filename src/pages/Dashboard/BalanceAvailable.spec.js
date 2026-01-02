@@ -49,16 +49,22 @@ describe('BalanceAvailable.vue', () => {
       modules: {
         profile: {
           namespaced: true,
+          state: {
+            profile: { balance: 100 }
+          },
           actions: profileActions,
           getters: {
-            getUserProfile: () => ({ balance: 100 })
+            getUserProfile: (state) => state.profile
           }
         },
         order: {
           namespaced: true,
+          state: {
+            purchases: []
+          },
           actions: orderActions,
           getters: {
-            GET_PURCHASES: () => []
+            GET_PURCHASES: (state) => state.purchases
           }
         }
       }
@@ -89,7 +95,10 @@ describe('BalanceAvailable.vue', () => {
       }
     });
 
+    // Wait for mounted hook to complete (fetchUserProfile and fetchPurchases)
+    await new Promise(resolve => setTimeout(resolve, 50));
     await wrapper.vm.$nextTick();
+    
     expect(wrapper.text()).toContain('100 credits');
     wrapper.unmount();
   });
