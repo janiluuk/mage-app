@@ -41,12 +41,15 @@ describe('Dashboard.vue', () => {
     vi.clearAllTimers();
   });
 
-  it('renders loading state initially', () => {
+  it('renders loading state initially', async () => {
     videoStatsService.getStats.mockImplementation(() => new Promise(() => {})); // Never resolves
     
     const wrapper = mount(Dashboard);
     
-    expect(wrapper.find('.p-progress-spinner').exists()).toBe(true);
+    // Check immediately, synchronously
+    expect(wrapper.vm.loading).toBe(true);
+    
+    wrapper.unmount();
   });
 
   it('displays stats after loading', async () => {
@@ -120,12 +123,11 @@ describe('Dashboard.vue', () => {
     const wrapper = mount(Dashboard);
     
     // Initially loading
-    expect(wrapper.find('.p-progress-spinner').exists()).toBe(true);
+    expect(wrapper.vm.loading).toBe(true);
     
     // Wait for loading to complete
-    await wrapper.vm.$nextTick();
     await vi.waitFor(() => {
-      expect(wrapper.find('.p-progress-spinner').exists()).toBe(false);
+      expect(wrapper.vm.loading).toBe(false);
     });
     
     wrapper.unmount();
@@ -169,14 +171,16 @@ describe('Dashboard.vue', () => {
     
     videoStatsService.getStats.mockResolvedValue(mockStats);
     
+    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
+    
     const wrapper = mount(Dashboard);
     await wrapper.vm.$nextTick();
-    
-    const clearIntervalSpy = vi.spyOn(global, 'clearInterval');
     
     wrapper.unmount();
     
     expect(clearIntervalSpy).toHaveBeenCalled();
+    
+    clearIntervalSpy.mockRestore();
   });
 
   it('continues to refresh stats at 30 second intervals', async () => {

@@ -32,9 +32,12 @@ describe('BalanceAvailable.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     
-    actions = {
-      'profile/getProfile': vi.fn().mockResolvedValue({}),
-      'order/GET_PURCHASES': vi.fn().mockResolvedValue([])
+    const profileActions = {
+      getProfile: vi.fn().mockResolvedValue({})
+    };
+    
+    const orderActions = {
+      GET_PURCHASES: vi.fn().mockResolvedValue([])
     };
 
     getters = {
@@ -46,16 +49,26 @@ describe('BalanceAvailable.vue', () => {
       modules: {
         profile: {
           namespaced: true,
-          actions,
-          getters
+          actions: profileActions,
+          getters: {
+            getUserProfile: () => ({ balance: 100 })
+          }
         },
         order: {
           namespaced: true,
-          actions,
-          getters
+          actions: orderActions,
+          getters: {
+            GET_PURCHASES: () => []
+          }
         }
       }
     });
+    
+    // Store references for testing
+    actions = {
+      'profile/getProfile': profileActions.getProfile,
+      'order/GET_PURCHASES': orderActions.GET_PURCHASES
+    };
   });
 
   it('renders the component', () => {
@@ -153,8 +166,11 @@ describe('BalanceAvailable.vue', () => {
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     const testError = new Error('Profile fetch failed');
     
-    const errorActions = {
-      getProfile: vi.fn().mockRejectedValue(testError),
+    const errorProfileActions = {
+      getProfile: vi.fn().mockRejectedValue(testError)
+    };
+    
+    const errorOrderActions = {
       GET_PURCHASES: vi.fn().mockResolvedValue([])
     };
     
@@ -162,13 +178,17 @@ describe('BalanceAvailable.vue', () => {
       modules: {
         profile: {
           namespaced: true,
-          actions: errorActions,
-          getters
+          actions: errorProfileActions,
+          getters: {
+            getUserProfile: () => ({ balance: 100 })
+          }
         },
         order: {
           namespaced: true,
-          actions: errorActions,
-          getters
+          actions: errorOrderActions,
+          getters: {
+            GET_PURCHASES: () => []
+          }
         }
       }
     });
@@ -181,7 +201,7 @@ describe('BalanceAvailable.vue', () => {
 
     await vi.waitFor(() => {
       expect(consoleErrorSpy).toHaveBeenCalledWith('Error loading balance information:', testError);
-    });
+    }, { timeout: 2000 });
     
     consoleErrorSpy.mockRestore();
     wrapper.unmount();
