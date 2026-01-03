@@ -17,6 +17,15 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   - Metadata editing and tagging system
   - Thumbnail generation and preview support
 
+- **📖 Story Creator** (NEW)
+  - Multi-scene narrative builder for longer animations
+  - Pre-built story templates (Hero's Journey, Three-Act Structure, Music Video, Documentary)
+  - Live preview with real-time generation monitoring
+  - Advanced scene management with keyframes and transitions
+  - Batch processing for long sequences
+  - Export to Deforum-compatible formats
+  - See [Story Creator Documentation](docs/STORY_CREATOR.md) for details
+
 ### AI & Media Processing
 - **🎬 Video Editing Tools**
   - Vid2Vid editor for video-to-video transformations
@@ -170,6 +179,7 @@ mage-app/
 - `GET /api/config`: returns instance configuration including the stable URL for the Studio iframe.
 
 ## UI additions
+- `/story`: Story Creator for building longer, narrative-driven animations with live preview
 - `/mage`: Mage helper dashboard that polls `/api/status` and `/api/queue` to surface backlog warnings.
 - `/dev/deforumation-qt`: JavaScript port of Deforumation QT for real-time Deforum parameter steering.
 
