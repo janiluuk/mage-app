@@ -417,14 +417,26 @@ Advanced tools for development and testing.
 - [ ] Dashboard statistics API connection
 
 ### 🔮 Planned Enhancements
-- [ ] Video trimming/clipping in editor
-- [ ] Batch processing multiple files
-- [ ] Preset library management
-- [ ] Export presets/settings
-- [ ] Advanced audio visualization
-- [ ] Real-time preview during editing
-- [ ] Collaborative project sharing
-- [ ] Cloud storage integration
+
+**Implementation Plan:** See [VIDEO_EDITING_FEATURES_PLAN.md](./docs/VIDEO_EDITING_FEATURES_PLAN.md) for detailed implementation plan.
+
+**Timeline:** Q1 2026 (9-week implementation)
+
+#### Phase 1: Foundation & Quick Wins (Weeks 1-2)
+- [ ] **Video trimming/clipping in editor** - Timeline-based trimming with frame-accurate preview
+- [ ] **Export presets/settings** - Import/export settings in JSON/YAML format
+
+#### Phase 2: Processing & Management (Weeks 3-4)
+- [ ] **Batch processing multiple files** - Upload and process multiple videos with shared settings
+- [ ] **Preset library management** - Save, organize, and reuse favorite settings combinations
+
+#### Phase 3: Visual Enhancements (Weeks 5-6)
+- [ ] **Advanced audio visualization** - Waveform, spectrum, and spectrogram displays
+- [ ] **Real-time preview during editing** - Immediate visual feedback as parameters change
+
+#### Phase 4: Collaboration & Cloud (Weeks 7-8)
+- [ ] **Collaborative project sharing** - Share projects with view/edit permissions
+- [ ] **Cloud storage integration** - S3-compatible cloud backup and sync
 
 ---
 
