@@ -418,7 +418,11 @@ Advanced tools for development and testing.
 
 ### 🔮 Planned Enhancements
 
-**Implementation Plan:** See [VIDEO_EDITING_FEATURES_PLAN.md](./docs/VIDEO_EDITING_FEATURES_PLAN.md) for detailed implementation plan.
+**Implementation Documentation:**
+- [Implementation Plan Summary](./docs/IMPLEMENTATION_PLAN_SUMMARY.md) - Executive overview and timeline
+- [Detailed Implementation Plan](./docs/VIDEO_EDITING_FEATURES_PLAN.md) - Comprehensive technical plan
+- [Quick Reference Guide](./docs/IMPLEMENTATION_QUICK_REFERENCE.md) - Developer quick start
+- [Technical Architecture](./docs/TECHNICAL_ARCHITECTURE.md) - System architecture and data flows
 
 **Timeline:** Q1 2026 (9-week implementation)
 
