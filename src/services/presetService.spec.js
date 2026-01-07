@@ -201,12 +201,20 @@ describe('presetService', () => {
           settings: {}
         });
         
+        const originalUpdatedAt = preset.updatedAt;
+        
+        // Use vi.useFakeTimers to advance time
+        vi.useFakeTimers();
+        vi.advanceTimersByTime(1000);
+        
         const updated = service.update(preset.id, {
           name: 'Updated'
         });
         
+        vi.useRealTimers();
+        
         expect(updated.name).toBe('Updated');
-        expect(updated.updatedAt).not.toBe(preset.updatedAt);
+        expect(updated.updatedAt).not.toBe(originalUpdatedAt);
       });
       
       it('prevents updating system preset', () => {

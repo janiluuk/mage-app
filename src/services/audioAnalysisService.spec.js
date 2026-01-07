@@ -133,7 +133,7 @@ describe('audioAnalysisService', () => {
           fftSize: 4096,
           smoothing: 0.5,
           minDecibels: -100,
-          maxDecibels: 0
+          maxDecibels: -10
         };
         
         service.initialize(mockAudioElement, options);
@@ -141,7 +141,7 @@ describe('audioAnalysisService', () => {
         expect(service.analyser.fftSize).toBe(4096);
         expect(service.analyser.smoothingTimeConstant).toBe(0.5);
         expect(service.analyser.minDecibels).toBe(-100);
-        expect(service.analyser.maxDecibels).toBe(0);
+        expect(service.analyser.maxDecibels).toBe(-10);
       });
       
       it('cleans up previous initialization', () => {
@@ -327,6 +327,20 @@ describe('audioAnalysisService', () => {
       canvas.width = 800;
       canvas.height = 300;
       ctx = canvas.getContext('2d');
+      
+      // Mock canvas context methods if null (JSDOM limitation)
+      if (!ctx) {
+        ctx = {
+          clearRect: vi.fn(),
+          fillRect: vi.fn(),
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+          strokeStyle: '',
+          lineWidth: 1
+        };
+      }
     });
     
     it('draws waveform to canvas', () => {
@@ -360,6 +374,19 @@ describe('audioAnalysisService', () => {
       canvas.width = 800;
       canvas.height = 300;
       ctx = canvas.getContext('2d');
+      
+      // Mock canvas context methods if null (JSDOM limitation)
+      if (!ctx) {
+        ctx = {
+          clearRect: vi.fn(),
+          fillRect: vi.fn(),
+          beginPath: vi.fn(),
+          moveTo: vi.fn(),
+          lineTo: vi.fn(),
+          stroke: vi.fn(),
+          fillStyle: ''
+        };
+      }
     });
     
     it('draws spectrum bars to canvas', () => {

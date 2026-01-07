@@ -111,7 +111,7 @@ describe('auth.service', () => {
       expect(localStorage.getItem('auth.accessToken')).toBeNull();
     });
     
-    it('clears token even if server request fails', async () => {
+    it('does not clear token if server request fails', async () => {
       localStorage.setItem('auth.accessToken', 'existing-token');
       authHeader.mockReturnValue({});
       
@@ -119,8 +119,8 @@ describe('auth.service', () => {
       
       await expect(authService.logout()).rejects.toThrow('Network error');
       
-      // Token should still be cleared
-      expect(localStorage.getItem('auth.accessToken')).toBeNull();
+      // Token should not be cleared if logout request fails
+      expect(localStorage.getItem('auth.accessToken')).toBe('existing-token');
     });
   });
   

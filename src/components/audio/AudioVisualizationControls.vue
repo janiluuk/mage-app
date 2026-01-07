@@ -45,7 +45,7 @@ export default {
       if (!visualizationCanvas.value) return;
       const dataUrl = visualizationCanvas.value.toDataURL('image/png');
       const link = document.createElement('a');
-      link.download = \`audio-visualization-\${Date.now()}.png\`;
+      link.download = `audio-visualization-${Date.now()}.png`;
       link.href = dataUrl;
       link.click();
       emit('export', dataUrl);

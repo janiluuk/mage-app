@@ -63,7 +63,7 @@ export function validateExportData(data) {
  * @returns {boolean} True if valid
  */
 export function validatePreset(preset) {
-  return (
+  return !!(
     preset &&
     typeof preset === 'object' &&
     preset.name &&

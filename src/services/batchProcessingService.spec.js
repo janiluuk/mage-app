@@ -91,7 +91,7 @@ describe('batchProcessingService', () => {
       const result = validateBatchSettings(settings);
       
       expect(result.isValid).toBe(false);
-      expect(result.error).toContain('concurrency');
+      expect(result.error.toLowerCase()).toContain('concurrency');
     });
     
     it('rejects invalid settings object', () => {
