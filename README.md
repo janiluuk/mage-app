@@ -32,12 +32,15 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   - Deforum editor for AI-powered animation sequences
   - Real-time parameter adjustment and preview
   - Job queue management and status tracking
+  - **Add soundtrack to videos** - Merge audio tracks with finished videos
+  - **Extend video duration** - Use frame interpolation to smoothly extend videos
 
-- **🎵 Soundscape Creator**
-  - Generate audio from text prompts using AI
+- **🎵 Audio Features**
+  - **Soundscape Creator** - Generate audio from text prompts using AI
   - Real-time streaming via FFmpeg/ComfyUI pipeline
   - Audio visualization and playback controls
   - Queue management with processing status
+  - **Audio animation** - Create animations synced to audio files (Audio Sync, BPM, Classic presets)
 
 - **🤖 Backend Processing Queue**
   - Monitor job status via `/api/status` endpoint

@@ -108,6 +108,20 @@ export const videojobs = {
     download({ commit, dispatch }, item) {
       return VideoJobService.downloadJob(item.url, item.original_filename);
     },
+
+    addSoundtrack({ commit, dispatch }, { videoId, audioFile, options }) {
+      return VideoJobService.addSoundtrack(videoId, audioFile, options).then((job) => {
+        commit("SET_RESOURCE", job);
+        return job;
+      });
+    },
+
+    extendVideo({ commit, dispatch }, { videoId, options }) {
+      return VideoJobService.extendVideo(videoId, options).then((job) => {
+        commit("SET_RESOURCE", job);
+        return job;
+      });
+    },
   },
   mutations: {
     SET_LIST: (state, list) => {
