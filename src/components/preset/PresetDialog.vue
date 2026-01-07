@@ -72,7 +72,7 @@
         <label class="font-semibold mb-2 block">Settings</label>
         <div class="p-3 bg-gray-100 border-round">
           <ScrollPanel style="width: 100%; height: 200px">
-            <pre class="text-sm">{{ JSON.stringify(formData.settings, null, 2) }}</pre>
+            <pre class="text-sm">{{ formatSettings(formData.settings) }}</pre>
           </ScrollPanel>
         </div>
         <small class="text-muted">Settings are managed from the editor</small>
@@ -248,6 +248,10 @@ export default {
       emit('update:visible', false);
     };
 
+    const formatSettings = (settings) => {
+      return JSON.stringify(settings, null, 2);
+    };
+
     watch(() => props.visible, (newValue) => {
       if (newValue) {
         resetForm();
@@ -261,6 +265,7 @@ export default {
       dialogTitle,
       isValid,
       dialogVisible,
+      formatSettings,
       onSave,
       onCancel,
       onHide
