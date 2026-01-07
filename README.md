@@ -232,5 +232,23 @@ Run `npm run test:frontend:coverage` to generate a coverage report for frontend 
 - When using the audio streaming page (`/soundscape`), ensure the backend helper and ComfyUI workflow defined in `backend/audio-workflow.json` are running.
 - **All code changes should include tests** - write unit tests for components, utilities, and services to maintain code quality.
 
+## Planned Features
+
+The following features are currently in the planning phase. See detailed implementation plans in the `docs/` directory:
+
+- **Video trimming/clipping in editor** - Timeline-based video trimming with frame-accurate preview
+- **Batch processing multiple files** - Process multiple videos simultaneously with shared settings
+- **Preset library management** - Save, organize, and reuse favorite settings combinations
+- **Export presets/settings** - Import/export settings in JSON/YAML format
+- **Advanced audio visualization** - Waveform, spectrum, and spectrogram displays
+- **Real-time preview during editing** - Immediate visual feedback as parameters change
+- **Collaborative project sharing** - Share projects with view/edit permissions
+- **Cloud storage integration** - S3-compatible cloud backup and sync
+
+**Implementation Documentation:**
+- [Video Editing Features Implementation Plan](docs/VIDEO_EDITING_FEATURES_PLAN.md) - Comprehensive 9-week implementation plan
+- [Implementation Quick Reference](docs/IMPLEMENTATION_QUICK_REFERENCE.md) - Quick reference for developers
+- [Technical Architecture](docs/TECHNICAL_ARCHITECTURE.md) - Detailed technical architecture and data flows
+
 ## Contributing
 Feel free to open issues or pull requests with bug fixes or enhancements. Please keep new components consistent with the existing PrimeVue/PrimeFlex patterns and prefer the services in `src/services` when talking to the API.
