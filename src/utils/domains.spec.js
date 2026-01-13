@@ -49,7 +49,6 @@ describe('Domains Utility', () => {
 
     it('constructs API_V1_URL from API_URL', async () => {
       process.env.VITE_API_URL = 'https://test-api.example.com'
-      delete process.env.VITE_API_V1_BASE_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')
@@ -66,7 +65,6 @@ describe('Domains Utility', () => {
 
     it('constructs VIDEO_PREVIEW_URL from API_URL', async () => {
       process.env.VITE_API_URL = 'https://test-api.example.com'
-      delete process.env.VITE_VIDEO_PREVIEW_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')
@@ -75,7 +73,6 @@ describe('Domains Utility', () => {
 
     it('constructs MODEL_PREVIEW_URL from API_URL', async () => {
       process.env.VITE_API_URL = 'https://test-api.example.com'
-      delete process.env.VITE_MODEL_PREVIEW_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')

@@ -354,10 +354,10 @@ export default {
     return {
       sidebarBackgroundColor: "black",
       sidebarBackground: "green",
-      sidebarBackgroundImage: env.VITE_BASE_URL + "/img/sidebar-2.jpg",
+      sidebarBackgroundImage: `${env.BASE_URL || '/'}img/sidebar-2.jpg`,
       sidebarMini: false,
       sidebarImg: true,
-      image: env.VITE_BASE_URL + '/img/laravel-vue.svg',
+      image: `${env.BASE_URL || '/'}img/laravel-vue.svg`,
       roles: []
     };
   },

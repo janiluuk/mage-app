@@ -102,11 +102,7 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
      - `VITE_IS_DEMO`: demo-mode flag for profile editing (`1` enables demo restrictions).
      - `VITE_APP_DEFORUM_WS_URL`: Deforum websocket URL used by StoryCreator.
    - **Optional overrides (see `.env.overrides.example`):**
-     - `VITE_BASE_URL`: base URL for dashboard static assets.
      - `VITE_API_BASE_URL`: base URL for services that hit v1 endpoints directly (defaults to `{VITE_API_URL}/api/v1`).
-     - `VITE_API_V1_BASE_URL`: explicit v1 base URL for legacy services (defaults to `{VITE_API_URL}/api/v1`).
-     - `VITE_MODEL_PREVIEW_URL`: base URL for model preview assets.
-     - `VITE_VIDEO_PREVIEW_URL`: base URL for video preview assets.
 
 ### Running the app
 - Development server with debug logging:
