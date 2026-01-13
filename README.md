@@ -218,7 +218,7 @@ The project includes comprehensive test coverage for both backend and frontend:
 
 You can override the base URL with `PLAYWRIGHT_BASE_URL`, for example:
 ```bash
-PLAYWRIGHT_BASE_URL=http://localhost:8080 npm run test:e2e
+PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
 ```
 
 ### Writing Tests
