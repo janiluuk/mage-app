@@ -127,21 +127,30 @@
 </template>
 
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
 import Dropdown from 'primevue/dropdown'
 import ProgressBar from 'primevue/progressbar'
+import GenerationService from '@/services/story/GenerationService'
 
 const props = defineProps({
   config: {
     type: Object,
     required: true
   },
+  jobId: {
+    type: String,
+    default: null
+  },
   websocketUrl: {
     type: String,
     default: null
+  },
+  generationService: {
+    type: Object,
+    default: () => new GenerationService()
   }
 })
 
@@ -159,6 +168,7 @@ const progress = ref(0)
 const startTime = ref(null)
 const frameHistory = ref([])
 const debugInfo = ref(null)
+const lastError = ref(null)
 
 // Settings
 const refreshRate = ref(2)
@@ -180,9 +190,8 @@ const qualityOptions = [
   { label: 'High (Slow)', value: 'high' }
 ]
 
-// WebSocket connection
+const service = props.generationService
 let ws = null
-let updateInterval = null
 
 // Computed properties
 const statusClass = computed(() => {
@@ -237,166 +246,160 @@ function toggleGeneration() {
 }
 
 function startGeneration() {
+  if (!props.jobId) {
+    emit('generation:error', new Error('No active generation job. Start a story job first.'))
+    return
+  }
+
   isGenerating.value = true
   isPaused.value = false
-  
+
   if (!startTime.value) {
     startTime.value = Date.now()
   }
-  
-  // Initialize WebSocket connection if URL provided
+
   if (props.websocketUrl && !ws) {
     connectWebSocket()
-  } else {
-    // Fallback to simulated generation for demo
-    startSimulatedGeneration()
   }
 }
 
-function pauseGeneration() {
+async function pauseGeneration() {
   isGenerating.value = false
   isPaused.value = true
-  
-  if (ws) {
-    ws.send(JSON.stringify({ action: 'pause' }))
-  }
-  
-  if (updateInterval) {
-    clearInterval(updateInterval)
+
+  if (props.jobId) {
+    try {
+      await service.pauseBatch(props.jobId)
+    } catch (error) {
+      emit('generation:error', error)
+    }
   }
 }
 
-function stopGeneration() {
+async function stopGeneration() {
   isGenerating.value = false
   isPaused.value = false
   currentFrame.value = 0
   framesGenerated.value = 0
   progress.value = 0
   startTime.value = null
-  
+  lastError.value = null
+
+  if (props.jobId) {
+    try {
+      await service.cancelBatch(props.jobId)
+    } catch (error) {
+      emit('generation:error', error)
+    }
+  }
+
   if (ws) {
-    ws.send(JSON.stringify({ action: 'stop' }))
     ws.close()
     ws = null
-  }
-  
-  if (updateInterval) {
-    clearInterval(updateInterval)
   }
 }
 
 function skipFrame() {
   if (ws) {
     ws.send(JSON.stringify({ action: 'skip' }))
-  } else {
-    currentFrame.value++
-    updateProgress()
   }
 }
 
 function connectWebSocket() {
-  ws = new WebSocket(props.websocketUrl)
-  
-  ws.onopen = () => {
-    ws.send(JSON.stringify({
-      action: 'start',
-      config: props.config,
-      refreshRate: refreshRate.value,
-      quality: previewQuality.value
-    }))
-  }
-  
-  ws.onmessage = (event) => {
-    const data = JSON.parse(event.data)
-    handleWebSocketMessage(data)
-  }
-  
-  ws.onerror = (error) => {
-    emit('generation:error', error)
-    stopGeneration()
-  }
-  
-  ws.onclose = () => {
-    if (isGenerating.value) {
-      stopGeneration()
+  ws = service.connectWebSocket({
+    websocketUrl: props.websocketUrl,
+    config: props.config,
+    refreshRate: refreshRate.value,
+    quality: previewQuality.value,
+    batchId: props.jobId,
+    onMessage: (data) => {
+      handleWebSocketMessage(data).catch((error) => {
+        console.error('Error handling websocket message:', error)
+        emit('generation:error', error)
+      })
+    },
+    onError: (error) => {
+      lastError.value = error
+      emit('generation:error', error)
+      stopGeneration().catch((err) => {
+        console.error('Error stopping generation after websocket error:', err)
+      })
+    },
+    onClose: () => {
+      if (isGenerating.value) {
+        stopGeneration().catch((err) => {
+          console.error('Error stopping generation after websocket close:', err)
+        })
+      }
     }
-  }
+  })
 }
 
-function handleWebSocketMessage(data) {
+async function handleWebSocketMessage(data) {
   switch (data.type) {
     case 'frame':
       currentFrame.value = data.frameId
       currentPrompt.value = data.prompt
-      previewImage.value = data.image
-      framesGenerated.value++
+      previewImage.value = data.imageUrl || data.image
+      framesGenerated.value = data.framesGenerated ?? framesGenerated.value + 1
       updateProgress()
-      
-      if (autoSave.value) {
-        frameHistory.value.push({
-          id: data.frameId,
-          thumbnail: data.image,
-          prompt: data.prompt,
-          timestamp: Date.now()
-        })
+
+      if (autoSave.value && props.jobId) {
+        try {
+          // Persist frame to backend. Both `image` (base64) and `imageUrl` (URL) are sent
+          // to support different backend storage strategies. The backend determines which to use.
+          const persisted = await service.persistFrame(props.jobId, {
+            frameId: data.frameId,
+            prompt: data.prompt,
+            image: data.image,
+            imageUrl: data.imageUrl
+          })
+
+          frameHistory.value.push({
+            id: persisted.frameId ?? data.frameId,
+            thumbnail: persisted.thumbnailUrl ?? persisted.imageUrl ?? data.imageUrl ?? data.image,
+            prompt: data.prompt,
+            timestamp: Date.now()
+          })
+        } catch (error) {
+          frameHistory.value.push({
+            id: data.frameId,
+            thumbnail: data.imageUrl || data.image,
+            prompt: data.prompt,
+            timestamp: Date.now()
+          })
+          emit('generation:error', error)
+        }
       }
-      
+
       emit('frame:generated', data)
       break
-      
+
+    case 'progress':
+      currentFrame.value = data.currentFrame ?? currentFrame.value
+      totalFrames.value = data.totalFrames ?? totalFrames.value
+      framesGenerated.value = data.completedFrames ?? framesGenerated.value
+      currentPrompt.value = data.currentPrompt ?? currentPrompt.value
+      updateProgress()
+      break
+
     case 'complete':
-      stopGeneration()
+      await stopGeneration()
       emit('generation:complete', data)
       break
-      
+
     case 'error':
+      lastError.value = data.error
       emit('generation:error', data.error)
-      stopGeneration()
+      await stopGeneration()
       break
-      
+
     case 'debug':
       if (showDebug.value) {
         debugInfo.value = data.info
       }
       break
   }
-}
-
-function createPlaceholderImage(frameNumber) {
-  const randomColor = Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
-  return `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512">` +
-    `<rect fill="%23${randomColor}" width="512" height="512"/>` +
-    `<text x="50%" y="50%" text-anchor="middle" fill="white" font-size="24">Frame ${frameNumber}</text>` +
-    `</svg>`
-}
-
-function startSimulatedGeneration() {
-  // Simulated generation for demo purposes
-  totalFrames.value = props.config.frames?.length * 30 || 100
-  
-  updateInterval = setInterval(() => {
-    if (!isGenerating.value) return
-    
-    currentFrame.value++
-    framesGenerated.value++
-    
-    // Simulate frame generation
-    const frameIndex = currentFrame.value % (props.config.frames?.length || 10)
-    currentPrompt.value = props.config.frames?.[frameIndex]?.prompt || 'Generating frame...'
-    
-    updateProgress()
-    
-    // Simulate preview image update
-    if (currentFrame.value % refreshRate.value === 0) {
-      // In real implementation, this would be actual frame data
-      previewImage.value = createPlaceholderImage(currentFrame.value)
-    }
-    
-    if (currentFrame.value >= totalFrames.value) {
-      stopGeneration()
-      emit('generation:complete', { framesGenerated: framesGenerated.value })
-    }
-  }, 1000 / refreshRate.value)
 }
 
 function updateProgress() {
@@ -416,13 +419,32 @@ watch(() => props.config, (newConfig) => {
   }
 }, { deep: true, immediate: true })
 
+watch(() => props.jobId, async (jobId, oldJobId) => {
+  if (!jobId || !props.websocketUrl || jobId === oldJobId) {
+    return
+  }
+
+  if (isGenerating.value) {
+    await stopGeneration()
+  }
+
+  startGeneration()
+})
+
+watch([refreshRate, previewQuality], () => {
+  if (isGenerating.value && props.websocketUrl) {
+    if (ws) {
+      ws.close()
+      ws = null
+    }
+    connectWebSocket()
+  }
+})
+
 // Cleanup
 onBeforeUnmount(() => {
   if (ws) {
     ws.close()
-  }
-  if (updateInterval) {
-    clearInterval(updateInterval)
   }
 })
 </script>

@@ -51,11 +51,76 @@
       <TabPanel header="Live Preview">
         <LivePreview 
           :config="generationConfig"
+          :job-id="generationJobId"
           :websocket-url="websocketUrl"
           @frame:generated="handleFrameGenerated"
           @generation:complete="handleGenerationComplete"
           @generation:error="handleGenerationError"
         />
+
+        <Card class="mt-4">
+          <template #title>Extend Generation</template>
+          <template #content>
+            <div class="extend-controls">
+              <p class="extend-description">
+                Extend the current generation with the same parameters or supply updated settings for the next clip.
+              </p>
+              <div class="extend-actions">
+                <Button 
+                  label="Extend with Last Parameters" 
+                  icon="pi pi-plus"
+                  class="p-button-primary"
+                  @click="extendGenerationJob"
+                  :disabled="!generationSegments.length || generationJobId || showGenerationDialog"
+                />
+                <Button 
+                  label="Extend with Current Settings" 
+                  icon="pi pi-sync"
+                  class="p-button-outlined"
+                  @click="extendGenerationJob({ useCurrent: true })"
+                  :disabled="!generationSegments.length || generationJobId || showGenerationDialog"
+                />
+              </div>
+              <div class="extend-overrides">
+                <div class="checkbox-item">
+                  <Checkbox v-model="useOverrideConfig" binary input-id="extendOverride" />
+                  <label for="extendOverride">Override parameters (JSON)</label>
+                </div>
+                <Textarea
+                  v-model="overrideConfigText"
+                  class="override-textarea"
+                  placeholder="Paste JSON to override parameters for the next clip"
+                  :disabled="!useOverrideConfig"
+                  auto-resize
+                  rows="6"
+                />
+              </div>
+            </div>
+          </template>
+        </Card>
+
+        <Card class="mt-4">
+          <template #title>Generation Parameters Overview</template>
+          <template #content>
+            <div v-if="generationSegments.length === 0" class="empty-overview">
+              No generation segments yet. Start a job to see parameters per clip.
+            </div>
+            <div v-else class="segment-overview">
+              <div 
+                v-for="segment in generationSegments" 
+                :key="segment.id"
+                class="segment-card"
+              >
+                <div class="segment-header">
+                  <strong>Segment {{ segment.id }}</strong>
+                  <span class="segment-meta">Job: {{ segment.batchId }}</span>
+                  <span class="segment-meta">Started: {{ segment.startedAt }}</span>
+                </div>
+                <pre class="segment-config">{{ segment.config }}</pre>
+              </div>
+            </div>
+          </template>
+        </Card>
       </TabPanel>
 
       <!-- Export Tab -->
@@ -166,17 +231,19 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
+import Checkbox from 'primevue/checkbox'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import InputText from 'primevue/inputtext'
 import ProgressBar from 'primevue/progressbar'
 import TabView from 'primevue/tabview'
 import TabPanel from 'primevue/tabpanel'
+import Textarea from 'primevue/textarea'
 
 import StoryBuilder from '@/components/story/StoryBuilder.vue'
 import LivePreview from '@/components/story/LivePreview.vue'
@@ -186,6 +253,7 @@ import SaveNotification from '@/components/Deforum/SaveNotification.vue'
 import { LocalStorage } from '@/components/Deforum/services/LocalStorage'
 import Config from '@/components/Deforum/types/Config'
 import UserConfig from '@/components/Deforum/types/UserConfig'
+import GenerationService from '@/services/story/GenerationService'
 import env from '@/utils/env'
 
 const router = useRouter()
@@ -202,8 +270,17 @@ const generationProgress = ref(0)
 const generationStatus = ref('')
 const framesCompleted = ref(0)
 const totalFramesToGenerate = ref(0)
+const generationJobId = ref(null)
 const storyShareUrl = ref('')
 const generatingLink = ref(false)
+const generationSegments = ref([])
+const useOverrideConfig = ref(false)
+const overrideConfigText = ref('')
+const generationService = new GenerationService()
+let statusPoller = null
+
+// Configuration constants
+const STATUS_POLLING_INTERVAL_MS = 3000
 
 // WebSocket URL - can be configured via environment variable
 const websocketUrl = computed(() => {
@@ -248,45 +325,178 @@ function handleStoryUpdate(story) {
 }
 
 function handleGenerateStory(storyData) {
+  startGenerationJob(storyData)
+}
+
+async function startGenerationJob(storyData) {
   showGenerationDialog.value = true
   totalFramesToGenerate.value = storyData.totalFrames
   framesCompleted.value = 0
   generationProgress.value = 0
   generationStatus.value = 'Initializing generation...'
-  
-  // In a real implementation, this would start the actual generation process
-  // For now, we'll just simulate it
-  simulateGeneration()
+
+  try {
+    const response = await generationService.startGeneration(generationConfig.value)
+    generationJobId.value = response.batchId
+    generationStatus.value = 'Generation started. Waiting for frames...'
+
+    if (response.totalFrames) {
+      totalFramesToGenerate.value = response.totalFrames
+    }
+
+    addGenerationSegment({
+      batchId: response.batchId,
+      config: generationConfig.value
+    })
+
+    startStatusPolling()
+  } catch (error) {
+    generationStatus.value = 'Failed to start generation'
+    showGenerationDialog.value = false
+    generationJobId.value = null
+    toast.add({
+      severity: 'error',
+      summary: 'Generation Error',
+      detail: error.message || 'Unable to start generation job',
+      life: 5000
+    })
+  }
 }
 
-function simulateGeneration() {
-  // Simulated generation for demo purposes
-  totalFramesToGenerate.value = currentStory.value?.scenes?.reduce((sum, scene) => 
-    sum + (scene.frames?.length || 0) * 30, 0) || 100
-  
-  let generationInterval = setInterval(() => {
-    framesCompleted.value++
-    generationProgress.value = Math.floor((framesCompleted.value / totalFramesToGenerate.value) * 100)
-    generationStatus.value = `Generating frame ${framesCompleted.value} of ${totalFramesToGenerate.value}...`
-    
-    if (framesCompleted.value >= totalFramesToGenerate.value) {
-      clearInterval(generationInterval)
-      generationStatus.value = 'Generation complete!'
-      setTimeout(() => {
-        showGenerationDialog.value = false
-        toast.add({
-          severity: 'success',
-          summary: 'Story Generated',
-          detail: 'Your story has been generated successfully!',
-          life: 5000
-        })
-      }, 2000)
+async function extendGenerationJob({ useCurrent = false } = {}) {
+  const lastSegment = generationSegments.value.at(-1)
+
+  if (useCurrent && !lastSegment) {
+    toast.add({
+      severity: 'warn',
+      summary: 'No Previous Generation',
+      detail: 'Start a generation job before extending it.',
+      life: 3000
+    })
+    return
+  }
+
+  const baseConfig = useCurrent ? generationConfig.value : lastSegment?.rawConfig
+  const baseBatchId = lastSegment?.batchId
+
+  if (!baseConfig) {
+    toast.add({
+      severity: 'warn',
+      summary: 'No Previous Generation',
+      detail: 'Start a generation job before extending it.',
+      life: 3000
+    })
+    return
+  }
+
+  let nextConfig = baseConfig
+
+  if (useOverrideConfig.value && overrideConfigText.value.trim()) {
+    try {
+      const overrides = JSON.parse(overrideConfigText.value)
+      nextConfig = {
+        ...baseConfig,
+        ...overrides
+      }
+    } catch (error) {
+      toast.add({
+        severity: 'error',
+        summary: 'Invalid JSON',
+        detail: 'Override parameters must be valid JSON.',
+        life: 3000
+      })
+      return
     }
-  }, 100) // Fast simulation, real generation would be much slower
+  }
+
+  showGenerationDialog.value = true
+  generationStatus.value = 'Extending generation with new parameters...'
+
+  try {
+    const response = await generationService.extendGeneration(baseBatchId, nextConfig)
+    generationJobId.value = response.batchId
+
+    if (response.totalFrames) {
+      totalFramesToGenerate.value = response.totalFrames
+    }
+
+    addGenerationSegment({
+      batchId: response.batchId,
+      config: nextConfig
+    })
+
+    startStatusPolling()
+  } catch (error) {
+    generationStatus.value = 'Failed to extend generation'
+    showGenerationDialog.value = false
+    toast.add({
+      severity: 'error',
+      summary: 'Extend Failed',
+      detail: error.message || 'Unable to extend generation job',
+      life: 5000
+    })
+  }
+}
+
+function addGenerationSegment({ batchId, config }) {
+  const id = generationSegments.value.length + 1
+  generationSegments.value.push({
+    id,
+    batchId,
+    startedAt: new Date().toLocaleString(),
+    config: JSON.stringify(config, null, 2),
+    rawConfig: config
+  })
+}
+
+function startStatusPolling() {
+  stopStatusPolling()
+
+  if (!generationJobId.value) return
+
+  statusPoller = setInterval(async () => {
+    try {
+      const status = await generationService.getBatchStatus(generationJobId.value)
+      updateStatusFromResponse(status)
+    } catch (error) {
+      stopStatusPolling()
+      toast.add({
+        severity: 'warn',
+        summary: 'Status Update Failed',
+        detail: error.message || 'Unable to fetch generation status',
+        life: 4000
+      })
+    }
+  }, STATUS_POLLING_INTERVAL_MS)
+}
+
+function stopStatusPolling() {
+  if (statusPoller) {
+    clearInterval(statusPoller)
+    statusPoller = null
+  }
+}
+
+function updateStatusFromResponse(status) {
+  if (!status) return
+
+  framesCompleted.value = status.completedFrames ?? framesCompleted.value
+  totalFramesToGenerate.value = status.totalFrames ?? totalFramesToGenerate.value
+  generationProgress.value = status.progress ?? Math.floor((framesCompleted.value / totalFramesToGenerate.value) * 100)
+  generationStatus.value = status.status || generationStatus.value
 }
 
 function cancelGeneration() {
   showGenerationDialog.value = false
+  stopStatusPolling()
+
+  if (generationJobId.value) {
+    generationService.cancelBatch(generationJobId.value)
+      .catch((error) => {
+        console.error('Failed to cancel generation batch', error)
+      })
+  }
+  generationJobId.value = null
   toast.add({
     severity: 'warn',
     summary: 'Generation Cancelled',
@@ -334,6 +544,12 @@ function handleSubstractXFramesChange(newSubstractXFrames) {
 
 function handleFrameGenerated(frameData) {
   framesCompleted.value++
+  if (totalFramesToGenerate.value > 0) {
+    generationProgress.value = Math.floor((framesCompleted.value / totalFramesToGenerate.value) * 100)
+  }
+  if (frameData?.frameId !== undefined) {
+    generationStatus.value = `Generating frame ${frameData.frameId} of ${totalFramesToGenerate.value}...`
+  }
   toast.add({
     severity: 'info',
     summary: 'Frame Generated',
@@ -343,6 +559,10 @@ function handleFrameGenerated(frameData) {
 }
 
 function handleGenerationComplete(data) {
+  stopStatusPolling()
+  showGenerationDialog.value = false
+  generationStatus.value = 'Generation complete'
+  generationJobId.value = null
   toast.add({
     severity: 'success',
     summary: 'Generation Complete',
@@ -352,6 +572,8 @@ function handleGenerationComplete(data) {
 }
 
 function handleGenerationError(error) {
+  stopStatusPolling()
+  generationJobId.value = null
   toast.add({
     severity: 'error',
     summary: 'Generation Error',
@@ -496,26 +718,48 @@ function exportStoryPackage() {
 
 function generateShareLink() {
   generatingLink.value = true
-  
-  // In a real implementation, this would upload the config to a server
-  // and return a shareable URL
-  setTimeout(() => {
-    const shareId = Math.random().toString(36).substring(2, 11)
-    storyShareUrl.value = `${window.location.origin}/story/share/${shareId}`
-    generatingLink.value = false
-    
-    toast.add({
-      severity: 'success',
-      summary: 'Link Generated',
-      detail: 'Share link generated successfully',
-      life: 3000
+
+  generationService.createShareLink({
+    story: currentStory.value,
+    config: deforumConfig.value,
+    batchId: generationJobId.value
+  })
+    .then((response) => {
+      // Normalize backend response: expected field is `shareUrl`; other fields are kept for backward compatibility.
+      const shareUrl = response.shareUrl ?? response.share_link ?? response.url
+
+      if (!shareUrl) {
+        throw new Error('Backend response did not include a shareUrl')
+      }
+
+      storyShareUrl.value = shareUrl
+      generatingLink.value = false
+
+      toast.add({
+        severity: 'success',
+        summary: 'Link Generated',
+        detail: 'Share link generated successfully',
+        life: 3000
+      })
     })
-  }, 1000)
+    .catch((error) => {
+      generatingLink.value = false
+      toast.add({
+        severity: 'error',
+        summary: 'Share Failed',
+        detail: error.message || 'Unable to generate share link',
+        life: 3000
+      })
+    })
 }
 
 // Initialize
 onMounted(() => {
   userConfig.value = LocalStorage.getUserConfig() ?? new UserConfig()
+})
+
+onBeforeUnmount(() => {
+  stopStatusPolling()
 })
 </script>
 
@@ -611,6 +855,74 @@ onMounted(() => {
 .generation-stats .stat strong {
   font-size: 1.25rem;
   color: #1f2937;
+}
+
+.extend-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.extend-description {
+  margin: 0;
+  color: #4b5563;
+}
+
+.extend-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.extend-overrides {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.override-textarea {
+  width: 100%;
+}
+
+.empty-overview {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.segment-overview {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.segment-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #f9fafb;
+}
+
+.segment-header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.segment-meta {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.segment-config {
+  margin: 0;
+  font-size: 0.75rem;
+  background: #111827;
+  color: #f9fafb;
+  padding: 0.75rem;
+  border-radius: 6px;
+  overflow-x: auto;
 }
 
 .mt-4 {
