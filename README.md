@@ -95,7 +95,6 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
      - `VITE_API_URL`: single source of truth for API base URL (e.g. `http://localhost:3000`). All API endpoints are derived from this.
    - **Optional:**
      - `VITE_APP_URL`: canonical public hostname for sharing links (defaults to `VITE_API_URL` if not set).
-     - `VITE_MAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
      - `VITE_FALLBACK_IMAGE_URL`: fallback image URL (defaults to `{API_URL}/images/notfound.jpg`).
      - `VITE_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
      - `VITE_STABLE_URL`: fallback stable URL (primary value fetched from backend `/api/config`).

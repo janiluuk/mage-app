@@ -24,7 +24,6 @@ describe('Domains Utility', () => {
       expect(domains.FALLBACK_IMAGE_URL).toBeDefined()
       expect(domains.APP_BASE_URL).toBeDefined()
       expect(domains.STABLE_URL).toBeDefined()
-      expect(domains.MAGE_API_URL).toBeDefined()
       expect(domains.SAMPLE_PROCESSED_VIDEO_URL).toBeDefined()
     })
 
@@ -96,13 +95,11 @@ describe('Domains Utility', () => {
       // Clear all relevant environment variables
       delete process.env.VITE_API_URL
       delete process.env.VITE_STABLE_URL
-      delete process.env.VITE_MAGE_API_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')
       expect(domains.API_URL).toBe('')
       expect(domains.STABLE_URL).toBe('')
-      expect(domains.MAGE_API_URL).toBe('')
     })
   })
 
@@ -115,7 +112,6 @@ describe('Domains Utility', () => {
       expect(typeof domains.FALLBACK_IMAGE_URL).toBe('string')
       expect(typeof domains.APP_BASE_URL).toBe('string')
       expect(typeof domains.STABLE_URL).toBe('string')
-      expect(typeof domains.MAGE_API_URL).toBe('string')
       expect(typeof domains.SAMPLE_PROCESSED_VIDEO_URL).toBe('string')
     })
 

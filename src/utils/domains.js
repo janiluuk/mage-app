@@ -15,8 +15,6 @@ const APP_BASE_URL = env.VITE_APP_URL || API_URL;
 // Use fetchStableUrl() to get the stable URL from the backend
 const STABLE_URL = env.VITE_STABLE_URL || '';
 
-// Other service URLs
-const MAGE_API_URL = env.VITE_MAGE_API_URL || '';
 const SAMPLE_PROCESSED_VIDEO_URL = env.VITE_SAMPLE_PROCESSED_VIDEO_URL || '';
 
 /**
@@ -46,7 +44,6 @@ export {
   FALLBACK_IMAGE_URL,
   APP_BASE_URL,
   STABLE_URL,
-  MAGE_API_URL,
   SAMPLE_PROCESSED_VIDEO_URL,
   fetchStableUrl,
 };
