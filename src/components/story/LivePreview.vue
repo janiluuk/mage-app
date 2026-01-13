@@ -313,16 +313,23 @@ function connectWebSocket() {
     quality: previewQuality.value,
     batchId: props.jobId,
     onMessage: (data) => {
-      void handleWebSocketMessage(data)
+      handleWebSocketMessage(data).catch((error) => {
+        console.error('Error handling websocket message:', error)
+        emit('generation:error', error)
+      })
     },
     onError: (error) => {
       lastError.value = error
       emit('generation:error', error)
-      void stopGeneration()
+      stopGeneration().catch((err) => {
+        console.error('Error stopping generation after websocket error:', err)
+      })
     },
     onClose: () => {
       if (isGenerating.value) {
-        void stopGeneration()
+        stopGeneration().catch((err) => {
+          console.error('Error stopping generation after websocket close:', err)
+        })
       }
     }
   })
@@ -339,6 +346,8 @@ async function handleWebSocketMessage(data) {
 
       if (autoSave.value && props.jobId) {
         try {
+          // Persist frame to backend. Both `image` (base64) and `imageUrl` (URL) are sent
+          // to support different backend storage strategies. The backend determines which to use.
           const persisted = await service.persistFrame(props.jobId, {
             frameId: data.frameId,
             prompt: data.prompt,
@@ -410,10 +419,16 @@ watch(() => props.config, (newConfig) => {
   }
 }, { deep: true, immediate: true })
 
-watch(() => props.jobId, (jobId) => {
-  if (jobId && props.websocketUrl) {
-    startGeneration()
+watch(() => props.jobId, async (jobId, oldJobId) => {
+  if (!jobId || !props.websocketUrl || jobId === oldJobId) {
+    return
   }
+
+  if (isGenerating.value) {
+    await stopGeneration()
+  }
+
+  startGeneration()
 })
 
 watch([refreshRate, previewQuality], () => {

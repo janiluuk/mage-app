@@ -71,13 +71,14 @@
                   icon="pi pi-plus"
                   class="p-button-primary"
                   @click="extendGenerationJob"
-                  :disabled="!generationSegments.length"
+                  :disabled="!generationSegments.length || generationJobId || showGenerationDialog"
                 />
                 <Button 
                   label="Extend with Current Settings" 
                   icon="pi pi-sync"
                   class="p-button-outlined"
                   @click="extendGenerationJob({ useCurrent: true })"
+                  :disabled="!generationSegments.length || generationJobId || showGenerationDialog"
                 />
               </div>
               <div class="extend-overrides">
@@ -277,6 +278,9 @@ const overrideConfigText = ref('')
 const generationService = new GenerationService()
 let statusPoller = null
 
+// Configuration constants
+const STATUS_POLLING_INTERVAL_MS = 3000
+
 // WebSocket URL - can be configured via environment variable
 const websocketUrl = computed(() => {
   return import.meta.env.VITE_APP_DEFORUM_WS_URL || null
@@ -360,6 +364,17 @@ async function startGenerationJob(storyData) {
 
 async function extendGenerationJob({ useCurrent = false } = {}) {
   const lastSegment = generationSegments.value.at(-1)
+
+  if (useCurrent && !lastSegment) {
+    toast.add({
+      severity: 'warn',
+      summary: 'No Previous Generation',
+      detail: 'Start a generation job before extending it.',
+      life: 3000
+    })
+    return
+  }
+
   const baseConfig = useCurrent ? generationConfig.value : lastSegment?.rawConfig
   const baseBatchId = lastSegment?.batchId
 
@@ -451,7 +466,7 @@ function startStatusPolling() {
         life: 4000
       })
     }
-  }, 3000)
+  }, STATUS_POLLING_INTERVAL_MS)
 }
 
 function stopStatusPolling() {
@@ -476,7 +491,9 @@ function cancelGeneration() {
 
   if (generationJobId.value) {
     generationService.cancelBatch(generationJobId.value)
-      .catch(() => {})
+      .catch((error) => {
+        console.error('Failed to cancel generation batch', error)
+      })
   }
   generationJobId.value = null
   toast.add({
@@ -707,7 +724,14 @@ function generateShareLink() {
     batchId: generationJobId.value
   })
     .then((response) => {
-      storyShareUrl.value = response.shareUrl || response.share_link || response.url || ''
+      // Normalize backend response: expected field is `shareUrl`; other fields are kept for backward compatibility.
+      const shareUrl = response.shareUrl ?? response.share_link ?? response.url
+
+      if (!shareUrl) {
+        throw new Error('Backend response did not include a shareUrl')
+      }
+
+      storyShareUrl.value = shareUrl
       generatingLink.value = false
 
       toast.add({
