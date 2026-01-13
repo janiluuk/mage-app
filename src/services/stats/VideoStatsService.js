@@ -1,7 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
+import env from '@/utils/env';
 
-const API_V1_BASE_URL = process.env.VUE_APP_API_V1_BASE_URL;
+const API_V1_BASE_URL = env.VITE_API_V1_BASE_URL;
 
 // Cache for stats to reduce API calls
 const statsCache = {

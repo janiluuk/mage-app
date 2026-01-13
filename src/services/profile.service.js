@@ -2,9 +2,10 @@ import axios from 'axios';
 import authHeader from './auth-header';
 import Jsona from 'jsona';
 import requestService from '@/services/request-service/ApiRequestService';
+import env from '@/utils/env';
 
-const API_URL = process.env.VUE_APP_API_BASE_URL;
-const API_V1_URL = process.env.VUE_APP_API_V1_BASE_URL;
+const API_URL = env.VITE_API_BASE_URL;
+const API_V1_URL = env.VITE_API_V1_BASE_URL;
 
 const dataFormatter = new Jsona();
 

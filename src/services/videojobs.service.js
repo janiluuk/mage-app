@@ -3,9 +3,10 @@ import Jsona from "jsona";
 import qs from "qs";
 import requestService from "@/services/request-service/ApiRequestService";
 import authHeader from "@/services/auth-header";
+import env from "@/utils/env";
 
 const jsona = new Jsona();
-const url = process.env.VUE_APP_API_V1_BASE_URL;
+const url = env.VITE_API_V1_BASE_URL;
 const includeParams = "modelfile,user";
 
 export default {

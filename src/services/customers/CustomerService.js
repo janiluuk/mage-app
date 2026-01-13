@@ -1,7 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
+import env from '@/utils/env';
 
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api/v1';
+const API_BASE_URL = env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
 
 /**
  * Service for managing customer data with backend API integration

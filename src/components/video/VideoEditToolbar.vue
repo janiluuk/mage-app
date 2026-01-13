@@ -45,6 +45,7 @@ import { useToast } from 'primevue/usetoast';
 import { ref } from 'vue';
 import { mapActions } from 'vuex';
 import VideoInfoDialog from './VideoInfoDialog.vue';
+import env from '@/utils/env';
 
 export default {
     name: 'VideoEditToolbar',
@@ -119,7 +120,7 @@ export default {
             return (this.isJobFinished && this.$props.job.url && this.$props.job.url.length > 0);
         },
         originalUrl() {
-            const url = process.env.VUE_APP_VIDEO_PREVIEW_URL;
+            const url = env.VITE_VIDEO_PREVIEW_URL;
             return url + this.$props.job.filename;
         },
         hasPreviewImage() {

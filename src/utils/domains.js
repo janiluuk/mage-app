@@ -1,5 +1,7 @@
+import env from '@/utils/env';
+
 // Single source of truth for API base URL
-const API_URL = process.env.VUE_APP_API_URL || '';
+const API_URL = env.VITE_API_URL || '';
 
 // Derive all other API URLs from the single base URL
 const API_BASE_URL = API_URL ? `${API_URL}/api` : '';
@@ -7,22 +9,22 @@ const API_V1_URL = API_URL ? `${API_URL}/api/v1` : '';
 const API_V2_URL = API_URL ? `${API_URL}/api/v2` : '';
 const VIDEO_PREVIEW_URL = API_URL ? `${API_URL}/videos/` : '';
 const MODEL_PREVIEW_URL = API_URL ? `${API_URL}/preview/model/` : '';
-const FALLBACK_IMAGE_URL = process.env.VUE_APP_FALLBACK_IMAGE_URL || (API_URL ? `${API_URL}/images/notfound.jpg` : '');
+const FALLBACK_IMAGE_URL = env.VITE_FALLBACK_IMAGE_URL || (API_URL ? `${API_URL}/images/notfound.jpg` : '');
 
 // App base URL for sharing links - defaults to API_URL if not provided
-const APP_BASE_URL = process.env.VUE_APP_APP_URL || API_URL;
+const APP_BASE_URL = env.VITE_APP_URL || API_URL;
 
 // Legacy: Keep STABLE_URL for backward compatibility during transition
 // Use fetchStableUrl() to get the stable URL from the backend
-const STABLE_URL = process.env.VUE_APP_STABLE_URL || '';
+const STABLE_URL = env.VITE_STABLE_URL || '';
 
 // Other service URLs
-const MAGE_API_URL = process.env.VUE_APP_MAGE_API_URL || '';
-const SAMPLE_PROCESSED_VIDEO_URL = process.env.VUE_APP_SAMPLE_PROCESSED_VIDEO_URL || '';
+const MAGE_API_URL = env.VITE_MAGE_API_URL || '';
+const SAMPLE_PROCESSED_VIDEO_URL = env.VITE_SAMPLE_PROCESSED_VIDEO_URL || '';
 
 /**
  * Fetch the stable URL from the backend configuration endpoint.
- * This replaces the hardcoded VUE_APP_STABLE_URL environment variable.
+ * This replaces the hardcoded VITE_STABLE_URL environment variable.
  * @returns {Promise<string>} The stable URL from the backend
  */
 async function fetchStableUrl() {

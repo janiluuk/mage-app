@@ -1,5 +1,7 @@
 import ModelFileService from '@/services/modelfile.service';
-const PREVIEW_URL = process.env.VUE_APP_MODEL_PREVIEW_URL;
+import env from '@/utils/env';
+
+const PREVIEW_URL = env.VITE_MODEL_PREVIEW_URL;
 
 const state = {
   modelFiles: [],

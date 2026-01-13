@@ -1,7 +1,9 @@
 <script>
 import _ from 'lodash';
 import { mapActions, mapGetters } from 'vuex';
-const PREVIEW_URL = process.env.VUE_APP_MODEL_PREVIEW_URL;
+import env from '@/utils/env';
+
+const PREVIEW_URL = env.VITE_MODEL_PREVIEW_URL;
 
 export default {
   name: 'ModelfileSelector',

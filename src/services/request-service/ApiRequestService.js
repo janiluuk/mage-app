@@ -1,8 +1,13 @@
 import axios from 'axios';
 import AuthService from '@/services/auth/AuthService';
 import router from '@/router';
+import env from '@/utils/env';
 
-const API_URL = process.env.VUE_APP_API_BASE_URL;
+const API_URL = env.VITE_API_BASE_URL || '';
+
+if (!API_URL) {
+  console.warn('Missing VITE_API_BASE_URL. API requests will fail until it is configured.');
+}
 
 /**
  * Dedicated Axios instance for API calls to avoid polluting the global Axios state

@@ -1,8 +1,9 @@
 import qs from 'qs';
 import axios from 'axios';
 import Jsona from 'jsona';
+import env from '@/utils/env';
 
-const url = process.env.VUE_APP_API_BASE_URL;
+const url = env.VITE_API_BASE_URL;
 const jsona = new Jsona();
 
 function list(params) {
@@ -99,4 +100,3 @@ export default {
   update,
   destroy
 };
-
