@@ -353,10 +353,10 @@ export default {
     return {
       sidebarBackgroundColor: "black",
       sidebarBackground: "green",
-      sidebarBackgroundImage: `${import.meta.env.BASE_URL || '/'}img/sidebar-2.jpg`,
+      sidebarBackgroundImage: `${import.meta.env.BASE_URL}img/sidebar-2.jpg`,
       sidebarMini: false,
       sidebarImg: true,
-      image: `${import.meta.env.BASE_URL || '/'}img/laravel-vue.svg`,
+      image: `${import.meta.env.BASE_URL}img/laravel-vue.svg`,
       roles: []
     };
   },
