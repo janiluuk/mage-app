@@ -284,8 +284,8 @@ export default {
       const clipDuration = this.resolvedVideoDuration;
       if (this.audioDuration < clipDuration) {
         this.audioStart = 0;
-        this.audioEnd = 0;
-        this.audioRange = [0, 0];
+        this.audioEnd = this.audioDuration;
+        this.audioRange = [0, this.audioDuration];
         return;
       }
       const start = Math.min(this.audioStart || 0, this.audioDuration - clipDuration);
