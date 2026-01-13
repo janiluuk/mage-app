@@ -340,7 +340,6 @@ import MobileMenu from "./Extra/MobileMenu.vue";
 import FixedPlugin from "../../FixedPlugin.vue";
 import UserMenu from "./Extra/UserMenu.vue";
 import Vuex from 'vuex';
-import env from '@/utils/env';
 
 export default {
   components: {
@@ -354,10 +353,10 @@ export default {
     return {
       sidebarBackgroundColor: "black",
       sidebarBackground: "green",
-      sidebarBackgroundImage: `${env.BASE_URL || '/'}img/sidebar-2.jpg`,
+      sidebarBackgroundImage: `${import.meta.env.BASE_URL}img/sidebar-2.jpg`,
       sidebarMini: false,
       sidebarImg: true,
-      image: `${env.BASE_URL || '/'}img/laravel-vue.svg`,
+      image: `${import.meta.env.BASE_URL}img/laravel-vue.svg`,
       roles: []
     };
   },
