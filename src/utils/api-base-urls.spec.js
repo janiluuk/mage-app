@@ -23,7 +23,7 @@ describe('API base URL helpers', () => {
   })
 
   it('uses VITE_API_BASE_URL when provided', async () => {
-    process.env.VITE_API_URL = 'https://test-api.example.com'
+    delete process.env.VITE_API_URL
     process.env.VITE_API_BASE_URL = 'https://override.example.com/api/v1'
     vi.resetModules()
 
