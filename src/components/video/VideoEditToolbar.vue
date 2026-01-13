@@ -9,6 +9,15 @@
             @click="$emit('submit:showoriginal', 1)" />
             <Button type="button" class="ml-5 p-button-success hidden" icon="pi pi-image" label="Wizard"
             @click="$emit('submit:overlay', 1)" />
+            <Button
+                v-if="showSoundtrack"
+                type="button"
+                class="ml-2 p-button-outlined p-button-help"
+                icon="pi pi-volume-up"
+                label="Add Soundtrack"
+                @click="$emit('submit:soundtrack')"
+                :disabled="soundtrackDisabled"
+            />
 
             <Toast />
             <VideoInfoDialog :job="job" :infodialog="infodialog" @dialog:close="closeInfoDialog"></VideoInfoDialog>
@@ -82,12 +91,14 @@ export default {
         const infodialog = ref(null);
         return { menu, toast, confirmPopup, infodialog }
     },
-    emits: ['submit:preview', 'submit:cancel', 'submit:finalize'],
+    emits: ['submit:preview', 'submit:cancel', 'submit:finalize', 'submit:soundtrack'],
 
     props: {
         job: { type: Object, default: { status: '' } },
         formChanged: { type: Boolean, default: false },
-        showOriginal: { type: Boolean, default: false }
+        showOriginal: { type: Boolean, default: false },
+        showSoundtrack: { type: Boolean, default: false },
+        soundtrackDisabled: { type: Boolean, default: false }
     },
     computed: {
         isJobSketch() {

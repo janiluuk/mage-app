@@ -7,7 +7,19 @@
       v-if="job.status == 'error' || errorMessage != ''">
       <span class="text-primary text-lg">{{ errorMessage }}</span>
     </div>
-    <VideoEditToolbar :job="job" :formChanged="formChanged" :showOriginal="showOriginal" @submit:cancel="handleCancelJob" @submit:showoriginal="onShowOriginal" @submit:overlay="toggleFullscreenOverlay" @submit:preview="handlePreviewSubmit" @submit:finalize="handleFinalizeJob"/>
+    <VideoEditToolbar
+      :job="job"
+      :formChanged="formChanged"
+      :showOriginal="showOriginal"
+      :showSoundtrack="true"
+      :soundtrackDisabled="!videoDurationSeconds"
+      @submit:cancel="handleCancelJob"
+      @submit:showoriginal="onShowOriginal"
+      @submit:overlay="toggleFullscreenOverlay"
+      @submit:preview="handlePreviewSubmit"
+      @submit:finalize="handleFinalizeJob"
+      @submit:soundtrack="showSoundtrackDialog = true"
+    />
     <div class="editor" v-if="job.status != null">
       <!-- Main settings container -->
       <Splitter class="mb-5 editor-container">
@@ -77,6 +89,13 @@
       <OverlayPanel ref="op">
       </OverlayPanel>
     </div>
+    <SoundtrackDialog
+      v-model:visible="showSoundtrackDialog"
+      :videoId="videoId"
+      :videoTitle="job.filename || job.prompt || 'Video'"
+      :videoDuration="videoDurationSeconds"
+      @soundtrack-added="handleSoundtrackAdded"
+    />
   </div>
 </template>
 
@@ -87,11 +106,13 @@ import VideoEditPreview from '@/components/video/VideoEditPreview.vue';
 import VideoEditToolbar from '@/components/video/VideoEditToolbar.vue';
 import VideoEntry from '@/components/video/VideoEntry.vue';
 import VideoPlayer from '@/components/video/VideoPlayer.vue';
+import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 import showSwal from "@/mixins/showSwal.js";
 import _ from 'lodash';
 import SimpleVueValidator from 'simple-vue3-validator';
 import { ref } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
+import { parseDuration } from '@/utils/format';
 
 const Validator = SimpleVueValidator.Validator;
 
@@ -113,6 +134,7 @@ export default {
       videoId: null,
       overlayActive: false,
       showOriginal: false,
+      showSoundtrackDialog: false,
       isLoading: false,
       isFetching: false,
       errorMessage: '',
@@ -176,7 +198,8 @@ export default {
     VideoPlayer,
     VideoEditOverlay,
     VideoEditPreview,
-    VideoEditToolbar
+    VideoEditToolbar,
+    SoundtrackDialog
   },
   validators: {
     'job.prompt': function (value) {
@@ -224,6 +247,18 @@ export default {
       } else {
         return 'Normal';
       }
+    },
+    videoDurationSeconds() {
+      const rawDuration = this.job.duration || this.job.length;
+      if (typeof rawDuration === 'number') return rawDuration;
+      if (typeof rawDuration === 'string') {
+        const parsed = parseDuration(rawDuration);
+        return parsed || null;
+      }
+      if (this.job.frame_count && this.job.fps) {
+        return this.job.frame_count / this.job.fps;
+      }
+      return null;
     },
     formAttributes() {
 
@@ -297,6 +332,13 @@ export default {
 
     toggleFullscreenOverlay() {
       this.overlayActive = !this.overlayActive
+    },
+    handleSoundtrackAdded(data) {
+      showSwal.methods.showSwal({
+        type: "success",
+        message: `Soundtrack "${data.audioFile}" is being added.`,
+        width: 500
+      });
     },
     updateModelId(newModelId) {
       this.job.model_id = newModelId;

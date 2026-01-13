@@ -48,7 +48,7 @@ describe('SoundtrackDialog', () => {
           },
           Slider: {
             template: '<input type="range" v-model="modelValue" />',
-            props: ['modelValue', 'min', 'max']
+            props: ['modelValue', 'min', 'max', 'range']
           },
           InputNumber: {
             template: '<input type="number" v-model="modelValue" />',
@@ -135,7 +135,7 @@ describe('SoundtrackDialog', () => {
 
   it('formats duration correctly', () => {
     wrapper = createWrapper();
-    expect(wrapper.vm.formatDuration(0)).toBe('Unknown');
+    expect(wrapper.vm.formatDuration(0)).toBe('0:00');
     expect(wrapper.vm.formatDuration(60)).toBe('1:00');
     expect(wrapper.vm.formatDuration(125)).toBe('2:05');
     expect(wrapper.vm.formatDuration(3661)).toBe('61:01');
@@ -164,11 +164,18 @@ describe('SoundtrackDialog', () => {
     const mockFile = new File(['audio content'], 'test.mp3', { type: 'audio/mp3' });
     
     wrapper.vm.audioFile = mockFile;
+    wrapper.vm.audioDuration = 120;
+    wrapper.vm.audioStart = 0;
+    wrapper.vm.audioEnd = 60;
     await wrapper.vm.addSoundtrack();
     
     expect(dispatchSpy).toHaveBeenCalledWith('videojobs/addSoundtrack', expect.objectContaining({
       videoId: 1,
-      audioFile: mockFile
+      audioFile: mockFile,
+      options: expect.objectContaining({
+        audioStart: 0,
+        audioEnd: 60
+      })
     }));
   });
 
@@ -177,6 +184,9 @@ describe('SoundtrackDialog', () => {
     const mockFile = new File(['audio content'], 'test.mp3', { type: 'audio/mp3' });
     
     wrapper.vm.audioFile = mockFile;
+    wrapper.vm.audioDuration = 120;
+    wrapper.vm.audioStart = 0;
+    wrapper.vm.audioEnd = 60;
     await wrapper.vm.addSoundtrack();
     
     expect(wrapper.emitted('soundtrack-added')).toBeTruthy();
@@ -202,33 +212,35 @@ describe('SoundtrackDialog', () => {
     const mockFile = new File(['audio content'], 'test.mp3', { type: 'audio/mp3' });
     
     wrapper.vm.audioFile = mockFile;
+    wrapper.vm.audioDuration = 120;
+    wrapper.vm.audioStart = 0;
+    wrapper.vm.audioEnd = 60;
     await wrapper.vm.addSoundtrack();
     
     expect(wrapper.vm.error).toBeTruthy();
     expect(wrapper.vm.processing).toBe(false);
   });
 
-  it('shows warning when audio is longer than video', async () => {
+  it('initializes audio trim when audio is longer than video', async () => {
     wrapper = createWrapper();
     const mockFile = new File(['audio content'], 'test.mp3', { type: 'audio/mp3' });
     
     wrapper.vm.audioFile = mockFile;
     wrapper.vm.audioDuration = 120; // 2 minutes
-    await wrapper.vm.$nextTick();
+    wrapper.vm.initializeAudioRange();
     
-    // Should show warning about audio being trimmed
-    // Note: The actual message component would need to be checked
+    expect(wrapper.vm.audioStart).toBe(0);
+    expect(wrapper.vm.audioEnd).toBe(60);
   });
 
-  it('shows info message when audio is shorter than video', async () => {
+  it('rejects audio shorter than video duration', async () => {
     wrapper = createWrapper();
     const mockFile = new File(['audio content'], 'test.mp3', { type: 'audio/mp3' });
     
     wrapper.vm.audioFile = mockFile;
     wrapper.vm.audioDuration = 30; // 30 seconds
-    await wrapper.vm.$nextTick();
+    wrapper.vm.initializeAudioRange();
     
-    // Should show info about audio looping or silence
-    // Note: The actual message component would need to be checked
+    expect(wrapper.vm.isAudioDurationValid).toBe(false);
   });
 });

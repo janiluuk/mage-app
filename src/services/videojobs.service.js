@@ -171,6 +171,12 @@ export default {
     formData.append('volume', options.volume || 100);
     formData.append('fadeIn', options.fadeIn || 0);
     formData.append('fadeOut', options.fadeOut || 0);
+    if (options.audioStart !== undefined && options.audioStart !== null) {
+      formData.append('audioStart', options.audioStart);
+    }
+    if (options.audioEnd !== undefined && options.audioEnd !== null) {
+      formData.append('audioEnd', options.audioEnd);
+    }
     formData.append('type', 'soundtrack');
     
     return await requestService.post('/v1/video-jobs/add-soundtrack', formData, {
