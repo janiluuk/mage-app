@@ -58,6 +58,7 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AudioVisualizer from '@/components/AudioVisualizer.vue'
 import MageApiService from '@/services/mage/MageApiService'
+import env from '@/utils/env'
 
 const prompt = ref('')
 const selectedMood = ref('')
@@ -71,7 +72,7 @@ const errorMessage = ref('')
 let intervalId
 
 function generate() {
-  const API_URL = process.env.VUE_APP_API_URL || ''
+  const API_URL = env.VITE_API_URL || ''
   const params = new URLSearchParams({
     text: prompt.value,
     mood: selectedMood.value
@@ -145,4 +146,3 @@ audio {
   margin-top: 1rem;
 }
 </style>
-

@@ -138,7 +138,7 @@
 <script>
 import { formatDistanceToNow } from 'date-fns';
 import axios from 'axios';
-import { API_BASE_URL } from '@/utils/domains';
+import { API_URL } from '@/utils/domains';
 export default {
     name: 'VideoEntry',
     props: ['job'],
@@ -146,6 +146,11 @@ export default {
         return {
             status: false
         };
+    },
+    computed: {
+        apiBaseUrl() {
+            return API_URL ? `${API_URL}/api` : '';
+        }
     },
     methods: {
         formatDate(dateStr) {
@@ -178,7 +183,7 @@ export default {
 
             this.isFetching = true;
             try {
-                const response = await axios.post(`${API_BASE_URL}/finalize`, {
+                const response = await axios.post(`${this.apiBaseUrl}/finalize`, {
                     modelId: this.job.model_id,
                     cfgScale: this.job.cfg_scale,
                     seed: this.job.seed,

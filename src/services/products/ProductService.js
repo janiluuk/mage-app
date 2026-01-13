@@ -1,7 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api/v1';
+const BASE_URL = API_BASE_URL || 'http://localhost:3000/api/v1';
 
 /**
  * Service for managing product data with backend API integration
@@ -13,7 +14,7 @@ class ProductService {
    */
   async getProductsSmall() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/products?limit=10`, {
+      const { data } = await axios.get(`${BASE_URL}/products?limit=10`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -29,7 +30,7 @@ class ProductService {
    */
   async getProducts() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/products`, {
+      const { data } = await axios.get(`${BASE_URL}/products`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -45,7 +46,7 @@ class ProductService {
    */
   async getProductsWithOrdersSmall() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/products?include=orders&limit=10`, {
+      const { data } = await axios.get(`${BASE_URL}/products?include=orders&limit=10`, {
         headers: authHeader()
       });
       return data.data || [];
