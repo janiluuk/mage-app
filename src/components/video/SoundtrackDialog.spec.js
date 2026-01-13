@@ -242,5 +242,6 @@ describe('SoundtrackDialog', () => {
     wrapper.vm.initializeAudioRange();
     
     expect(wrapper.vm.isAudioDurationValid).toBe(false);
+    expect(wrapper.vm.audioEnd).toBe(30); // audioEnd should be set to audioDuration
   });
 });
