@@ -158,7 +158,7 @@ import axios from 'axios';
 import _ from 'lodash';
 import moment from 'moment';
 import VideoPlayer from '@/components/video/VideoPlayer.vue';
-import { API_BASE_URL, API_V1_URL, VIDEO_PREVIEW_URL } from '@/utils/domains';
+import { API_URL, VIDEO_PREVIEW_URL } from '@/utils/domains';
 
 import ModelfileSelector from '@/components/Modelfile/ModelfileSelector.vue';
 import showSwal from "@/mixins/showSwal.js";
@@ -229,6 +229,12 @@ export default {
     }
   },
   computed: {
+    apiBaseUrl() {
+      return API_URL ? `${API_URL}/api` : '';
+    },
+    apiV1Url() {
+      return API_URL ? `${API_URL}/api/v1` : '';
+    },
     cancelButtonValue() {
       if (this.operation == "preview") {
         return "Cancel preview generation";
@@ -352,7 +358,7 @@ export default {
 
         try {
           let token = this.getToken();
-          const response = await axios.get(`${API_V1_URL}/video-jobs/${this.videoId}?include=modelfile`, {
+          const response = await axios.get(`${this.apiV1Url}/video-jobs/${this.videoId}?include=modelfile`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.api+json',
@@ -402,7 +408,7 @@ export default {
         this.errorMessage = '';
         this.isFetching = true;
         try {
-          const response = await axios.post(`${API_BASE_URL}/finalize`, this.formAttributes).finally(() => { this.isFetching = false; });
+          const response = await axios.post(`${this.apiBaseUrl}/finalize`, this.formAttributes).finally(() => { this.isFetching = false; });
           this.resetProgress();
           this.operation = 'finalize';
 
@@ -419,7 +425,7 @@ export default {
         this.job.status = 'cancelled';
         this.isFetching = true;
         try {
-          const response = await axios.post(`${API_BASE_URL}/cancelJob/${this.videoId}`, {
+          const response = await axios.post(`${this.apiBaseUrl}/cancelJob/${this.videoId}`, {
 
             videoId: this.videoId
           },
@@ -451,7 +457,7 @@ export default {
 
         try {
           let token = this.getToken();
-          await axios.delete(`${API_V1_URL}/video-jobs/${id}?sort=-updated_at`, {
+          await axios.delete(`${this.apiV1Url}/video-jobs/${id}?sort=-updated_at`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/vnd.api+json',
@@ -483,7 +489,7 @@ export default {
 
             var options = _.clone(this.formAttributes);
             options.frameCount = frameCount;
-            let response = await axios.post(`${API_BASE_URL}/generate`, options)
+            let response = await axios.post(`${this.apiBaseUrl}/generate`, options)
               .finally(() => {
                 this.isFetching = false;
               });

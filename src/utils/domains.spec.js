@@ -19,8 +19,6 @@ describe('Domains Utility', () => {
     it('exports all required URL constants', async () => {
       const domains = await import('./domains.js')
       expect(domains.API_URL).toBeDefined()
-      expect(domains.API_BASE_URL).toBeDefined()
-      expect(domains.API_V1_URL).toBeDefined()
       expect(domains.VIDEO_PREVIEW_URL).toBeDefined()
       expect(domains.MODEL_PREVIEW_URL).toBeDefined()
       expect(domains.FALLBACK_IMAGE_URL).toBeDefined()
@@ -36,31 +34,6 @@ describe('Domains Utility', () => {
       
       const domains = await import('./domains.js')
       expect(domains.API_URL).toBe('https://test-api.example.com')
-    })
-
-    it('constructs API_BASE_URL from API_URL', async () => {
-      process.env.VITE_API_URL = 'https://test-api.example.com'
-      delete process.env.VITE_API_BASE_URL
-      vi.resetModules()
-      
-      const domains = await import('./domains.js')
-      expect(domains.API_BASE_URL).toBe('https://test-api.example.com/api')
-    })
-
-    it('constructs API_V1_URL from API_URL', async () => {
-      process.env.VITE_API_URL = 'https://test-api.example.com'
-      vi.resetModules()
-      
-      const domains = await import('./domains.js')
-      expect(domains.API_V1_URL).toBe('https://test-api.example.com/api/v1')
-    })
-
-    it('constructs API_V2_URL from API_URL', async () => {
-      process.env.VITE_API_URL = 'https://test-api.example.com'
-      vi.resetModules()
-      
-      const domains = await import('./domains.js')
-      expect(domains.API_V2_URL).toBe('https://test-api.example.com/api/v2')
     })
 
     it('constructs VIDEO_PREVIEW_URL from API_URL', async () => {
@@ -122,14 +95,12 @@ describe('Domains Utility', () => {
     it('uses empty string as default when no environment variables are set', async () => {
       // Clear all relevant environment variables
       delete process.env.VITE_API_URL
-      delete process.env.VITE_API_BASE_URL
       delete process.env.VITE_STABLE_URL
       delete process.env.VITE_MAGE_API_URL
       vi.resetModules()
       
       const domains = await import('./domains.js')
       expect(domains.API_URL).toBe('')
-      expect(domains.API_BASE_URL).toBe('')
       expect(domains.STABLE_URL).toBe('')
       expect(domains.MAGE_API_URL).toBe('')
     })
@@ -139,9 +110,6 @@ describe('Domains Utility', () => {
     it('exports values as strings', async () => {
       const domains = await import('./domains.js')
       expect(typeof domains.API_URL).toBe('string')
-      expect(typeof domains.API_BASE_URL).toBe('string')
-      expect(typeof domains.API_V1_URL).toBe('string')
-      expect(typeof domains.API_V2_URL).toBe('string')
       expect(typeof domains.VIDEO_PREVIEW_URL).toBe('string')
       expect(typeof domains.MODEL_PREVIEW_URL).toBe('string')
       expect(typeof domains.FALLBACK_IMAGE_URL).toBe('string')

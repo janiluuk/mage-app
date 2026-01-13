@@ -3,10 +3,7 @@ import env from '@/utils/env';
 // Single source of truth for API base URL
 const API_URL = env.VITE_API_URL || '';
 
-// Derive all other API URLs from the single base URL
-const API_BASE_URL = API_URL ? `${API_URL}/api` : '';
-const API_V1_URL = API_URL ? `${API_URL}/api/v1` : '';
-const API_V2_URL = API_URL ? `${API_URL}/api/v2` : '';
+// Derive other API URLs from the single base URL as needed in consumers
 const VIDEO_PREVIEW_URL = API_URL ? `${API_URL}/videos/` : '';
 const MODEL_PREVIEW_URL = API_URL ? `${API_URL}/preview/model/` : '';
 const FALLBACK_IMAGE_URL = env.VITE_FALLBACK_IMAGE_URL || (API_URL ? `${API_URL}/images/notfound.jpg` : '');
@@ -44,9 +41,6 @@ async function fetchStableUrl() {
 
 export {
   API_URL,
-  API_BASE_URL,
-  API_V1_URL,
-  API_V2_URL,
   VIDEO_PREVIEW_URL,
   MODEL_PREVIEW_URL,
   FALLBACK_IMAGE_URL,

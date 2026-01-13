@@ -55,7 +55,7 @@ import { mapActions } from 'vuex';
 import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import MediaInfoFactory from 'mediainfo.js'
 import VideoClipper from '@/components/video/VideoClipper.vue';
-import { API_BASE_URL } from '@/utils/domains';
+import { API_URL } from '@/utils/domains';
 
 export default {
   name: 'VideoUpload',
@@ -78,8 +78,8 @@ export default {
     });
 
   },
-  data() {
-    return {
+    data() {
+      return {
       isLoading: false,
       ffmpegLoaded: false,
       currentTrimRange: { start: 0.0, end:0.0 },
@@ -97,8 +97,13 @@ export default {
       errorMessage: '',
       status: null,
       message: ''
-    };
-  },
+      };
+    },
+    computed: {
+      apiBaseUrl() {
+        return API_URL ? `${API_URL}/api` : '';
+      }
+    },
   watch: {
     videoId(newValue) {
       if (newValue) {
@@ -319,7 +324,7 @@ export default {
 
       try {
         const response = await
-          axios.post(`${API_BASE_URL}/upload`, formData, {
+          axios.post(`${this.apiBaseUrl}/upload`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
               'Authorization': 'Bearer ' + this.getToken()
