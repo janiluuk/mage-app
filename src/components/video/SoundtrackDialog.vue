@@ -240,9 +240,12 @@ export default {
     resolvedVideoDuration() {
       this.initializeAudioRange();
     },
-    audioRange(newRange, oldRange) {
-      if (this.isAdjustingRange || !this.isAudioDurationValid) return;
-      this.syncAudioRange(newRange, oldRange);
+    audioRange: {
+      handler(newRange, oldRange) {
+        if (this.isAdjustingRange || !this.isAudioDurationValid) return;
+        this.syncAudioRange(newRange, oldRange);
+      },
+      deep: true
     }
   },
   methods: {
@@ -279,13 +282,16 @@ export default {
       audio.src = url;
     },
 
-    initializeAudioRange() {
+    async initializeAudioRange() {
       if (!this.audioDuration || !this.resolvedVideoDuration) return;
       const clipDuration = this.resolvedVideoDuration;
       if (this.audioDuration < clipDuration) {
+        this.isAdjustingRange = true;
         this.audioStart = 0;
         this.audioEnd = this.audioDuration;
         this.audioRange = [0, this.audioDuration];
+        await this.$nextTick();
+        this.isAdjustingRange = false;
         return;
       }
       const start = Math.min(this.audioStart || 0, this.audioDuration - clipDuration);
@@ -294,10 +300,12 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
-    syncAudioRange(newRange, oldRange) {
+    async syncAudioRange(newRange, oldRange) {
       const clipDuration = this.resolvedVideoDuration;
       if (!clipDuration) return;
       const [newStart, newEnd] = newRange;
@@ -326,14 +334,19 @@ export default {
         nextStart = this.audioDuration - clipDuration;
       }
 
-      this.isAdjustingRange = true;
-      this.audioStart = nextStart;
-      this.audioEnd = nextEnd;
-      this.audioRange = [nextStart, nextEnd];
-      this.isAdjustingRange = false;
+      // Only update if values actually changed
+      if (nextStart !== this.audioStart || nextEnd !== this.audioEnd) {
+        this.isAdjustingRange = true;
+        this.audioStart = nextStart;
+        this.audioEnd = nextEnd;
+        this.audioRange = [nextStart, nextEnd];
+        this.$nextTick(() => {
+          this.isAdjustingRange = false;
+        });
+      }
     },
 
-    updateAudioStart(value) {
+    async updateAudioStart(value) {
       if (!this.isAudioDurationValid) return;
       const clipDuration = this.resolvedVideoDuration;
       const start = Math.min(Math.max(0, value || 0), this.audioDuration - clipDuration);
@@ -342,10 +355,12 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
-    updateAudioEnd(value) {
+    async updateAudioEnd(value) {
       if (!this.isAudioDurationValid) return;
       const clipDuration = this.resolvedVideoDuration;
       const end = Math.min(Math.max(clipDuration, value || clipDuration), this.audioDuration);
@@ -354,7 +369,9 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
     formatDuration(seconds) {

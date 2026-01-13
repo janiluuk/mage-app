@@ -47,12 +47,12 @@ describe('SoundtrackDialog', () => {
             props: ['label', 'icon', 'disabled', 'loading']
           },
           Slider: {
-            template: '<input type="range" v-model="modelValue" />',
-            props: ['modelValue', 'min', 'max', 'range']
+            template: '<input type="range" :value="modelValue" />',
+            props: ['modelValue', 'min', 'max', 'range', 'step', 'disabled']
           },
           InputNumber: {
-            template: '<input type="number" v-model="modelValue" />',
-            props: ['modelValue', 'min', 'max', 'step', 'showButtons']
+            template: '<input type="number" :value="modelValue" />',
+            props: ['modelValue', 'min', 'max', 'step', 'showButtons', 'disabled']
           },
           Divider: { template: '<hr />' },
           Message: {
@@ -227,7 +227,7 @@ describe('SoundtrackDialog', () => {
     
     wrapper.vm.audioFile = mockFile;
     wrapper.vm.audioDuration = 120; // 2 minutes
-    wrapper.vm.initializeAudioRange();
+    await wrapper.vm.initializeAudioRange();
     
     expect(wrapper.vm.audioStart).toBe(0);
     expect(wrapper.vm.audioEnd).toBe(60);
@@ -239,8 +239,9 @@ describe('SoundtrackDialog', () => {
     
     wrapper.vm.audioFile = mockFile;
     wrapper.vm.audioDuration = 30; // 30 seconds
-    wrapper.vm.initializeAudioRange();
+    await wrapper.vm.initializeAudioRange();
     
     expect(wrapper.vm.isAudioDurationValid).toBe(false);
+    expect(wrapper.vm.audioEnd).toBe(30); // audioEnd should be set to audioDuration
   });
 });
