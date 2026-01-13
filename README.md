@@ -202,6 +202,28 @@ The project includes comprehensive test coverage for both backend and frontend:
 - `src/router/*.spec.js` - Router configuration tests
 - `src/utils/*.spec.js` - Utility function tests
 
+**End-to-End Tests** (Playwright)
+- `e2e/*.spec.ts` - Browser-based tests for critical UI flows
+
+### Running end-to-end tests
+1. Start the dev server in one terminal:
+   ```bash
+   npm run dev
+   ```
+2. Install Playwright browsers (first run only):
+   ```bash
+   npx playwright install
+   ```
+3. Run the tests in another terminal:
+   ```bash
+   npm run test:e2e
+   ```
+
+You can override the base URL with `PLAYWRIGHT_BASE_URL`, for example:
+```bash
+PLAYWRIGHT_BASE_URL=http://localhost:3000 npm run test:e2e
+```
+
 ### Writing Tests
 Frontend tests use [Vitest](https://vitest.dev/) and [@vue/test-utils](https://test-utils.vuejs.org/):
 

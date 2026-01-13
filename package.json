@@ -24,7 +24,9 @@
     "test:frontend": "vitest run",
     "test:frontend:watch": "vitest",
     "test:frontend:ui": "vitest --ui",
-    "test:frontend:coverage": "vitest run --coverage"
+    "test:frontend:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@cloudgeek/vue3-video-player": "^0.3.10",
@@ -97,6 +99,7 @@
     "@types/pako": "^2.0.0",
     "@types/sanitize-html": "^2.6.2",
     "@vitejs/plugin-vue": "^4.6.2",
+    "@playwright/test": "^1.57.0",
     "@vitest/ui": "^1.6.1",
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-router": "~4.5.0",
@@ -111,6 +114,7 @@
     "eslint-plugin-vue": "9.0.0",
     "jsdom": "^24.1.0",
     "npm-run-all": "^4.1.5",
+    "playwright": "^1.57.0",
     "prettier": "3.0.0",
     "sass": "1.43.3",
     "sass-loader": "10.1.1",

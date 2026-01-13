@@ -12,9 +12,9 @@
           <i class="pi pi-video"></i>
           Adding soundtrack to: <strong>{{ videoTitle }}</strong>
         </p>
-        <p v-if="videoDuration" class="info-text">
+        <p v-if="resolvedVideoDuration" class="info-text">
           <i class="pi pi-clock"></i>
-          Video Duration: <strong>{{ formatDuration(videoDuration) }}</strong>
+          Video Duration: <strong>{{ formatDuration(resolvedVideoDuration) }}</strong>
         </p>
       </div>
 
@@ -28,6 +28,57 @@
       <div v-if="audioFile" class="audio-options">
         <Divider />
         
+        <div class="field" v-if="audioDuration && resolvedVideoDuration">
+          <label for="audio-range">
+            Audio Clip ({{ formatDuration(audioStart) }} - {{ formatDuration(audioEnd) }})
+          </label>
+          <div class="audio-range">
+            <Slider
+              id="audio-range"
+              v-model="audioRange"
+              :min="0"
+              :max="audioDuration"
+              :step="0.1"
+              range
+              class="w-full"
+              :disabled="!isAudioDurationValid"
+            />
+            <div class="range-inputs">
+              <div class="range-input">
+                <label for="audio-start">Start (seconds)</label>
+                <InputNumber
+                  id="audio-start"
+                  :modelValue="audioStart"
+                  :min="0"
+                  :max="maxAudioStart"
+                  :step="0.1"
+                  showButtons
+                  class="w-full"
+                  :disabled="!isAudioDurationValid"
+                  @update:modelValue="updateAudioStart"
+                />
+              </div>
+              <div class="range-input">
+                <label for="audio-end">End (seconds)</label>
+                <InputNumber
+                  id="audio-end"
+                  :modelValue="audioEnd"
+                  :min="minAudioEnd"
+                  :max="audioDuration"
+                  :step="0.1"
+                  showButtons
+                  class="w-full"
+                  :disabled="!isAudioDurationValid"
+                  @update:modelValue="updateAudioEnd"
+                />
+              </div>
+            </div>
+            <small class="field-help">
+              Clip length always matches the video length ({{ formatDuration(resolvedVideoDuration) }}).
+            </small>
+          </div>
+        </div>
+
         <div class="field">
           <label for="volume">Volume: {{ volume }}%</label>
           <Slider 
@@ -66,19 +117,11 @@
         </div>
 
         <Message 
-          v-if="audioDuration && videoDuration && audioDuration < videoDuration"
-          severity="info"
+          v-if="audioDuration && resolvedVideoDuration && audioDuration < resolvedVideoDuration"
+          severity="error"
           :closable="false"
         >
-          Audio is shorter than video. Audio will loop or video will have silence at the end.
-        </Message>
-
-        <Message 
-          v-if="audioDuration && videoDuration && audioDuration > videoDuration"
-          severity="warn"
-          :closable="false"
-        >
-          Audio is longer than video. Audio will be trimmed to match video duration.
+          Audio must be at least as long as the video to create a soundtrack.
         </Message>
       </div>
 
@@ -106,7 +149,7 @@
         label="Add Soundtrack" 
         icon="pi pi-check"
         @click="addSoundtrack" 
-        :disabled="!audioFile || processing"
+        :disabled="!audioFile || processing || !isAudioDurationValid"
         :loading="processing"
       />
     </template>
@@ -115,6 +158,7 @@
 
 <script>
 import AudioFileUpload from '@/components/job/AudioFileUpload.vue';
+import { parseDuration } from '@/utils/format';
 
 export default {
   name: 'SoundtrackDialog',
@@ -135,7 +179,7 @@ export default {
       default: 'Unknown Video'
     },
     videoDuration: {
-      type: Number,
+      type: [Number, String],
       default: null
     }
   },
@@ -144,6 +188,10 @@ export default {
     return {
       audioFile: null,
       audioDuration: null,
+      audioStart: 0,
+      audioEnd: 0,
+      audioRange: [0, 0],
+      isAdjustingRange: false,
       volume: 100,
       fadeIn: 0,
       fadeOut: 0,
@@ -152,6 +200,30 @@ export default {
     };
   },
   computed: {
+    resolvedVideoDuration() {
+      if (!this.videoDuration) return null;
+      if (typeof this.videoDuration === 'number') return this.videoDuration;
+      if (typeof this.videoDuration === 'string') {
+        const parsed = parseDuration(this.videoDuration);
+        return parsed || null;
+      }
+      return null;
+    },
+    isAudioDurationValid() {
+      return Boolean(
+        this.audioDuration &&
+        this.resolvedVideoDuration &&
+        this.audioDuration >= this.resolvedVideoDuration
+      );
+    },
+    maxAudioStart() {
+      if (!this.isAudioDurationValid) return 0;
+      return Math.max(0, this.audioDuration - this.resolvedVideoDuration);
+    },
+    minAudioEnd() {
+      if (!this.isAudioDurationValid) return 0;
+      return this.resolvedVideoDuration;
+    },
     dialogVisible: {
       get() {
         return this.visible;
@@ -159,6 +231,21 @@ export default {
       set(value) {
         this.$emit('update:visible', value);
       }
+    }
+  },
+  watch: {
+    audioDuration() {
+      this.initializeAudioRange();
+    },
+    resolvedVideoDuration() {
+      this.initializeAudioRange();
+    },
+    audioRange: {
+      handler(newRange, oldRange) {
+        if (this.isAdjustingRange || !this.isAudioDurationValid) return;
+        this.syncAudioRange(newRange, oldRange);
+      },
+      deep: true
     }
   },
   methods: {
@@ -171,6 +258,9 @@ export default {
     onAudioRemoved() {
       this.audioFile = null;
       this.audioDuration = null;
+      this.audioStart = 0;
+      this.audioEnd = 0;
+      this.audioRange = [0, 0];
       this.error = null;
     },
 
@@ -180,6 +270,7 @@ export default {
       
       audio.addEventListener('loadedmetadata', () => {
         this.audioDuration = audio.duration;
+        this.initializeAudioRange();
         URL.revokeObjectURL(url);
       });
       
@@ -191,8 +282,100 @@ export default {
       audio.src = url;
     },
 
+    async initializeAudioRange() {
+      if (!this.audioDuration || !this.resolvedVideoDuration) return;
+      const clipDuration = this.resolvedVideoDuration;
+      if (this.audioDuration < clipDuration) {
+        this.isAdjustingRange = true;
+        this.audioStart = 0;
+        this.audioEnd = this.audioDuration;
+        this.audioRange = [0, this.audioDuration];
+        await this.$nextTick();
+        this.isAdjustingRange = false;
+        return;
+      }
+      const start = Math.min(this.audioStart || 0, this.audioDuration - clipDuration);
+      const end = start + clipDuration;
+      this.isAdjustingRange = true;
+      this.audioStart = start;
+      this.audioEnd = end;
+      this.audioRange = [start, end];
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
+    },
+
+    async syncAudioRange(newRange, oldRange) {
+      const clipDuration = this.resolvedVideoDuration;
+      if (!clipDuration) return;
+      const [newStart, newEnd] = newRange;
+      const [oldStart, oldEnd] = oldRange || [];
+      let nextStart = newStart;
+      let nextEnd = newEnd;
+      const startChanged = newStart !== oldStart;
+      const endChanged = newEnd !== oldEnd;
+      const rangeLength = newEnd - newStart;
+      if (Math.abs(rangeLength - clipDuration) > 0.05) {
+        if (startChanged && !endChanged) {
+          nextEnd = newStart + clipDuration;
+        } else if (endChanged && !startChanged) {
+          nextStart = newEnd - clipDuration;
+        } else {
+          nextEnd = newStart + clipDuration;
+        }
+      }
+
+      if (nextStart < 0) {
+        nextStart = 0;
+        nextEnd = clipDuration;
+      }
+      if (nextEnd > this.audioDuration) {
+        nextEnd = this.audioDuration;
+        nextStart = this.audioDuration - clipDuration;
+      }
+
+      // Only update if values actually changed
+      if (nextStart !== this.audioStart || nextEnd !== this.audioEnd) {
+        this.isAdjustingRange = true;
+        this.audioStart = nextStart;
+        this.audioEnd = nextEnd;
+        this.audioRange = [nextStart, nextEnd];
+        this.$nextTick(() => {
+          this.isAdjustingRange = false;
+        });
+      }
+    },
+
+    async updateAudioStart(value) {
+      if (!this.isAudioDurationValid) return;
+      const clipDuration = this.resolvedVideoDuration;
+      const start = Math.min(Math.max(0, value || 0), this.audioDuration - clipDuration);
+      const end = start + clipDuration;
+      this.isAdjustingRange = true;
+      this.audioStart = start;
+      this.audioEnd = end;
+      this.audioRange = [start, end];
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
+    },
+
+    async updateAudioEnd(value) {
+      if (!this.isAudioDurationValid) return;
+      const clipDuration = this.resolvedVideoDuration;
+      const end = Math.min(Math.max(clipDuration, value || clipDuration), this.audioDuration);
+      const start = end - clipDuration;
+      this.isAdjustingRange = true;
+      this.audioStart = start;
+      this.audioEnd = end;
+      this.audioRange = [start, end];
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
+    },
+
     formatDuration(seconds) {
-      if (!seconds) return 'Unknown';
+      if (seconds === null || seconds === undefined || Number.isNaN(seconds)) return 'Unknown';
       const mins = Math.floor(seconds / 60);
       const secs = Math.floor(seconds % 60);
       return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -203,6 +386,10 @@ export default {
         this.error = 'Please select an audio file';
         return;
       }
+      if (!this.isAudioDurationValid) {
+        this.error = 'Audio must be at least as long as the video to create a soundtrack.';
+        return;
+      }
 
       this.processing = true;
       this.error = null;
@@ -211,7 +398,9 @@ export default {
         const options = {
           volume: this.volume,
           fadeIn: this.fadeIn,
-          fadeOut: this.fadeOut
+          fadeOut: this.fadeOut,
+          audioStart: this.audioStart,
+          audioEnd: this.audioEnd
         };
 
         await this.$store.dispatch('videojobs/addSoundtrack', {
@@ -238,6 +427,9 @@ export default {
     resetForm() {
       this.audioFile = null;
       this.audioDuration = null;
+      this.audioStart = 0;
+      this.audioEnd = 0;
+      this.audioRange = [0, 0];
       this.volume = 100;
       this.fadeIn = 0;
       this.fadeOut = 0;
@@ -293,6 +485,28 @@ export default {
 .field label {
   font-weight: 600;
   color: var(--text-color);
+}
+
+.audio-range {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.range-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.range-input label {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
+}
+
+.field-help {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary);
 }
 
 .error-section,
