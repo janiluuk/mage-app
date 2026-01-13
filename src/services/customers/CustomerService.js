@@ -1,7 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const API_BASE_URL = process.env.VUE_APP_API_BASE_URL || 'http://localhost:3000/api/v1';
+const BASE_URL = API_BASE_URL || 'http://localhost:3000/api/v1';
 
 /**
  * Service for managing customer data with backend API integration
@@ -13,7 +14,7 @@ class CustomerService {
    */
   async getCustomersSmall() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/customers?limit=10`, {
+      const { data } = await axios.get(`${BASE_URL}/customers?limit=10`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -29,7 +30,7 @@ class CustomerService {
    */
   async getCustomersMedium() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/customers?limit=50`, {
+      const { data } = await axios.get(`${BASE_URL}/customers?limit=50`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -45,7 +46,7 @@ class CustomerService {
    */
   async getCustomersLarge() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/customers?limit=200`, {
+      const { data } = await axios.get(`${BASE_URL}/customers?limit=200`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -61,7 +62,7 @@ class CustomerService {
    */
   async getCustomersXLarge() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/customers?limit=1000`, {
+      const { data } = await axios.get(`${BASE_URL}/customers?limit=1000`, {
         headers: authHeader()
       });
       return data.data || [];
@@ -79,7 +80,7 @@ class CustomerService {
   async getCustomers(params) {
     try {
       const queryParams = new URLSearchParams(params).toString();
-      const { data } = await axios.get(`${API_BASE_URL}/customers?${queryParams}`, {
+      const { data } = await axios.get(`${BASE_URL}/customers?${queryParams}`, {
         headers: authHeader()
       });
       return data;

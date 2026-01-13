@@ -35,7 +35,6 @@ import { useLayout } from '@/layout/composables/layout';
 import _ from 'lodash';
 import { mapActions } from 'vuex';
 import * as authActions from '@/store/modules/auth/types/actions';
-import * as notificationActions from '@/store/modules/notification/types/actions';
 import { required } from  '@vuelidate/validators';
 import useVuelidate from "@vuelidate/core";
 const { layoutConfig } = useLayout();
@@ -75,10 +74,6 @@ export default {
       verifiedEmail: authActions.VERIFIED_EMAIL
     }),
 
-    ...mapActions('notification', {
-      setErrorNotification: notificationActions.SET_ERROR_NOTIFICATION
-    }),
-
     status(validation) {
       return {
         error: validation.$error,
@@ -87,14 +82,10 @@ export default {
     },
 
     async onVerifiedEmail() {
-      try {
-        const verified = await this.verifiedEmail(this.verifiedEmailData);
+      const verified = await this.verifiedEmail(this.verifiedEmailData);
 
-        if (verified !== false) {
-          await this.$router.push({ name: 'login' });
-        }
-      } catch (error) {
-        this.setErrorNotification(error);
+      if (verified !== false) {
+        await this.$router.push({ name: 'login' });
       }
     }
   }

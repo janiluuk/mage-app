@@ -45,10 +45,10 @@
 
 <script>
 import '@/assets/scss/material-dashboard.scss';
-import { APP_BASE_URL, API_BASE_URL } from '@/utils/domains';
+import { API_URL, APP_BASE_URL } from '@/utils/domains';
 export default {
-  data() {
-    return {
+    data() {
+      return {
       uploadedVideo: null,
       dragOver: false,
       showForm: false,
@@ -57,8 +57,13 @@ export default {
         cfgScale: 7,
         modelName: 'ChilloutMix'
       }
-    };
-  },
+      };
+    },
+    computed: {
+      apiBaseUrl() {
+        return API_URL ? `${API_URL}/api` : '';
+      }
+    },
   methods: {
     handleFileUpload(event) {
       const file = event.target.files[0];
@@ -105,7 +110,7 @@ export default {
 
       // Send the form data to the Laravel API
       // Adjust the API endpoint URL as per your configuration
-      fetch(`${API_BASE_URL}/generate`, {
+      fetch(`${this.apiBaseUrl}/generate`, {
         method: 'POST',
         body: JSON.stringify(payload),
         headers: {

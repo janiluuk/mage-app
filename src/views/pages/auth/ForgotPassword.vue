@@ -84,9 +84,17 @@ export default {
         async onForgotPassword() {
             if (!this.validationRestorePasswordForm()) {
                 try {
-                    await this.forgotPassword(this.forgotPasswordData);
-
-                    await this.$router.push({ name: 'ResetPassword' });
+                    const resetData = await this.forgotPassword(this.forgotPasswordData);
+                    if (resetData !== false) {
+                        const query = {};
+                        if (resetData?.id) {
+                            query.id = resetData.id;
+                        }
+                        if (resetData?.hash) {
+                            query.hash = resetData.hash;
+                        }
+                        await this.$router.push({ name: 'verify-email', query });
+                    }
                 } catch (error) {
                     this.setErrorNotification(error);
                 }

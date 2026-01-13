@@ -253,6 +253,7 @@ import { LocalStorage } from '@/components/Deforum/services/LocalStorage'
 import Config from '@/components/Deforum/types/Config'
 import UserConfig from '@/components/Deforum/types/UserConfig'
 import GenerationService from '@/services/story/GenerationService'
+import env from '@/utils/env'
 
 const router = useRouter()
 const toast = useToast()
@@ -279,7 +280,7 @@ let statusPoller = null
 
 // WebSocket URL - can be configured via environment variable
 const websocketUrl = computed(() => {
-  return import.meta.env.VITE_APP_DEFORUM_WS_URL || null
+  return env.VITE_APP_DEFORUM_WS_URL || null
 })
 
 // Generation config combines story and deforum settings

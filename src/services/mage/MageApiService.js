@@ -1,3 +1,5 @@
+import env from '@/utils/env';
+
 /**
  * Fetch and parse JSON from a URL with error handling and timeout.
  * @param {string} url - URL to fetch from
@@ -34,12 +36,12 @@ async function fetchJson(url, timeoutMs = 10000) {
 const MageApiService = {
   getStatus() {
     // Use full API URL from environment
-    const API_URL = process.env.VUE_APP_API_URL || '';
+    const API_URL = env.VITE_API_URL || '';
     return fetchJson(`${API_URL}/api/status`);
   },
   getQueue() {
     // Use audio-queue endpoint to avoid conflict with video queue
-    const API_URL = process.env.VUE_APP_API_URL || '';
+    const API_URL = env.VITE_API_URL || '';
     return fetchJson(`${API_URL}/api/audio-queue`);
   },
 };

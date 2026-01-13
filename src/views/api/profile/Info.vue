@@ -66,6 +66,7 @@ import ValidationError from "@/components/ValidationError.vue";
 import formMixin from "@/mixins/formMixin.js";
 import showSwal from "@/mixins/showSwal.js";
 import _ from "lodash"
+import env from "@/utils/env";
 
 export default {
   name: "Info",
@@ -117,7 +118,7 @@ export default {
       this.user.profile_image = this.initialImageUrl;
     },
     async handleSubmit() {
-      if (this.user.id <= 3 && (process.env.VUE_APP_IS_DEMO ?? 1) == 1) {
+      if (this.user.id <= 3 && (env.VITE_IS_DEMO ?? 1) == 1) {
         showSwal.methods.showSwal({
           type: "error",
           message: "You are not allowed to change data of default users.",

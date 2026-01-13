@@ -18,7 +18,13 @@ export default {
   },
   [actions.VERIFIED_EMAIL]: async ({ dispatch }, verifiedEmailData) => {
     try {
-      await AuthService.verifiedEmail(verifiedEmailData);
+      const verified = await AuthService.verifiedEmail(verifiedEmailData);
+      dispatch(
+        'notification/' + notificationActions.SET_SUCCESS_NOTIFICATION,
+        'Email verification succeeded.',
+        { root: true }
+      );
+      return verified;
     } catch (error) {
       dispatch(
         'notification/' + notificationActions.SET_ERROR_NOTIFICATION,
@@ -67,13 +73,14 @@ export default {
 
   [actions.FORGOT_PASSWORD]: async ({ dispatch }, forgotPasswordData) => {
     try {
-      await AuthService.forgotPassword(forgotPasswordData);
+      return await AuthService.forgotPassword(forgotPasswordData);
     } catch (error) {
       dispatch(
         'notification/' + notificationActions.SET_ERROR_NOTIFICATION,
         error,
         { root: true }
       );
+      return false;
     }
   },
 
