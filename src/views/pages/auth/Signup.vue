@@ -156,9 +156,16 @@ export default {
           );
             console.log(isRegisterSuccessful);
           if (isRegisterSuccessful !== false) {
+            const query = {};
+            if (isRegisterSuccessful?.id) {
+              query.id = isRegisterSuccessful.id;
+            }
+            if (isRegisterSuccessful?.hash) {
+              query.hash = isRegisterSuccessful.hash;
+            }
             await this.$router.push({
-              name: 'verification',
-              query: { id: isRegisterSuccessful.id }
+              name: 'verify-email',
+              query
             });
           }
         } catch (error) {

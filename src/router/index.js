@@ -14,6 +14,7 @@ import DeforumUI from "@/views/dev/DeforumUI.vue";
 import DeforumationQT from "@/views/dev/DeforumationQT.vue";
 import MageAppMain from "@/views/MageAppMain.vue";
 import StoryCreator from "@/views/StoryCreator.vue";
+import Verification from "@/views/pages/auth/Verification.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -279,6 +280,12 @@ const router = createRouter({
       name: "login",
       meta: { handleAuth: true },
       component: () => import("@/views/pages/auth/Login.vue"),
+    },
+    {
+      path: "/verify-email",
+      name: "verify-email",
+      meta: { handleAuth: true },
+      component: Verification,
     },
     {
       path: "/password-forgot",
