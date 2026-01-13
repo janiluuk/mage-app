@@ -240,9 +240,12 @@ export default {
     resolvedVideoDuration() {
       this.initializeAudioRange();
     },
-    audioRange(newRange, oldRange) {
-      if (this.isAdjustingRange || !this.isAudioDurationValid) return;
-      this.syncAudioRange(newRange, oldRange);
+    audioRange: {
+      handler(newRange, oldRange) {
+        if (this.isAdjustingRange || !this.isAudioDurationValid) return;
+        this.syncAudioRange(newRange, oldRange);
+      },
+      deep: true
     }
   },
   methods: {
@@ -297,8 +300,9 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      await this.$nextTick();
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
     async syncAudioRange(newRange, oldRange) {
@@ -330,12 +334,16 @@ export default {
         nextStart = this.audioDuration - clipDuration;
       }
 
-      this.isAdjustingRange = true;
-      this.audioStart = nextStart;
-      this.audioEnd = nextEnd;
-      this.audioRange = [nextStart, nextEnd];
-      await this.$nextTick();
-      this.isAdjustingRange = false;
+      // Only update if values actually changed
+      if (nextStart !== this.audioStart || nextEnd !== this.audioEnd) {
+        this.isAdjustingRange = true;
+        this.audioStart = nextStart;
+        this.audioEnd = nextEnd;
+        this.audioRange = [nextStart, nextEnd];
+        this.$nextTick(() => {
+          this.isAdjustingRange = false;
+        });
+      }
     },
 
     async updateAudioStart(value) {
@@ -347,8 +355,9 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      await this.$nextTick();
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
     async updateAudioEnd(value) {
@@ -360,8 +369,9 @@ export default {
       this.audioStart = start;
       this.audioEnd = end;
       this.audioRange = [start, end];
-      await this.$nextTick();
-      this.isAdjustingRange = false;
+      this.$nextTick(() => {
+        this.isAdjustingRange = false;
+      });
     },
 
     formatDuration(seconds) {
