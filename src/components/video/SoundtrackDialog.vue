@@ -283,9 +283,11 @@ export default {
       if (!this.audioDuration || !this.resolvedVideoDuration) return;
       const clipDuration = this.resolvedVideoDuration;
       if (this.audioDuration < clipDuration) {
+        this.isAdjustingRange = true;
         this.audioStart = 0;
         this.audioEnd = this.audioDuration;
         this.audioRange = [0, this.audioDuration];
+        this.isAdjustingRange = false;
         return;
       }
       const start = Math.min(this.audioStart || 0, this.audioDuration - clipDuration);
