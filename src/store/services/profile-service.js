@@ -1,8 +1,8 @@
 import axios from 'axios';
 import Jsona from 'jsona';
-import env from '@/utils/env';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const url = env.VITE_API_BASE_URL;
+const url = API_BASE_URL;
 const jsona = new Jsona();
 
 function get() {

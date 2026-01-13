@@ -25,9 +25,9 @@
 
 <script>
 import axios from 'axios';
-import env from '@/utils/env';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const API_URL = env.VITE_API_BASE_URL;
+const API_URL = API_BASE_URL;
 
 	export default {
 		data(){

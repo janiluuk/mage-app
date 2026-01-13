@@ -1,8 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
-import env from '@/utils/env';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const API_BASE_URL = env.VITE_API_BASE_URL || 'http://localhost:3000/api/v1';
+const BASE_URL = API_BASE_URL || 'http://localhost:3000/api/v1';
 
 /**
  * Service for managing hierarchical node data with backend API integration
@@ -14,7 +14,7 @@ class NodeService {
    */
   async getTreeTableNodes() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/nodes/tree-table`, {
+      const { data } = await axios.get(`${BASE_URL}/nodes/tree-table`, {
         headers: authHeader()
       });
       return data.root || [];
@@ -30,7 +30,7 @@ class NodeService {
    */
   async getTreeNodes() {
     try {
-      const { data } = await axios.get(`${API_BASE_URL}/nodes/tree`, {
+      const { data } = await axios.get(`${BASE_URL}/nodes/tree`, {
         headers: authHeader()
       });
       return data.root || [];

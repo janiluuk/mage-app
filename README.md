@@ -93,19 +93,20 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
 3. Set the URLs in `.env` (exact variables read by the app):
    - **Required:**
      - `VITE_API_URL`: single source of truth for API base URL (e.g. `http://localhost:3000`). All API endpoints are derived from this.
-     - `VITE_API_BASE_URL`: base URL for services that hit v1 endpoints directly (e.g. `http://localhost:3000/api/v1`).
-     - `VITE_API_V1_BASE_URL`: explicit v1 base URL for legacy services (e.g. `http://localhost:3000/api/v1`).
    - **Optional:**
-     - `VITE_BASE_URL`: base URL for dashboard static assets.
      - `VITE_APP_URL`: canonical public hostname for sharing links (defaults to `VITE_API_URL` if not set).
      - `VITE_MAGE_API_URL`: profile/user service endpoint (e.g. `http://localhost:47860`).
      - `VITE_FALLBACK_IMAGE_URL`: fallback image URL (defaults to `{API_URL}/images/notfound.jpg`).
      - `VITE_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
      - `VITE_STABLE_URL`: fallback stable URL (primary value fetched from backend `/api/config`).
-     - `VITE_MODEL_PREVIEW_URL`: base URL for model preview assets.
-     - `VITE_VIDEO_PREVIEW_URL`: base URL for video preview assets.
      - `VITE_IS_DEMO`: demo-mode flag for profile editing (`1` enables demo restrictions).
      - `VITE_APP_DEFORUM_WS_URL`: Deforum websocket URL used by StoryCreator.
+   - **Optional overrides (see `.env.overrides.example`):**
+     - `VITE_BASE_URL`: base URL for dashboard static assets.
+     - `VITE_API_BASE_URL`: base URL for services that hit v1 endpoints directly (defaults to `{VITE_API_URL}/api/v1`).
+     - `VITE_API_V1_BASE_URL`: explicit v1 base URL for legacy services (defaults to `{VITE_API_URL}/api/v1`).
+     - `VITE_MODEL_PREVIEW_URL`: base URL for model preview assets.
+     - `VITE_VIDEO_PREVIEW_URL`: base URL for video preview assets.
 
 ### Running the app
 - Development server with debug logging:

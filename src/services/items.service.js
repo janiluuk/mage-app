@@ -2,9 +2,9 @@ import axios from 'axios';
 import Jsona from 'jsona';
 import qs from 'qs';
 import authHeader from './auth-header';
-import env from '@/utils/env';
+import { API_V1_BASE_URL } from '@/utils/api-base-urls';
 
-const url = env.VITE_API_V1_BASE_URL;
+const url = API_V1_BASE_URL;
 const dataFormatter = new Jsona();
 
 export default {

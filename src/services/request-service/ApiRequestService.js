@@ -1,12 +1,12 @@
 import axios from 'axios';
 import AuthService from '@/services/auth/AuthService';
 import router from '@/router';
-import env from '@/utils/env';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
-const API_URL = env.VITE_API_BASE_URL || '';
+const API_URL = API_BASE_URL || '';
 
 if (!API_URL) {
-  console.warn('Missing VITE_API_BASE_URL. API requests will fail until it is configured.');
+  console.warn('Missing VITE_API_URL or VITE_API_BASE_URL. API requests will fail until it is configured.');
 }
 
 /**

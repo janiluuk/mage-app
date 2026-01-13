@@ -1,9 +1,9 @@
 import qs from 'qs';
 import axios from 'axios';
 import Jsona from 'jsona';
-import env from '@/utils/env';
+import { API_V1_BASE_URL } from '@/utils/api-base-urls';
 
-const url = env.VITE_API_V1_BASE_URL;
+const url = API_V1_BASE_URL;
 const jsona = new Jsona();
 
 function list(params) {

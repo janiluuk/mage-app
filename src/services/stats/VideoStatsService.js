@@ -1,8 +1,8 @@
 import axios from 'axios';
 import authHeader from '../auth-header';
-import env from '@/utils/env';
+import { API_V1_BASE_URL as V1_BASE_URL } from '@/utils/api-base-urls';
 
-const API_V1_BASE_URL = env.VITE_API_V1_BASE_URL;
+const API_V1_BASE_URL = V1_BASE_URL;
 
 // Cache for stats to reduce API calls
 const statsCache = {
