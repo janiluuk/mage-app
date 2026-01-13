@@ -2,7 +2,7 @@ import axios from 'axios';
 import authHeader from './auth-header';
 import { API_URL, APP_BASE_URL } from '@/utils/domains';
 
-const API_URL_V2 = API_URL ? `${API_URL}/api/v2` : '';
+const API_V2_URL = API_URL ? `${API_URL}/api/v2` : '';
 const BASE_URL = APP_BASE_URL;
 const jsonApiHeaders = {
   Accept: 'application/vnd.api+json',
@@ -14,7 +14,7 @@ const jsonApiHeaders = {
  */
 async function login(user) {
   const { data } = await axios.post(
-    `${API_URL_V2}/login`,
+    `${API_V2_URL}/login`,
     {
       email: user.email,
       password: user.password,
@@ -33,7 +33,7 @@ async function login(user) {
  * Terminate the active session on the server and clear the local token.
  */
 async function logout() {
-  await axios.post(`${API_URL_V2}/logout`, {}, { headers: authHeader() });
+  await axios.post(`${API_V2_URL}/logout`, {}, { headers: authHeader() });
   localStorage.removeItem('auth.accessToken');
 }
 
@@ -41,7 +41,7 @@ async function logout() {
  * Register a new account and store the issued token when present.
  */
 async function register(user) {
-  const { data } = await axios.post(`${API_URL_V2}/register`, {
+  const { data } = await axios.post(`${API_V2_URL}/register`, {
     name: user.name,
     email: user.email,
     password: user.password,
@@ -60,7 +60,7 @@ async function register(user) {
  */
 async function passwordForgot(userEmail) {
   const response = await axios.post(
-    `${API_URL_V2}/password-forgot`,
+    `${API_V2_URL}/password-forgot`,
     {
       redirect_url: `${BASE_URL}/password-reset`,
       email: userEmail,
@@ -76,7 +76,7 @@ async function passwordForgot(userEmail) {
  */
 async function passwordReset(passwordDTO) {
   const response = await axios.post(
-    `${API_URL_V2}/password-reset`,
+    `${API_V2_URL}/password-reset`,
     {
       password: passwordDTO.newPassword,
       password_confirmation: passwordDTO.confirmPassword,
