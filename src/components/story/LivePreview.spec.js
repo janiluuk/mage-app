@@ -86,6 +86,7 @@ describe('LivePreview', () => {
     await vm.toggleGeneration()
     expect(vm.isGenerating).toBe(false)
     expect(vm.isPaused).toBe(true)
+    expect(generationService.pauseBatch).toHaveBeenCalledWith('job-123')
   })
 
   it('displays progress bar when generating', async () => {
