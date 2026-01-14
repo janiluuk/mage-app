@@ -18,10 +18,12 @@
       ×
     </button>
     <i data-notify="icon" class="material-icons" v-if="icon">{{ icon }}</i>
-    <span data-notify="message" v-html="message"></span>
+    <span data-notify="message" v-html="sanitizedMessage"></span>
   </div>
 </template>
 <script>
+import { sanitize } from '@/utils/sanitize';
+
 export default {
   name: "notification",
   props: {
@@ -56,6 +58,9 @@ export default {
   computed: {
     hasIcon() {
       return this.icon && this.icon.length > 0;
+    },
+    sanitizedMessage() {
+      return sanitize(this.message || '');
     },
     alertType() {
       return `alert-${this.type}`;

@@ -2,8 +2,7 @@
   <div class="card" :class="darkMode ? 'bg-gradient-dark' : ''">
     <div class="pb-0 card-header" :class="darkMode ? 'bg-transparent' : ''">
       <h6 :class="darkMode ? 'text-white' : ''">{{ title }}</h6>
-      <!--  eslint-disable-next-line vue/no-v-html -->
-      <p class="text-sm" v-html="description"></p>
+      <p class="text-sm" v-html="sanitizedDescription"></p>
     </div>
     <div class="p-3 card-body">
       <div
@@ -17,6 +16,8 @@
 </template>
 
 <script>
+import { sanitize } from '@/utils/sanitize';
+
 export default {
   name: "TimelineList",
   props: {
@@ -31,6 +32,11 @@ export default {
     darkMode: {
       type: Boolean,
       default: false,
+    },
+  },
+  computed: {
+    sanitizedDescription() {
+      return sanitize(this.description || '');
     },
   },
 };

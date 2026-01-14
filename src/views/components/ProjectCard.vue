@@ -4,7 +4,7 @@
       <div class="row">
         <div class="col-lg-6 col-7">
           <h6>{{ title }}</h6>
-          <p class="text-sm mb-0" v-html="description"></p>
+          <p class="text-sm mb-0" v-html="sanitizedDescription"></p>
         </div>
         <div class="col-lg-6 col-5 my-auto text-end">
           <div class="dropdown float-lg-end pe-4">
@@ -132,6 +132,8 @@
 </template>
 
 <script>
+import { sanitize } from '@/utils/sanitize';
+
 export default {
   name: "projectCard",
   props: {
@@ -159,6 +161,11 @@ export default {
         percentage: Number,
         color: String,
       },
+    },
+  },
+  computed: {
+    sanitizedDescription() {
+      return sanitize(this.description || '');
     },
   },
 };
