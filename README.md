@@ -392,6 +392,21 @@ describe('MyComponent', () => {
 ### Coverage
 Run `npm run test:frontend:coverage` to generate a coverage report for frontend tests. Coverage reports are generated in the `coverage/` directory and include HTML, JSON, and text formats.
 
+## Releases
+
+This project uses automated releases with semantic versioning. When changes are merged to the `main` branch:
+- Version is automatically bumped based on [Conventional Commits](https://www.conventionalcommits.org/)
+- A changelog is generated from commit messages
+- A GitHub release is created with the changelog
+- The version in `package.json` is updated
+
+**Version bumping rules:**
+- `feat:` commits trigger a **minor** version bump (e.g., 1.0.0 → 1.1.0)
+- `fix:` commits trigger a **patch** version bump (e.g., 1.0.0 → 1.0.1)
+- `BREAKING CHANGE:` or `!` in commit triggers a **major** version bump (e.g., 1.0.0 → 2.0.0)
+
+See [Release Workflow Documentation](docs/RELEASE_WORKFLOW.md) for detailed information on conventional commits, changelog generation, and release management.
+
 ## Security
 
 ### XSS Prevention
