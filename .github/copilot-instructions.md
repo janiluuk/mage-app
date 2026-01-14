@@ -105,9 +105,10 @@ npm run api              # Start audio streaming helper
 - JWT authentication with token storage in localStorage
 
 ### State Management
-- Use Vuex for global state
+- Use Vuex for global state (primary state management solution)
 - Store modules are in `src/store/`
 - Prefer composables for component-level state management
+- Note: Pinia is available as a dependency but not actively used in the codebase
 
 ### Routing
 - Protected routes use `meta.requiresAuth = true`
@@ -225,7 +226,7 @@ Optional:
 ### API Service Pattern
 ```javascript
 // src/services/example.service.js
-import requestService from './request-service/ApiRequestService';
+import requestService from '@/services/request-service/ApiRequestService';
 
 export default {
   async getData(id) {
