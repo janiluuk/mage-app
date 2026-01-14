@@ -26,6 +26,17 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   - Export to Deforum-compatible formats
   - See [Story Creator Documentation](docs/STORY_CREATOR.md) for details
 
+- **🤝 Collaboration & Sharing** (NEW)
+  - **Share projects with granular permissions** - Generate secure share links with view, edit, or admin access
+  - **Real-time presence tracking** - See who's viewing or editing your project in real-time
+  - **Activity logs** - Track all changes with automatic timestamps and user attribution
+  - **Live cursor broadcasting** - Watch collaborators' cursors move as they work
+  - **Automatic reconnection** - Smart reconnect logic ensures seamless collaboration even with network interruptions
+  - **Permission management** - Add or remove collaborators and adjust their access levels on the fly
+  - **Expiring shares** - Set time limits on shared links for enhanced security
+  
+  *Perfect for teams working on video projects together, sharing work-in-progress with clients, or getting real-time feedback from stakeholders.*
+
 ### AI & Media Processing
 - **🎬 Video Editing Tools**
   - Vid2Vid editor for video-to-video transformations
@@ -75,6 +86,84 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
 - [Vue Plyr](https://github.com/redxtech/vue-plyr) and [vue-audio-visual](https://github.com/staskobzar/vue-audio-visual) for media playback
 - Optional Node helper in `backend/` for streaming audio via FFmpeg and ComfyUI
 
+## How to Use
+
+### Collaboration & Sharing
+
+**Share a project:**
+```javascript
+import { useSharingService } from '@/services/sharingService';
+
+const sharingService = useSharingService();
+
+// Create a shareable link with edit permissions that expires in 7 days
+const share = await sharingService.createShare(projectId, 'edit', 7);
+const shareUrl = generateShareUrl(share.share_id);
+
+// Share the URL with your team
+console.log(`Share this link: ${shareUrl}`);
+```
+
+**Track collaborators in real-time:**
+```javascript
+import { useCollaborationService } from '@/services/collaborationService';
+
+const collaboration = useCollaborationService();
+
+// Connect to a project session
+await collaboration.connect(wsUrl, projectId, currentUser);
+
+// Listen for collaborators joining
+collaboration.addEventListener('user_joined', (data) => {
+  console.log(`${data.user.name} joined the project!`);
+});
+
+// See who's online right now
+const onlineUsers = collaboration.getOnlineUsers();
+
+// Broadcast your cursor position for real-time feedback
+collaboration.broadcastCursor(mouseX, mouseY);
+```
+
+**Manage permissions:**
+```javascript
+// Add a collaborator with view-only access
+await addCollaborator(shareId, 'colleague@example.com', 'view');
+
+// Upgrade their permission to edit
+await updateSharePermission(shareId, 'edit');
+
+// Remove access when done
+await removeCollaborator(shareId, userId);
+```
+
+**Monitor activity:**
+```javascript
+// Get recent activity log
+const activities = collaboration.getActivityLog(10);
+
+activities.forEach(activity => {
+  console.log(`${activity.user_name} ${getActivityDescription(activity)}`);
+  console.log(`  ${formatActivityTime(activity.timestamp)}`);
+});
+```
+
+### Creating Stories
+
+Navigate to `/story` to access the Story Creator. Choose a template or start from scratch, then:
+1. Add scenes with keyframes and prompts
+2. Configure camera movements and transitions
+3. Preview generation in real-time
+4. Export when complete
+
+### Processing Media
+
+Upload videos through the Media Library, then use:
+- **Vid2Vid editor** to transform video style
+- **Add Soundtrack** to merge audio with video
+- **Extend Video** to smoothly increase duration
+- **Deforum editor** for AI animation sequences
+
 ## Backend Architecture
 
 **Important:** This repository contains the frontend application only. The main API backend is maintained in a separate repository:
@@ -102,6 +191,8 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
      - `VITE_API_URL`: single source of truth for API base URL (e.g. `http://localhost:3000`). All API endpoints are derived from this.
    - **Optional:**
      - `VITE_APP_URL`: canonical public hostname for sharing links (defaults to `VITE_API_URL` if not set).
+     - `VITE_SHARE_BASE_URL`: base URL for shared project links (defaults to `VITE_APP_URL` or `window.location.origin`).
+     - `VITE_WS_URL`: WebSocket URL for real-time collaboration (e.g., `ws://localhost:3000` - defaults to derived from `VITE_API_URL`).
      - `VITE_FALLBACK_IMAGE_URL`: fallback image URL (defaults to `{API_URL}/images/notfound.jpg`).
      - `VITE_SAMPLE_PROCESSED_VIDEO_URL`: sample processed video URL for the dev modal.
      - `VITE_STABLE_URL`: fallback stable URL (primary value fetched from backend `/api/config`).
