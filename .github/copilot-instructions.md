@@ -60,12 +60,12 @@ mage-app/
 
 ```bash
 # Development
-npm run dev              # Start dev server (port 8080)
-npm run serve            # Preview production build
+npm run dev              # Start dev server with debug logging (port 8080)
+npm run serve            # Start dev server (port 8080)
 
 # Building
 npm run build            # Build for production
-npm run lint             # Run linter
+npm run lint             # Optimize dependencies (vite optimize --force)
 
 # Testing
 npm test                 # Run all tests (backend + frontend)
@@ -92,7 +92,7 @@ npm run api              # Start audio streaming helper
 ### Code Style
 - Follow Vue 3 style guide: https://vuejs.org/style-guide/
 - ESLint config: `plugin:vue/vue3-essential`, `eslint:recommended`, `@vue/prettier`
-- Prettier formatting is disabled (see `.eslintrc.js`)
+- Prettier formatting rule is turned off in ESLint but Prettier is available as a dependency
 - Console logs allowed in development, warn in production
 - Use single quotes for strings where possible
 
