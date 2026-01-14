@@ -485,8 +485,10 @@ describe('collaborationService', () => {
 
       it('checks if connected', async () => {
         // Initial state - should return false, not throw
-        const isConnected = service.isConnected();
-        expect(isConnected).toBeFalsy();
+        expect(() => {
+          const isConnected = service.isConnected();
+          expect(isConnected).toBeFalsy();
+        }).not.toThrow();
         
         await service.connect('ws://localhost:8080', 1, mockUser);
         expect(service.isConnected()).toBe(true);
