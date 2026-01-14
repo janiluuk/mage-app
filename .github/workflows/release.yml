@@ -44,7 +44,7 @@ jobs:
           
           # Get commits since last tag
           if [ "$LAST_TAG" = "v0.0.0" ]; then
-            COMMITS=$(git log --pretty=format:"%s" origin/main)
+            COMMITS=$(git log --pretty=format:"%s" HEAD)
           else
             COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s")
           fi
@@ -64,7 +64,7 @@ jobs:
           # Determine version bump type based on conventional commits
           BUMP="patch"
           
-          if echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?!:|^[a-z]+(\(.+\))?!:|BREAKING CHANGE:"; then
+          if echo "$COMMITS" | grep -qiE "^(feat|feature|fix|refactor|perf)(\(.+\))?!:|BREAKING CHANGE:"; then
             BUMP="major"
           elif echo "$COMMITS" | grep -qiE "^(feat|feature)(\(.+\))?:"; then
             BUMP="minor"
@@ -115,7 +115,7 @@ jobs:
           echo "" >> CHANGELOG.tmp
           
           if [ "$LAST_TAG" = "v0.0.0" ]; then
-            COMMITS=$(git log --pretty=format:"* %s (%h)" origin/main)
+            COMMITS=$(git log --pretty=format:"* %s (%h)" HEAD)
           else
             COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"* %s (%h)")
           fi

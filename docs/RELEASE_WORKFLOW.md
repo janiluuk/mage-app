@@ -20,7 +20,8 @@ The workflow uses **Conventional Commits** to determine the type of version bump
 
 1. **Major version bump** (e.g., 1.0.0 → 2.0.0):
    - Commit message contains `BREAKING CHANGE:` in the body or footer
-   - Commit message has `!` after the type/scope (e.g., `feat!:` or `feat(api)!:`)
+   - Commit message has `!` after specific types: `feat!:`, `fix!:`, `refactor!:`, or `perf!:`
+   - Note: Only meaningful commit types trigger major bumps with `!` to prevent accidental breaking changes
 
 2. **Minor version bump** (e.g., 1.0.0 → 1.1.0):
    - Commit message starts with `feat:` or `feature:`
@@ -83,7 +84,15 @@ The changelog also includes a link to view the full diff between releases on Git
 
 ## Skipping Releases
 
-If you want to merge changes to main without creating a release, include `[skip ci]` in your commit message or pull request title.
+To merge changes to main without creating a release, include `[skip ci]` in your commit message:
+
+```
+chore: update documentation [skip ci]
+```
+
+Note: The workflow analyzes individual commit messages, not pull request titles. If you want to skip a release, ensure all commits in your PR contain `[skip ci]`.
+
+This marker is automatically added to version bump commits to prevent infinite loops.
 
 ## Example Commit Messages
 
