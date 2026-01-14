@@ -2,6 +2,50 @@
 
 An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bundles media tooling, PrimeVue components, and audio/video workflows into a single dashboard that talks to a JSON API backend and an experimental FFmpeg/ComfyUI helper.
 
+## Screenshots
+
+### Authentication
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/01-login-page.png" alt="Login Page" />
+      <p align="center"><strong>Login Page</strong><br/>Secure JWT-based authentication with social login options</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/02-signup-page.png" alt="Signup Page" />
+      <p align="center"><strong>Signup Page</strong><br/>Easy account creation with email verification</p>
+    </td>
+  </tr>
+</table>
+
+### Dashboard & Library
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/05-dashboard.png" alt="Dashboard" />
+      <p align="center"><strong>Dashboard</strong><br/>Overview of your AI video generation projects with quick actions</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/04-media-library.png" alt="Media Library" />
+      <p align="center"><strong>Media Library</strong><br/>Browse, search, and manage your AI-generated videos</p>
+    </td>
+  </tr>
+</table>
+
+### Content Creation
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/06-upload-page.png" alt="Upload Page" />
+      <p align="center"><strong>Upload Page</strong><br/>Drag & drop interface for images, videos, and audio files</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/03-forgot-password.png" alt="Password Recovery" />
+      <p align="center"><strong>Password Recovery</strong><br/>Simple password reset workflow</p>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 ### Core Features
