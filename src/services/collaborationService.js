@@ -395,7 +395,7 @@ export class CollaborationService {
   logActivity(activity) {
     const logEntry = {
       ...activity,
-      id: `activity_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `activity_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       timestamp: activity.timestamp || new Date().toISOString()
     };
 
