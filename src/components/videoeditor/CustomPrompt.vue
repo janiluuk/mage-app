@@ -2,7 +2,7 @@
     <Dialog v-model="$store.state.electron.textPrompt.show" width="500">
         <Card>
             <Card-title>{{ prompt.title }}</CardTitle>
-            <Card-subtitle v-if="prompt.subtitle !== ''" v-html="prompt.subtitle"></v-card-subtitle>
+            <Card-subtitle v-if="prompt.subtitle !== ''" v-html="sanitizedSubtitle"></v-card-subtitle>
             <v-form @submit.prevent="dialogConfirm">
                 <InputText filled
                               :label="prompt.label"
@@ -28,6 +28,7 @@
 
 <script>
 import {mapState} from "vuex";
+import { sanitize } from '@/utils/sanitize';
 
 export default {
     name: "CustomPrompt",
@@ -50,6 +51,9 @@ export default {
         ...mapState({
             prompt: state => state.electron.textPrompt,
         }),
+        sanitizedSubtitle() {
+            return sanitize(this.prompt?.subtitle || '');
+        },
     },
 }
 </script>

@@ -19,14 +19,15 @@
     </div>
     <hr class="dark horizontal my-0" />
     <div class="card-footer p-3" :class="isRTL ? 'text-start' : 'text-end'">
-      <!--  eslint-disable-next-line vue/no-v-html -->
-      <p class="mb-0" v-html="detail"></p>
+      <p class="mb-0" v-html="sanitizedDetail"></p>
     </div>
   </div>
 </template>
 
 <script>
 import { mapState } from "vuex";
+import { sanitize } from '@/utils/sanitize';
+
 export default {
   name: "MiniStatisticsCard",
   data() {
@@ -63,6 +64,9 @@ export default {
   },
   computed: {
     ...mapState(["isRTL"]),
+    sanitizedDetail() {
+      return sanitize(this.detail || '');
+    },
   },
 };
 </script>

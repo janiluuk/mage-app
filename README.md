@@ -75,6 +75,13 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
 - [Vue Plyr](https://github.com/redxtech/vue-plyr) and [vue-audio-visual](https://github.com/staskobzar/vue-audio-visual) for media playback
 - Optional Node helper in `backend/` for streaming audio via FFmpeg and ComfyUI
 
+## Backend Architecture
+
+**Important:** This repository contains the frontend application only. The main API backend is maintained in a separate repository:
+- **Backend Repository:** [janiluuk/mage-api](https://github.com/janiluuk/mage-api)
+- **Purpose:** Main API server handling authentication, database operations, video processing, and core business logic
+- **The `/backend` directory** in this repository contains optional helper code for development/testing audio streaming only
+
 ## Getting Started
 ### Prerequisites
 - Node.js **18+** and npm
@@ -249,6 +256,31 @@ describe('MyComponent', () => {
 
 ### Coverage
 Run `npm run test:frontend:coverage` to generate a coverage report for frontend tests. Coverage reports are generated in the `coverage/` directory and include HTML, JSON, and text formats.
+
+## Security
+
+### XSS Prevention
+The application implements comprehensive XSS (Cross-Site Scripting) prevention:
+- **Sanitization utilities** in `src/utils/sanitize.js` for cleaning user-generated HTML content
+- **All v-html usage** is protected with the `sanitize()` function
+- Components sanitize dynamic HTML before rendering
+
+### Memory Leak Prevention
+Composables for preventing memory leaks are available in `src/composables/useCleanup.js`:
+- `usePolling()` - Auto-cleanup polling intervals
+- `useEventListener()` - Auto-remove event listeners
+- `useWebSocket()` - Auto-close WebSocket connections
+- `useRequestCancellation()` - Cancel pending requests on unmount
+
+### Error Handling
+- Global unhandled promise rejection handler in `src/main.js`
+- Vue global error handler with production-safe error messages
+- Service-level error handling with user-friendly messages
+
+### Authentication Security
+- JWT-based authentication with secure token handling
+- Protected routes with automatic redirect for unauthenticated users
+- **Note:** For production, JWT tokens should be moved from localStorage to httpOnly cookies (requires backend implementation in janiluuk/mage-api)
 
 ## Development Notes
 - Auth-protected routes use `meta.requiresAuth`; unauthenticated users are redirected to `/login`.
