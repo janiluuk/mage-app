@@ -238,4 +238,33 @@ app.component("BlockViewer", BlockViewer);
 app.use(store);
 app.use(SimpleVueValidator, { mode: "conservative" });
 
+// Global error handler for unhandled promise rejections
+window.addEventListener('unhandledrejection', (event) => {
+  console.error('Unhandled promise rejection:', event.reason);
+  
+  // Show user-friendly error message via toast if available
+  if (app.config.globalProperties.$toast) {
+    app.config.globalProperties.$toast.add({
+      severity: 'error',
+      summary: 'An error occurred',
+      detail: 'Something went wrong. Please try again.',
+      life: 5000
+    });
+  }
+  
+  // Prevent default browser behavior
+  event.preventDefault();
+});
+
+// Global error handler for uncaught errors
+app.config.errorHandler = (err, instance, info) => {
+  console.error('Global error:', err, info);
+  
+  // Report to error tracking service in production
+  if (process.env.NODE_ENV === 'production') {
+    // TODO: Add error tracking service (e.g., Sentry)
+    // Sentry.captureException(err);
+  }
+};
+
 app.mount("#app");
