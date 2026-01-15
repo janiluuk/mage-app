@@ -186,6 +186,12 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
+          path: "/browser",
+          name: "Browser",
+          component: () => import("@/views/pages/Browser.vue"),
+          meta: { requiresAuth: true },
+        },
+        {
           path: "/oldlibrary",
           name: "OldLibrary",
           component: VideoLibraryTabs,
