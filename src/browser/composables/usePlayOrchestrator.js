@@ -1,5 +1,8 @@
 import { ref, watch, onBeforeUnmount } from "vue";
 
+// Buffer multiplier to evict playing videos when exceeding max (10% buffer)
+const EVICTION_BUFFER_MULTIPLIER = 1.1;
+
 export default function usePlayOrchestrator({ visibleIds, loadedIds, maxPlaying }) {
   const playingSet = ref(new Set());
   const hoveredId = ref(null);
@@ -97,7 +100,7 @@ export default function usePlayOrchestrator({ visibleIds, loadedIds, maxPlaying 
       }
     }
 
-    if (next.size > maxPlaying.value * 1.1) {
+    if (next.size > maxPlaying.value * EVICTION_BUFFER_MULTIPLIER) {
       const evicted = evictIfNeeded(next);
       if (evicted.size !== next.size) {
         next.clear();
