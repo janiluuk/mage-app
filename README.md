@@ -46,6 +46,26 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   </tr>
 </table>
 
+### Advanced Video Browser
+<table>
+  <tr>
+    <td width="50%">
+      <img src="docs/screenshots/07-browser-filtered-view.png" alt="Browser Filtered View" />
+      <p align="center"><strong>Browser with Filters</strong><br/>Advanced filtering by tags and rating with active filter display</p>
+    </td>
+    <td width="50%">
+      <img src="docs/screenshots/09-browser-grid-view.png" alt="Browser Grid View" />
+      <p align="center"><strong>Browser Grid View</strong><br/>Responsive masonry layout with adjustable zoom and metadata</p>
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2">
+      <img src="docs/screenshots/08-browser-empty-state.png" alt="Browser Empty State" />
+      <p align="center"><strong>Empty State</strong><br/>User-friendly empty state with action prompts</p>
+    </td>
+  </tr>
+</table>
+
 ## Features
 
 ### Core Features
@@ -55,8 +75,15 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   - Email verification and password reset workflows
   - Profile management with user settings and preferences
 
-- **📚 Media Library**
-  - Browse, search, and organize video content
+- **📚 Media Library & Browser**
+  - **Advanced Video Browser** - Modern grid interface with masonry layout
+  - **Smart Filtering** - Filter by tags (include/exclude), rating, and custom criteria
+  - **Flexible Sorting** - Sort by date, rating, name, duration, or shuffle randomly
+  - **Zoom Control** - Adjustable thumbnail sizes (5 levels) for optimal viewing
+  - **Progressive Rendering** - Smooth performance with large video libraries
+  - **Batch Selection** - Multi-select with keyboard shortcuts for bulk operations
+  - **Video Metadata** - Display resolution, FPS, duration, and custom tags
+  - **Group by Folders** - Organize videos by directory structure
   - Upload videos with drag-and-drop support
   - Metadata editing and tagging system
   - Thumbnail generation and preview support
@@ -127,7 +154,7 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
 - [Vue 3](https://vuejs.org/) with [Vue Router](https://router.vuejs.org/) and [Vuex](https://vuex.vuejs.org/)
 - [Vite](https://vitejs.dev/) dev/build tooling
 - [PrimeVue](https://primevue.org/) + [PrimeFlex](https://primeflex.org/) + [PrimeIcons](https://primefaces.org/primeicons/)
-- [Vue Plyr](https://github.com/redxtech/vue-plyr) and [vue-audio-visual](https://github.com/staskobzar/vue-audio-visual) for media playback
+- Media playback with Vue Plyr and vue-audio-visual
 - Optional Node helper in `backend/` for streaming audio via FFmpeg and ComfyUI
 
 ## How to Use
@@ -199,6 +226,28 @@ Navigate to `/story` to access the Story Creator. Choose a template or start fro
 2. Configure camera movements and transitions
 3. Preview generation in real-time
 4. Export when complete
+
+### Creating and Managing Jobs
+
+**Create new jobs:**
+1. Navigate to `/upload` to access the upload interface
+2. Choose your creation type:
+   - **Animation** - Upload images (JPG, PNG, GIF) to create AI-powered animations
+   - **Video Effect** - Upload videos (MP4) to apply visual transformations
+   - **Audio Animation** - Upload audio files and configure motion settings
+3. For audio animations:
+   - Upload audio file (MP3, WAV, OGG, M4A, FLAC, max 50MB)
+   - Select motion style: Audio Sync, BPM (60-200), or Classic presets
+   - Configure animation parameters
+4. Submit job and track progress in the dashboard
+
+**Edit existing videos:**
+1. Browse your library at `/library` or `/browser`
+2. Select a video and choose edit option
+3. Use **Vid2Vid editor** (`/edit/vid2vid/:id`) for style transformations
+4. Use **Deforum editor** (`/edit/deforum/:id`) for animation sequences
+5. Adjust parameters in real-time preview
+6. Submit changes and monitor job queue
 
 ### Processing Media
 
