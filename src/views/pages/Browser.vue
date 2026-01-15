@@ -186,7 +186,7 @@
         :get-by-id="getById"
         :selection-count="selection.size"
         :on-close="hideContextMenu"
-        :on-action="runContextAction"
+        :on-action="handleContextAction"
       />
 
       <SoundtrackDialog
@@ -203,8 +203,8 @@
         v-model:visible="showExtensionDialog"
         :video-id="selectedVideoForExtension.id"
         :video-title="selectedVideoForExtension.filename || selectedVideoForExtension.prompt"
-        :video-duration="selectedVideoForExtension.duration || DEFAULT_VIDEO_DURATION"
-        :video-fps="selectedVideoForExtension.fps || DEFAULT_VIDEO_FPS"
+        :video-duration="selectedVideoForExtension.duration || 60"
+        :video-fps="selectedVideoForExtension.fps || 30"
         @video-extended="onVideoExtended"
       />
     </div>
@@ -248,10 +248,6 @@ import {
 import { zoomClassForLevel } from "@/browser/zoom/utils";
 import { ZOOM_MAX_INDEX } from "@/browser/zoom/config";
 import "@/assets/video-browser.css";
-
-// Default fallback values for video metadata
-const DEFAULT_VIDEO_DURATION = 60;
-const DEFAULT_VIDEO_FPS = 30;
 
 const router = useRouter();
 const store = useStore();
@@ -677,6 +673,10 @@ watch(
     loadedVideos.value = next;
   }
 );
+
+const handleContextAction = (actionId) => {
+  runContextAction(actionId);
+};
 
 const copyToClipboard = async (text) => {
   if (!text) return;
