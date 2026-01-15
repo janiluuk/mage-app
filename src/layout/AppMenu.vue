@@ -12,6 +12,7 @@ const model = ref([
         label: 'Video Studio',
         items: [
             { label: 'Library', icon: 'pi pi-fw pi-video', to: '/library' },
+            { label: 'Browser', icon: 'pi pi-fw pi-th-large', to: '/browser' },
             { label: 'Upload', icon: 'pi pi-fw pi-upload', to: '/upload' },
             { label: 'Jobs', icon: 'pi pi-fw pi-list', to: '/jobs' }
         ]
