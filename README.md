@@ -232,8 +232,8 @@ Navigate to `/story` to access the Story Creator. Choose a template or start fro
 **Create new jobs:**
 1. Navigate to `/upload` to access the upload interface
 2. Choose your creation type:
-   - **Animation** - Upload images (JPG, PNG, GIF) to create AI-powered animations
-   - **Video Effect** - Upload videos (MP4) to apply visual transformations
+   - **Animation** - Upload images (JPG, PNG, GIF, max 2MB) to create AI-powered animations
+   - **Video Effect** - Upload videos (MP4, max 50MB) to apply visual transformations
    - **Audio Animation** - Upload audio files and configure motion settings
 3. For audio animations:
    - Upload audio file (MP3, WAV, OGG, M4A, FLAC, max 50MB)
