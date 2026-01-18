@@ -13,15 +13,7 @@
 
 <script>
 export default {
-  name: 'VideoProcessing',
-  data() {
-    return {
-      // Component data will be added as features are implemented
-    };
-  },
-  mounted() {
-    // Initialization logic will be added here
-  }
+  name: 'VideoProcessing'
 };
 </script>
 

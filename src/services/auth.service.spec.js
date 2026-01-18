@@ -23,17 +23,17 @@ describe('auth.service', () => {
     vi.resetModules()
   })
 
-  it('tries v1 auth endpoint first, then falls back to v2', async () => {
+  it('targets v2 endpoints derived from API_URL', async () => {
     process.env.VITE_API_URL = 'https://api.example.com'
     vi.resetModules()
 
     const authService = await import('./auth.service.js')
     await authService.default.login({ email: 'a@example.com', password: 'pw' })
 
-    // Should try v1 JWT endpoint first
     expect(mockPost).toHaveBeenCalledWith(
-      'https://api.example.com/api/auth/login',
-      { email: 'a@example.com', password: 'pw' }
+      'https://api.example.com/api/v2/login',
+      { email: 'a@example.com', password: 'pw' },
+      { headers: { Accept: 'application/vnd.api+json', 'Content-Type': 'application/vnd.api+json' } }
     )
   })
 })
