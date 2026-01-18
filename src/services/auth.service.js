@@ -13,20 +13,38 @@ const jsonApiHeaders = {
  * Authenticate the user and persist the returned access token.
  */
 async function login(user) {
-  const { data } = await axios.post(
-    `${API_V2_URL}/login`,
-    {
-      email: user.email,
-      password: user.password,
-    },
-    { headers: jsonApiHeaders }
-  );
+  // Try v1 JWT endpoint first, fallback to v2
+  try {
+    const { data } = await axios.post(
+      `${API_URL}/api/auth/login`,
+      {
+        email: user.email,
+        password: user.password,
+      }
+    );
 
-  if (data?.access_token) {
-    localStorage.setItem('auth.accessToken', data.access_token);
+    if (data?.access_token || data?.token) {
+      localStorage.setItem('auth.accessToken', data.access_token || data.token);
+    }
+
+    return data;
+  } catch (error) {
+    // Fallback to v2 endpoint if v1 fails
+    const { data } = await axios.post(
+      `${API_V2_URL}/login`,
+      {
+        email: user.email,
+        password: user.password,
+      },
+      { headers: jsonApiHeaders }
+    );
+
+    if (data?.access_token) {
+      localStorage.setItem('auth.accessToken', data.access_token);
+    }
+
+    return data;
   }
-
-  return data;
 }
 
 /**

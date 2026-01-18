@@ -257,6 +257,12 @@ const router = createRouter({
           meta: { requiresAuth: true },
           component: VideoEditDeforum,
         },
+        {
+          path: "/admin/video-processing",
+          name: "Video Processing",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/VideoProcessing.vue"),
+        },
       ],
     },
     {

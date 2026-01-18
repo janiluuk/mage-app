@@ -1,4 +1,4 @@
-import requestService from '@/services/request-service/ApiRequestService';
+import requestService, { apiClient } from '@/services/request-service/ApiRequestService';
 
 const AuthService = {
   /**
@@ -20,10 +20,23 @@ const AuthService = {
     return response?.data?.data;
   },
   async signIn(userLoginData) {
-    const response = await requestService.post('/auth/login', userLoginData);
-    this.saveToken(response?.data?.data.accessToken);
-
-    return response?.data?.data;
+    // Auth routes are at /api/auth/*, not /api/v1/auth/*
+    // Temporarily override baseURL for this request
+    const originalBaseURL = apiClient.defaults.baseURL;
+    apiClient.defaults.baseURL = apiClient.defaults.baseURL?.replace('/api/v1', '/api') || '/api';
+    
+    try {
+      const response = await requestService.post('/auth/login', userLoginData);
+      // Handle both response formats
+      const token = response?.data?.accessToken || response?.data?.data?.accessToken || response?.data?.token;
+      if (token) {
+        this.saveToken(token);
+      }
+      return response?.data?.data || response?.data;
+    } finally {
+      // Restore original baseURL
+      apiClient.defaults.baseURL = originalBaseURL;
+    }
   },
   async toggleCurrentUserEmailNotification() {
     const response = await requestService.patch(
