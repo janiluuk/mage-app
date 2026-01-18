@@ -1,8 +1,5 @@
 import { ref, computed, watch, watchEffect } from "vue";
 
-// Timeout for requestIdleCallback fallback
-const IDLE_CALLBACK_TIMEOUT_MS = 250;
-
 export function useProgressiveList(
   items = [],
   initial = 100,
@@ -211,7 +208,7 @@ export function useProgressiveList(
       };
 
       if (typeof window.requestIdleCallback === "function") {
-        ricId = window.requestIdleCallback(idleCb, { timeout: IDLE_CALLBACK_TIMEOUT_MS });
+        ricId = window.requestIdleCallback(idleCb, { timeout: 250 });
       } else {
         idleCb();
       }

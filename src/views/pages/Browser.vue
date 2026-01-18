@@ -3,7 +3,7 @@
     <div class="app">
       <BrowserHeaderBar
         :is-loading="isLoading"
-        :on-refresh="loadJobs"
+        :on-refresh="refreshData"
         :show-filenames="showFilenames"
         :on-toggle-filenames="toggleFilenames"
         :render-limit-step="renderLimitStep"
@@ -23,6 +23,10 @@
         :filters-are-open="isFiltersOpen"
         :filters-button-ref="filtersButtonRef"
         :on-filters-toggle="toggleFilters"
+        :view-mode="viewMode"
+        :view-grouped-by-tags="viewGroupedByTags"
+        :on-view-mode-change="handleViewModeChange"
+        :on-toggle-grouped-by-tags="toggleGroupedByTags"
       />
 
       <BrowserFiltersPopover
@@ -84,15 +88,97 @@
       </div>
 
       <div
-        v-if="videos.length === 0 && !isLoading"
+        v-if="videos.length === 0 && !isLoading && !viewGroupedByTags"
         class="drop-zone"
       >
         <h2>Library is empty</h2>
         <p>Click the green button to refresh your library from the API.</p>
       </div>
 
+      <!-- Grouped by Tags View -->
       <div
-        v-else
+        v-if="viewGroupedByTags && viewMode === 'files'"
+        ref="contentRegionRef"
+        :class="contentRegionClassName"
+        :style="contentRegionStyle"
+      >
+        <div
+          ref="scrollContainerRef"
+          class="content-region__viewport"
+        >
+          <div class="tag-groups">
+            <div
+              v-for="group in groupedByTags"
+              :key="group.tag.id"
+              class="tag-group"
+            >
+              <div class="tag-group__header">
+                <h3 class="tag-group__title">
+                  <span class="tag-group__tag-name" @click="() => viewFilesByTag(group.tag.id)">#{{ group.tag.name }}</span>
+                  <span class="tag-group__count">{{ group.tag.files_count || group.files.length }} files</span>
+                </h3>
+                <button
+                  class="tag-group__toggle"
+                  type="button"
+                  @click="() => toggleTagGroup(group.tag.id)"
+                >
+                  {{ expandedTagGroups.has(group.tag.id) ? '−' : '+' }}
+                </button>
+              </div>
+              <div
+                v-if="expandedTagGroups.has(group.tag.id)"
+                class="tag-group__files"
+              >
+                <div
+                  ref="gridRef"
+                  class="video-grid masonry-vertical"
+                  :class="[
+                    showFilenames ? '' : 'hide-filenames',
+                    zoomClassForLevel(zoomLevel),
+                  ]"
+                >
+                  <BrowserVideoCard
+                    v-for="file in group.files"
+                    :key="file.id"
+                    :video="normalizeFile(file)"
+                    :observe-intersection="ioRegistry?.observe"
+                    :unobserve-intersection="ioRegistry?.unobserve"
+                    :scroll-root-ref="scrollContainerRef"
+                    :selected="selection.selected.has(file.id)"
+                    :on-select="handleVideoSelect"
+                    :on-context-menu="handleCardContextMenu"
+                    :show-filenames="showFilenames"
+                    :can-load-more-videos="canLoadVideo"
+                    :is-loading="loadingVideos.has(file.id)"
+                    :is-loaded="loadedVideos.has(file.id)"
+                    :is-visible="visibleVideos.has(file.id)"
+                    :is-playing="isVideoPlaying(file.id)"
+                    :is-near="ioRegistry?.isNear"
+                    :layout-epoch="layoutEpoch"
+                    :on-start-loading="handleVideoStartLoading"
+                    :on-stop-loading="handleVideoStopLoading"
+                    :on-video-load="handleVideoLoaded"
+                    :on-video-unload="handleVideoUnloaded"
+                    :on-visibility-change="handleVideoVisibilityChange"
+                    :on-video-play="handleVideoPlay"
+                    :on-video-pause="handleVideoPause"
+                    :on-play-error="handleVideoPlayError"
+                    :on-hover="markHover"
+                  />
+                </div>
+              </div>
+            </div>
+            <div v-if="groupedByTags.length === 0 && !isLoading" class="drop-zone">
+              <h2>No tagged files</h2>
+              <p>Tag some files to see them grouped here.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regular Grid View -->
+      <div
+        v-else-if="!viewGroupedByTags"
         ref="contentRegionRef"
         :class="contentRegionClassName"
         :style="contentRegionStyle"
@@ -203,8 +289,8 @@
         v-model:visible="showExtensionDialog"
         :video-id="selectedVideoForExtension.id"
         :video-title="selectedVideoForExtension.filename || selectedVideoForExtension.prompt"
-        :video-duration="selectedVideoForExtension.duration || DEFAULT_VIDEO_DURATION"
-        :video-fps="selectedVideoForExtension.fps || DEFAULT_VIDEO_FPS"
+        :video-duration="selectedVideoForExtension.duration || 60"
+        :video-fps="selectedVideoForExtension.fps || 30"
         @video-extended="onVideoExtended"
       />
     </div>
@@ -232,6 +318,7 @@ import { useVideoCollection } from "@/browser/composables/useVideoCollection";
 import { useFullScreenModal } from "@/browser/composables/useFullScreenModal";
 import { useZoomControls } from "@/browser/composables/useZoomControls";
 import { useHotkeys } from "@/browser/composables/useHotkeys";
+import FileService from "@/services/file.service";
 import { SortKey } from "@/browser/utils/sorting";
 import { parseSortValue, formatSortValue } from "@/browser/utils/sortOption";
 import {
@@ -245,13 +332,10 @@ import {
   normalizeTags,
   normalizeRating,
 } from "@/browser/utils/normalizeVideoJob";
+import { normalizeFile } from "@/browser/utils/normalizeFile";
 import { zoomClassForLevel } from "@/browser/zoom/utils";
 import { ZOOM_MAX_INDEX } from "@/browser/zoom/config";
 import "@/assets/video-browser.css";
-
-// Default fallback values for video metadata
-const DEFAULT_VIDEO_DURATION = 60;
-const DEFAULT_VIDEO_FPS = 30;
 
 const router = useRouter();
 const store = useStore();
@@ -267,7 +351,15 @@ const isLoading = ref(false);
 const refreshInterval = ref(null);
 
 const rawJobs = computed(() => store.getters["videojobs/list"] || []);
+const rawFiles = computed(() => store.getters["files/list"] || []);
 const metadataOverrides = ref(new Map());
+
+// Mode: 'videojobs' or 'files'
+const viewMode = ref('videojobs');
+const viewGroupedByTags = ref(false);
+const selectedTagId = ref(null);
+const expandedTagGroups = ref(new Set());
+const groupedByTags = computed(() => store.getters["files/groupedByTags"] || []);
 
 const applyMetadataOverrides = (video) => {
   const patch = metadataOverrides.value.get(video.id);
@@ -282,9 +374,29 @@ const applyMetadataOverrides = (video) => {
   return next;
 };
 
-const videos = computed(() =>
-  rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides)
+// Normalize files from API
+const normalizedFiles = computed(() =>
+  rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides)
 );
+
+// Combine videojobs and files, or use one based on view mode
+// When viewing by tag, use files from the tag endpoint
+const tagFiles = computed(() => {
+  if (selectedTagId.value && viewMode.value === 'files') {
+    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+  }
+  return [];
+});
+
+const videos = computed(() => {
+  if (viewMode.value === 'files') {
+    if (selectedTagId.value) {
+      return tagFiles.value;
+    }
+    return normalizedFiles.value;
+  }
+  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
+});
 
 const selection = useSelectionState();
 
@@ -307,6 +419,19 @@ const availableTags = computed(() => {
       counts.set(key, (counts.get(key) || 0) + 1);
     });
   });
+  
+  // Also include tags from files if in files mode
+  if (viewMode.value === 'files') {
+    normalizedFiles.value.forEach((file) => {
+      const tags = Array.isArray(file.tags) ? file.tags : [];
+      tags.forEach((tag) => {
+        if (!tag) return;
+        const key = tag.toString();
+        counts.set(key, (counts.get(key) || 0) + 1);
+      });
+    });
+  }
+  
   return Array.from(counts.entries()).map(([name, usageCount]) => ({ name, usageCount }));
 });
 
@@ -491,9 +616,73 @@ const applyMetadataPatch = (updates) => {
   metadataOverrides.value = next;
 };
 
-const handleAddTags = (tagNames) => {
+const handleAddTags = async (tagNames) => {
   const additions = normalizeTags(tagNames);
   if (!additions.length) return;
+  
+  // If in files mode, persist tags via API
+  if (viewMode.value === 'files') {
+    try {
+      // Get tag IDs from tag names (or create tags if needed)
+      const tagPromises = additions.map(async (tagName) => {
+        // First try to find existing tag
+        try {
+          const tagsResponse = await store.dispatch('tags/list', { 
+            filter: { name: tagName } 
+          });
+          const existingTag = tagsResponse?.list?.[0];
+          if (existingTag?.id) {
+            return existingTag.id;
+          }
+          
+          // Tag doesn't exist, create it
+          const newTag = await store.dispatch('tags/add', { 
+            name: tagName,
+            color: null,
+          });
+          return newTag?.id;
+        } catch (e) {
+          console.error('Failed to find or create tag:', e);
+          return null;
+        }
+      });
+      
+      const tagIds = (await Promise.all(tagPromises)).filter(Boolean);
+      
+      if (tagIds.length === 0) {
+        console.warn('No valid tag IDs found');
+        return;
+      }
+      
+      // Attach tags to selected files
+      const filePromises = selectedIds.value.map(async (id) => {
+        const video = getById(id);
+        if (!video?.file?.id) return;
+        
+        try {
+          await store.dispatch('files/attachTags', {
+            id: video.file.id,
+            tagIds: tagIds,
+          });
+        } catch (error) {
+          console.error(`Failed to attach tags to file ${id}:`, error);
+        }
+      });
+      
+      await Promise.all(filePromises);
+      
+      // Refresh files list and grouped view
+      if (viewGroupedByTags.value) {
+        await loadFilesGroupedByTags();
+      } else {
+        await loadFiles();
+      }
+    } catch (error) {
+      console.error('Failed to add tags:', error);
+    }
+  }
+  
+  // Update local state immediately for UI responsiveness
   const updates = {};
   selectedIds.value.forEach((id) => {
     const video = getById(id);
@@ -504,10 +693,49 @@ const handleAddTags = (tagNames) => {
   applyMetadataPatch(updates);
 };
 
-const handleRemoveTag = (tagName) => {
+const handleRemoveTag = async (tagName) => {
   const clean = normalizeTags([tagName]);
   if (!clean.length) return;
   const [tag] = clean;
+  
+  // If in files mode, persist tag removal via API
+  if (viewMode.value === 'files') {
+    try {
+      // Find tag ID
+      const tagsResponse = await store.dispatch('tags/list', { 
+        filter: { name: tag } 
+      });
+      const tagObj = tagsResponse?.list?.[0];
+      if (tagObj?.id) {
+        const filePromises = selectedIds.value.map(async (id) => {
+          const video = getById(id);
+          if (!video?.file?.id) return;
+          
+          try {
+            await store.dispatch('files/detachTag', {
+              id: video.file.id,
+              tagId: tagObj.id,
+            });
+          } catch (error) {
+            console.error(`Failed to detach tag from file ${id}:`, error);
+          }
+        });
+        
+        await Promise.all(filePromises);
+        
+        // Refresh files list and grouped view
+        if (viewGroupedByTags.value) {
+          await loadFilesGroupedByTags();
+        } else {
+          await loadFiles();
+        }
+      }
+    } catch (error) {
+      console.error('Failed to remove tag:', error);
+    }
+  }
+  
+  // Update local state immediately for UI responsiveness
   const updates = {};
   selectedIds.value.forEach((id) => {
     const video = getById(id);
@@ -535,6 +763,49 @@ const handleSetRating = (value, targetIds = selectedIds.value) => {
 const handleClearRating = () => {
   handleSetRating(null, selectedIds.value);
 };
+
+const handleViewModeChange = async (mode) => {
+  viewMode.value = mode;
+  await refreshData();
+};
+
+const toggleGroupedByTags = async () => {
+  viewGroupedByTags.value = !viewGroupedByTags.value;
+  if (viewGroupedByTags.value && viewMode.value === 'files') {
+    await loadFilesGroupedByTags();
+  } else {
+    await refreshData();
+  }
+};
+
+const toggleTagGroup = (tagId) => {
+  const current = expandedTagGroups.value;
+  if (current.has(tagId)) {
+    current.delete(tagId);
+  } else {
+    current.add(tagId);
+  }
+  expandedTagGroups.value = new Set(current);
+};
+
+const viewFilesByTag = async (tagId) => {
+  selectedTagId.value = tagId;
+  viewGroupedByTags.value = false;
+  viewMode.value = 'files';
+  await loadFiles();
+};
+
+// Expand all tag groups by default when viewing grouped
+watch(
+  () => [viewGroupedByTags.value, groupedByTags.value],
+  ([isGrouped, groups]) => {
+    if (isGrouped && Array.isArray(groups) && groups.length > 0) {
+      const allTagIds = new Set(groups.map(g => g.tag?.id).filter(Boolean));
+      expandedTagGroups.value = allTagIds;
+    }
+  },
+  { immediate: true }
+);
 
 const {
   fullScreenVideo,
@@ -646,9 +917,104 @@ const loadJobs = async () => {
   }
 };
 
+const loadFiles = async () => {
+  if (isLoading.value) return;
+  isLoading.value = true;
+  try {
+    const params = {
+      per_page: 100,
+    };
+    
+    // Add tag filter if viewing by tag
+    if (selectedTagId.value) {
+      // Use listByTag endpoint which supports sorting
+      const sortParams = {
+        per_page: 100,
+      };
+      
+      // Add sorting
+      if (sortKey.value && sortDir.value) {
+        const sortByMap = {
+          'name': 'original_name',
+          'created': 'created_at',
+          'modified': 'updated_at',
+          'size': 'size',
+          'type': 'type',
+        };
+        sortParams.sort_by = sortByMap[sortKey.value] || sortKey.value;
+        sortParams.sort_order = sortDir.value;
+      }
+      
+      await store.dispatch("files/listByTag", {
+        tagId: selectedTagId.value,
+        params: sortParams,
+      });
+    } else if (filters.value.includeTags?.length) {
+      // If filtering by tag name, use tag_name parameter
+      const firstTag = filters.value.includeTags[0];
+      params.tag_name = firstTag;
+      
+      // Add sorting
+      if (sortKey.value && sortDir.value) {
+        const sortByMap = {
+          'name': 'original_name',
+          'created': 'created_at',
+          'modified': 'updated_at',
+          'size': 'size',
+          'type': 'type',
+        };
+        params.sort_by = sortByMap[sortKey.value] || sortKey.value;
+        params.sort_order = sortDir.value;
+      }
+      
+      await store.dispatch("files/list", params);
+    } else {
+      // Regular file list
+      // Add sorting
+      if (sortKey.value && sortDir.value) {
+        const sortByMap = {
+          'name': 'original_name',
+          'created': 'created_at',
+          'modified': 'updated_at',
+          'size': 'size',
+          'type': 'type',
+        };
+        params.sort_by = sortByMap[sortKey.value] || sortKey.value;
+        params.sort_order = sortDir.value;
+      }
+      
+      await store.dispatch("files/list", params);
+    }
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const loadFilesGroupedByTags = async () => {
+  if (isLoading.value) return;
+  isLoading.value = true;
+  try {
+    await store.dispatch("files/listByTags");
+  } finally {
+    isLoading.value = false;
+  }
+};
+
+const refreshData = async () => {
+  if (viewMode.value === 'files') {
+    if (viewGroupedByTags.value) {
+      await loadFilesGroupedByTags();
+    } else {
+      await loadFiles();
+    }
+  } else {
+    await loadJobs();
+  }
+};
+
 onMounted(() => {
-  loadJobs();
-  refreshInterval.value = setInterval(loadJobs, 10000);
+  refreshData();
+  refreshInterval.value = setInterval(refreshData, 10000);
 });
 
 onBeforeUnmount(() => {
@@ -656,6 +1022,17 @@ onBeforeUnmount(() => {
     clearInterval(refreshInterval.value);
   }
 });
+
+// Watch for sort changes and reload files if in files mode
+watch(
+  () => [sortKey.value, sortDir.value, viewMode.value, selectedTagId.value],
+  async () => {
+    if (viewMode.value === 'files' && !viewGroupedByTags.value) {
+      await loadFiles();
+    }
+    onItemsChanged();
+  }
+);
 
 watch(
   () => videosToRender.value.length,
@@ -677,6 +1054,8 @@ watch(
     loadedVideos.value = next;
   }
 );
+
+
 
 const copyToClipboard = async (text) => {
   if (!text) return;
