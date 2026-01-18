@@ -23,11 +23,42 @@ const AuthService = {
     // Auth routes are at /api/auth/*, not /api/v1/auth/*
     // Temporarily override baseURL for this request
     const originalBaseURL = apiClient.defaults.baseURL;
-    apiClient.defaults.baseURL = apiClient.defaults.baseURL?.replace('/api/v1', '/api') || '/api';
+    let updatedBaseURL = originalBaseURL;
+
+    if (originalBaseURL) {
+      try {
+        // Use URL parsing to safely adjust the path segment
+        // Determine base origin from originalBaseURL or fall back to window.location
+        let baseOrigin = 'http://localhost';
+        if (originalBaseURL.startsWith('http://') || originalBaseURL.startsWith('https://')) {
+          // Extract origin from full URL
+          const tempUrl = new URL(originalBaseURL);
+          baseOrigin = tempUrl.origin;
+        } else if (typeof window !== 'undefined' && window.location && window.location.origin) {
+          baseOrigin = window.location.origin;
+        }
+        
+        const parsedUrl = new URL(originalBaseURL, baseOrigin);
+        parsedUrl.pathname = parsedUrl.pathname.replace(/\/api\/v1(\/?)/, '/api$1');
+        // Use full URL if original was full URL, otherwise use pathname
+        updatedBaseURL = originalBaseURL.startsWith('http') ? parsedUrl.toString() : parsedUrl.pathname;
+      } catch (e) {
+        // Fallback to simple string replacement
+        updatedBaseURL = originalBaseURL.replace('/api/v1', '/api');
+      }
+    } else {
+      // If there was no baseURL configured at all, fall back to /api
+      updatedBaseURL = '/api';
+    }
+
+    apiClient.defaults.baseURL = updatedBaseURL;
     
     try {
       const response = await requestService.post('/auth/login', userLoginData);
-      // Handle both response formats
+      // Handle multiple response formats for compatibility with different API versions
+      // - response.data.accessToken: v1 API direct token
+      // - response.data.data.accessToken: v1 API nested token
+      // - response.data.token: v2 API token format
       const token = response?.data?.accessToken || response?.data?.data?.accessToken || response?.data?.token;
       if (token) {
         this.saveToken(token);
