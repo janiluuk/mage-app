@@ -186,7 +186,7 @@
         :get-by-id="getById"
         :selection-count="selection.size"
         :on-close="hideContextMenu"
-        :on-action="handleContextAction"
+        :on-action="runContextAction"
       />
 
       <SoundtrackDialog
@@ -674,9 +674,7 @@ watch(
   }
 );
 
-const handleContextAction = (actionId) => {
-  runContextAction(actionId);
-};
+
 
 const copyToClipboard = async (text) => {
   if (!text) return;

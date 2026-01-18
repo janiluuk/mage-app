@@ -11,9 +11,10 @@ const jsonApiHeaders = {
 
 /**
  * Authenticate the user and persist the returned access token.
+ * Attempts v1 JWT endpoint first, then falls back to v2 if v1 returns 404.
  */
 async function login(user) {
-  // Try v1 JWT endpoint first, fallback to v2
+  // Try v1 JWT endpoint first
   try {
     const { data } = await axios.post(
       `${API_URL}/api/auth/login`,
@@ -23,13 +24,26 @@ async function login(user) {
       }
     );
 
-    if (data?.access_token || data?.token) {
-      localStorage.setItem('auth.accessToken', data.access_token || data.token);
+    // Standardize token field name to access_token
+    if (data?.access_token) {
+      localStorage.setItem('auth.accessToken', data.access_token);
+    } else if (data?.token) {
+      // Fallback for legacy v1 responses
+      localStorage.setItem('auth.accessToken', data.token);
     }
 
     return data;
   } catch (error) {
-    // Fallback to v2 endpoint if v1 fails
+    // Only fallback to v2 if v1 endpoint doesn't exist (404)
+    // For other errors (401, 500, etc.), throw immediately
+    if (error.response && error.response.status !== 404) {
+      console.error('Login failed at v1 endpoint:', error.message);
+      throw error;
+    }
+    
+    console.log('v1 auth endpoint not found, falling back to v2');
+    
+    // Fallback to v2 endpoint
     const { data } = await axios.post(
       `${API_V2_URL}/login`,
       {
