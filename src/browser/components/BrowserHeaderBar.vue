@@ -116,6 +116,31 @@
             <span v-if="filtersActiveCount > 0" class="filters-button-badge">{{ filtersActiveCount }}</span>
           </button>
         </div>
+
+        <div v-if="viewMode === 'files'" :style="dividerStyle">
+          <select
+            class="select-control"
+            :value="viewMode"
+            :disabled="isLoading"
+            title="Select view mode"
+            @change="(e) => onViewModeChange(e.target.value)"
+          >
+            <option value="videojobs">Video Jobs</option>
+            <option value="files">Files</option>
+          </select>
+
+          <button
+            class="toggle-button"
+            :class="{ active: viewGroupedByTags }"
+            :disabled="isLoading"
+            title="Group files by tags"
+            type="button"
+            @click="onToggleGroupedByTags"
+          >
+            <TagIcon />
+            <span>Group by Tags</span>
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -149,6 +174,10 @@ const props = defineProps({
   filtersAreOpen: { type: Boolean, default: false },
   filtersButtonRef: { type: Object, default: null },
   onFiltersToggle: { type: Function, default: () => {} },
+  viewMode: { type: String, default: 'videojobs' },
+  viewGroupedByTags: { type: Boolean, default: false },
+  onViewModeChange: { type: Function, default: () => {} },
+  onToggleGroupedByTags: { type: Function, default: () => {} },
 });
 
 const zoomMaxIndex = ZOOM_MAX_INDEX;
@@ -300,6 +329,17 @@ const FilterIcon = defineComponent({
         h("path", { d: "M6 9h12" }),
         h("path", { d: "M10 14h4" }),
         h("path", { d: "M12 14v6" }),
+      ]);
+  },
+});
+
+const TagIcon = defineComponent({
+  name: "TagIcon",
+  setup(_, { attrs }) {
+    return () =>
+      h(Icon, attrs, () => [
+        h("path", { d: "M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.3-8.3a1 1 0 0 0 0-1.41L12 2z" }),
+        h("circle", { cx: "7", cy: "7", r: "1.5" }),
       ]);
   },
 });

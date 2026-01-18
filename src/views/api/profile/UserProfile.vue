@@ -12,21 +12,25 @@
                 <div class="card-body">
                   <TabView>
                     <TabPanel header="Profile">
-                      {{ profile }}
-
-                      <!-- <p>Email: {{ userProfile.data.email }}</p>
-                      <p>Login: {{ userProfile.data.login }}</p>
-                      <p>Profile picture: {{ userProfile.data.profile_image }}</p>
-                      <p>Balance: {{ userProfile.data.balance }}</p> -->
+                      <Info v-if="profile" />
+                      <div v-else class="text-center p-4">
+                        <ProgressSpinner />
+                        <p class="mt-3 text-500">Loading profile...</p>
+                      </div>
                     </TabPanel>
                     <TabPanel header="Password">
-                      <div v-for="purchase in purchases" :key="purchase.id">
-                        <h4>Product: {{ purchase.product }}</h4>
-                        <p>Wallet type: {{ purchase.walletType }}</p>
-                        <p>Payment method: {{ purchase.paymentMethod }}</p>
-                        <p>Quantity: {{ purchase.quantity }}</p>
-                        <p>Order price: {{ purchase.orderPrice }}</p>
-                        <p>Date opened: {{ purchase.dateOpen }}</p>
+                      <Password />
+                      <div v-if="purchases && purchases.length > 0" class="mt-4">
+                        <h5>Recent Purchases</h5>
+                        <div v-for="purchase in purchases" :key="purchase.id" class="p-3 border-round mb-2 bg-surface-100">
+                          <h6 class="mb-1">{{ purchase.product }}</h6>
+                          <p class="text-sm text-500 mb-0">Wallet: {{ purchase.walletType }} | Method: {{ purchase.paymentMethod }}</p>
+                          <p class="text-sm text-500 mb-0">Quantity: {{ purchase.quantity }} | Price: {{ purchase.orderPrice }}</p>
+                          <p class="text-xs text-500 mt-1">Date: {{ purchase.dateOpen }}</p>
+                        </div>
+                      </div>
+                      <div v-else class="text-center p-4 text-500">
+                        <p>No purchases found</p>
                       </div>
                     </TabPanel>
                   </TabView>

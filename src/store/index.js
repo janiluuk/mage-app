@@ -7,6 +7,7 @@ import categories from './modules/categories-module';
 import { videojobs } from './videojobs.module';
 import { tags } from './tags.module';
 import { items } from './items.module';
+import { files } from './files.module';
 import {
   alertsModule,
   authServiceModule,
@@ -103,6 +104,7 @@ const featureModules = {
   videojobs,
   tags,
   items,
+  files,
   CategoriesV2: categoriesModule,
   TagsV2: tagsModule,
   RolesV2: rolesModule,

@@ -1,0 +1,45 @@
+name: Frontend Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'mage-app/**'
+      - '.github/workflows/tests.yml'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'mage-app/**'
+      - '.github/workflows/tests.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: mage-app/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./mage-app
+        run: npm ci
+
+      - name: Run Vitest tests
+        working-directory: ./mage-app
+        run: npm run test:frontend
+
+      - name: Upload coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports
+          path: mage-app/coverage/
+          if-no-files-found: ignore
+
