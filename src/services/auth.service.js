@@ -36,7 +36,7 @@ async function login(user) {
   } catch (error) {
     // Only fallback to v2 if v1 endpoint doesn't exist (404)
     // For other errors (401, 500, etc.), throw immediately
-    if (error.response && error.response.status !== 404) {
+    if (error.response?.status !== 404) {
       console.error('Login failed at v1 endpoint:', error.message);
       throw error;
     }

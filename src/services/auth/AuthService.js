@@ -28,17 +28,23 @@ const AuthService = {
     if (originalBaseURL) {
       try {
         // Use URL parsing to safely adjust the path segment
-        const baseOrigin =
-          typeof window !== 'undefined' && window.location && window.location.origin
-            ? window.location.origin
-            : 'http://localhost';
+        // Determine base origin from originalBaseURL or fall back to window.location
+        let baseOrigin = 'http://localhost';
+        if (originalBaseURL.startsWith('http://') || originalBaseURL.startsWith('https://')) {
+          // Extract origin from full URL
+          const tempUrl = new URL(originalBaseURL);
+          baseOrigin = tempUrl.origin;
+        } else if (typeof window !== 'undefined' && window.location && window.location.origin) {
+          baseOrigin = window.location.origin;
+        }
+        
         const parsedUrl = new URL(originalBaseURL, baseOrigin);
         parsedUrl.pathname = parsedUrl.pathname.replace(/\/api\/v1(\/?)/, '/api$1');
-        updatedBaseURL = parsedUrl.pathname;
+        // Use full URL if original was full URL, otherwise use pathname
+        updatedBaseURL = originalBaseURL.startsWith('http') ? parsedUrl.toString() : parsedUrl.pathname;
       } catch (e) {
-        // Fallback to simple string replacement; only use it if it changes the URL
-        const replaced = originalBaseURL.replace('/api/v1', '/api');
-        updatedBaseURL = replaced !== originalBaseURL ? replaced : originalBaseURL;
+        // Fallback to simple string replacement
+        updatedBaseURL = originalBaseURL.replace('/api/v1', '/api');
       }
     } else {
       // If there was no baseURL configured at all, fall back to /api
