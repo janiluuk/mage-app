@@ -119,6 +119,9 @@ export function getUserFriendlyMessage(error, defaultMessage = 'Something went w
     return codeMessages[code];
   }
 
+  // Normalize error to extract message
+  const normalized = normalizeError(error, '', false); // Skip logging here to avoid duplicates
+  
   // Return the error message if it's user-friendly, otherwise return default
   if (message && message.length < 200) {
     return message;
