@@ -166,7 +166,7 @@ describe('MyComponent', () => {
 ### Test Coverage
 - Generate frontend coverage: `npm run test:frontend:coverage`
 - Reports in `coverage/` directory (HTML, JSON, text)
-- Excluded: `node_modules/`, `src/test/`, `**/*.spec.js`, `**/*.test.js`, `backend/**`
+- Excluded: `node_modules/`, `tests/`, `**/*.spec.js`, `**/*.test.js`, `backend/**`
 
 ## API Endpoints (Backend: janiluuk/mage-api)
 
