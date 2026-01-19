@@ -188,7 +188,7 @@ export default {
   async finalize(params) {
     // Finalize endpoint is at /api/finalize, not /api/v1/finalize
     const API_URL = env.VITE_API_URL || '';
-    const response = await axios.post(`${API_URL}/api/finalize`, params, {
+    const response = await requestService.post(`${API_URL}/api/finalize`, params, {
       headers: {
         ...authHeader(),
         'Content-Type': 'application/json',

@@ -109,9 +109,9 @@ describe('ApiCache', () => {
     });
 
     it('should remove pending request after rejection', async () => {
-      const promise = Promise.reject(new Error('Test error')).catch(() => {
-        // Catch immediately to prevent unhandled rejection
-      });
+      const promise = (async () => {
+        throw new Error('Test error');
+      })();
       
       cache.setPending('/api/test', {}, promise);
       
