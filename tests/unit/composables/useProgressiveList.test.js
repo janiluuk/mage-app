@@ -61,6 +61,10 @@ describe('useProgressiveList', () => {
 
   describe('leading-edge debounce strategy', () => {
     it('should allow immediate first update when using idle callback', async () => {
+      // Store original values
+      const originalRequestIdleCallback = global.requestIdleCallback;
+      const originalCancelIdleCallback = global.cancelIdleCallback;
+
       // Mock requestIdleCallback to be available
       global.requestIdleCallback = vi.fn((cb) => {
         setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 50 }), 0);
@@ -88,8 +92,9 @@ describe('useProgressiveList', () => {
       const firstUpdateCount = result.value.visibleCount;
       expect(firstUpdateCount).toBeGreaterThan(50);
 
-      delete global.requestIdleCallback;
-      delete global.cancelIdleCallback;
+      // Restore original values
+      global.requestIdleCallback = originalRequestIdleCallback;
+      global.cancelIdleCallback = originalCancelIdleCallback;
     });
   });
 
