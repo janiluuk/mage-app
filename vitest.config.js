@@ -1,51 +1,74 @@
-import { fileURLToPath, URL } from 'node:url'
-import { defineConfig, configDefaults } from 'vitest/config'
-import vue from '@vitejs/plugin-vue'
-import { viteStaticCopy } from 'vite-plugin-static-copy'
-import path from 'path'
-import dotenv from 'dotenv'
+/**
+ * Vitest configuration for unit testing
+ * @see https://vitest.dev/config/
+ */
 
-dotenv.config()
+import { defineConfig } from 'vitest/config';
+import vue from '@vitejs/plugin-vue';
+import { fileURLToPath, URL } from 'node:url';
+import path from 'path';
 
 export default defineConfig({
-  plugins: [
-    vue(),
-    viteStaticCopy({
-      targets: [
-        {
-          src: path.join(
-            process.cwd(),
-            'node_modules',
-            'mediainfo.js',
-            'dist',
-            'MediaInfoModule.wasm'
-          ),
-          dest: '',
-        },
+  plugins: [vue()],
+  test: {
+    // Test environment
+    environment: 'jsdom',
+    
+    // Global test setup
+    setupFiles: ['./tests/setup.js'],
+    
+    // Coverage configuration
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html', 'lcov'],
+      exclude: [
+        'node_modules/',
+        'tests/',
+        '**/*.config.js',
+        '**/*.config.ts',
+        'dist/',
+        'build/',
+        '**/*.d.ts',
+        '**/types/**',
+        '**/*.test.js',
+        '**/*.spec.js',
       ],
-    }),
-  ],
+      include: [
+        'src/**/*.js',
+        'src/**/*.vue',
+        'src/**/*.ts',
+      ],
+      thresholds: {
+        lines: 60,
+        functions: 60,
+        branches: 60,
+        statements: 60,
+      },
+    },
+    
+    // Test file patterns
+    include: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
+    
+    // Exclude patterns
+    exclude: ['node_modules', 'dist', 'build'],
+    
+    // Global test timeout
+    testTimeout: 10000,
+    
+    // Watch mode options
+    watch: false,
+    
+    // Reporter configuration
+    reporters: ['verbose'],
+    
+    // Globals (for describe, it, expect, etc.)
+    globals: true,
+  },
+  
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '~': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
-  test: {
-    environment: 'jsdom',
-    exclude: [...configDefaults.exclude, 'e2e/**', 'backend/**'],
-    root: fileURLToPath(new URL('./', import.meta.url)),
-    globals: true,
-    setupFiles: ['./src/test/setup.js'],
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'src/test/',
-        '**/*.spec.js',
-        '**/*.test.js',
-        'backend/**'
-      ]
-    }
-  }
-})
+});

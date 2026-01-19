@@ -5,6 +5,8 @@ import requestService from "@/services/request-service/ApiRequestService";
 import authHeader from "@/services/auth-header";
 import { API_V1_BASE_URL } from "@/utils/api-base-urls";
 import env from "@/utils/env";
+import { normalizeError, getUserFriendlyMessage } from "@/utils/errorHandler";
+import apiCache from "@/utils/apiCache";
 
 const jsona = new Jsona();
 const url = API_V1_BASE_URL;
@@ -12,44 +14,70 @@ const includeParams = "modelfile,user";
 
 export default {
   async list(params) {
+    // Check cache first
+    const cacheKey = "/video-jobs";
+    const cached = apiCache.get(cacheKey, params);
+    if (cached) {
+      return cached;
+    }
+
+    // Check if request is already pending (deduplication)
+    const pending = apiCache.getPending(cacheKey, params);
+    if (pending) {
+      return pending;
+    }
+
     const options = {
       params: params,
       paramsSerializer: function (params) {
         return qs.stringify(params, { encode: false });
       },
     };
-    const response = await requestService.get(
+    
+    const requestPromise = requestService.get(
       "/video-jobs",
       options,
       {},
       true
-    );
-    const meta = response.data.meta === undefined 
-      ? { page: { total: 1 } } 
-      : response.data.meta;
-    
-    const deserialized = jsona.deserialize(response.data);
-    // jsona.deserialize returns an array for collections
-    // If it's not an array, it might be wrapped in an object
-    let list = [];
-    if (Array.isArray(deserialized)) {
-      list = deserialized;
-    } else if (deserialized && Array.isArray(deserialized.data)) {
-      list = deserialized.data;
-    } else if (deserialized && deserialized.type === 'video-jobs') {
-      // Single item, wrap in array
-      list = [deserialized];
-    } else {
-      if (import.meta.env.DEV) {
-        console.warn('Unexpected deserialized format:', deserialized);
+    ).then(response => {
+      const meta = response.data.meta === undefined 
+        ? { page: { total: 1 } } 
+        : response.data.meta;
+      
+      const deserialized = jsona.deserialize(response.data);
+      // jsona.deserialize returns an array for collections
+      // If it's not an array, it might be wrapped in an object
+      let list = [];
+      if (Array.isArray(deserialized)) {
+        list = deserialized;
+      } else if (deserialized && Array.isArray(deserialized.data)) {
+        list = deserialized.data;
+      } else if (deserialized && deserialized.type === 'video-jobs') {
+        // Single item, wrap in array
+        list = [deserialized];
+      } else {
+        if (import.meta.env.DEV) {
+          console.warn('Unexpected deserialized format:', deserialized);
+        }
+        list = [];
       }
-      list = [];
-    }
-    
-    return {
-      list: list,
-      meta: meta,
-    };
+      
+      const result = {
+        list: list,
+        meta: meta,
+      };
+      
+      // Cache the result
+      apiCache.set(cacheKey, params, result, 30000); // 30s cache for lists
+      
+      return result;
+    }).catch(error => {
+      // Don't cache errors
+      throw error;
+    });
+
+    // Mark as pending and return promise
+    return apiCache.setPending(cacheKey, params, requestPromise);
   },
 
   async get(id) {
@@ -95,10 +123,8 @@ export default {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      if (import.meta.env.DEV) {
-        console.error("Download error:", error.message);
-      }
-      throw error;
+        const normalized = normalizeError(error, 'VideoJobService.download');
+        throw new Error(getUserFriendlyMessage(normalized));
     }
   },
   async update(item) {

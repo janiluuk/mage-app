@@ -333,6 +333,8 @@ import { useVideoCollection } from "@/browser/composables/useVideoCollection";
 import { useFullScreenModal } from "@/browser/composables/useFullScreenModal";
 import { useZoomControls } from "@/browser/composables/useZoomControls";
 import { useHotkeys } from "@/browser/composables/useHotkeys";
+import { useBrowserData } from "@/browser/composables/useBrowserData";
+import { useBrowserMetadata } from "@/browser/composables/useBrowserMetadata";
 import FileService from "@/services/file.service";
 import { SortKey } from "@/browser/utils/sorting";
 import { parseSortValue, formatSortValue } from "@/browser/utils/sortOption";
@@ -379,7 +381,22 @@ const rawFiles = computed(() => {
   const list = store.getters["files/list"];
   return Array.isArray(list) ? list : [];
 });
-const metadataOverrides = ref(new Map());
+// Use browser metadata composable
+const {
+  metadataOverrides,
+  isMetadataPanelOpen,
+  metadataPanelDismissed,
+  metadataDockHeight,
+  metadataFocusToken,
+  MIN_METADATA_DOCK_HEIGHT,
+  MAX_METADATA_DOCK_HEIGHT,
+  applyMetadataPatch,
+  applyMetadataOverrides,
+  openMetadataPanel,
+  toggleMetadataPanel,
+  handleMetadataDockHeightChange,
+  shouldRenderCollapsedHint,
+} = useBrowserMetadata(selection.size);
 
 // Mode: 'videojobs' or 'files'
 const viewMode = ref('videojobs');
@@ -388,10 +405,13 @@ const selectedTagId = ref(null);
 const expandedTagGroups = ref(new Set());
 const groupedByTags = computed(() => store.getters["files/groupedByTags"] || []);
 
-const applyMetadataOverrides = (video) => {
+// applyMetadataOverrides is now provided by useBrowserMetadata composable
+// But we need to extend it to handle tags and rating normalization
+const applyMetadataOverridesWithNormalization = (video) => {
+  const patched = applyMetadataOverrides(video);
   const patch = metadataOverrides.value.get(video.id);
-  if (!patch) return video;
-  const next = { ...video, ...patch };
+  if (!patch) return patched;
+  const next = { ...patched };
   if ("tags" in patch) {
     next.tags = normalizeTags(patch.tags);
   }
@@ -404,14 +424,14 @@ const applyMetadataOverrides = (video) => {
 // Normalize files from API
 const normalizedFiles = computed(() => {
   if (!Array.isArray(rawFiles.value)) return [];
-  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
 });
 
 // Combine videojobs and files, or use one based on view mode
 // When viewing by tag, use files from the tag endpoint
 const tagFiles = computed(() => {
   if (selectedTagId.value && viewMode.value === 'files') {
-    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
   }
   return [];
 });
@@ -425,7 +445,7 @@ const videos = computed(() => {
   }
   // Ensure rawJobs.value is an array before mapping
   if (!Array.isArray(rawJobs.value)) return [];
-  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
+  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverridesWithNormalization);
 });
 
 const selection = useSelectionState();
@@ -1050,7 +1070,7 @@ onMounted(async () => {
     console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
     console.log('videosToRender:', videosToRender.value.length);
   }
-  refreshInterval.value = setInterval(refreshData, 10000);
+  startAutoRefresh(10000);
 });
 
 onBeforeUnmount(() => {
@@ -1064,20 +1084,15 @@ onBeforeUnmount(() => {
     });
   }
   
-  // Clear refresh interval if it exists
-  if (refreshInterval.value) {
-    clearInterval(refreshInterval.value);
-    refreshInterval.value = null;
-  }
+  // Stop auto-refresh
+  stopAutoRefresh();
 });
 
-// Watch for sort changes and reload files if in files mode
+// Watch for sort changes - handled by useBrowserData composable
+// Additional watch for layout updates
 watch(
   () => [sortKey.value, sortDir.value, viewMode.value, selectedTagId.value],
-  async () => {
-    if (viewMode.value === 'files' && !viewGroupedByTags.value) {
-      await loadFiles();
-    }
+  () => {
     onItemsChanged();
   }
 );
