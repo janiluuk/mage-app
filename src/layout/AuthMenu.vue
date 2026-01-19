@@ -24,7 +24,6 @@
 import * as authActions from '@/store/modules/auth/types/actions';
 import * as authGetters from '@/store/modules/auth/types/getters';
 import * as notificationActions from '@/store/modules/notification/types/actions';
-import { useToast } from 'primevue/usetoast';
 import Menu from 'primevue/menu';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -42,9 +41,8 @@ export default {
     },
     setup() {
         const menu = ref(null);
-        const toast = useToast();
         const topbarMenuActive = ref(false);
-        return { menu, toast, topbarMenuActive };
+        return { menu, topbarMenuActive };
     },
     props: {
         user: {
@@ -95,9 +93,9 @@ export default {
                     command: () => {
                         this.exit();
                         this.signOut();
-                        // Toast is handled in setup, access via this.toast
-                        if (this.toast && this.toast.add) {
-                            this.toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.' });
+                        // Use $toast (globally injected) for reliable access in callbacks
+                        if (this.$toast) {
+                            this.$toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.', life: 3000 });
                         }
                     }
                 }
@@ -119,7 +117,6 @@ export default {
         async exit() {
             try {
                 await this.signOut();
-                // Toast notification is handled in getOverlayMenu command
             } catch (error) {
                 this.setErrorNotification(error);
             }
