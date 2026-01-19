@@ -45,8 +45,10 @@ mage-app/
 │   ├── middleware/       # Route middleware
 │   ├── mixins/           # Vue mixins
 │   ├── utils/            # Utility functions
-│   ├── test/             # Test setup and helpers
 │   └── main.js           # App bootstrap
+├── tests/                # Test files and setup
+│   ├── setup.js          # Global test setup
+│   └── unit/             # Unit tests
 ├── backend/              # Optional audio streaming helper
 │   ├── app.js            # Express app
 │   ├── queueManager.js   # Job queue management
@@ -128,10 +130,10 @@ npm run api              # Start audio streaming helper
 
 ### Frontend Tests (Vitest)
 - Test files: `*.spec.js` or `*.test.js`
-- Location: Co-located with source files
+- Location: `tests/` directory
 - Use `@vue/test-utils` for component testing
 - Mock external dependencies with `vi.mock()`
-- Test setup: `src/test/setup.js`
+- Test setup: `tests/setup.js`
 
 Example:
 ```javascript
