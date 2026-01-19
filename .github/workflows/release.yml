@@ -55,6 +55,13 @@ jobs:
             COMMITS=$(git log ${LAST_TAG}..HEAD --pretty=format:"%s")
           fi
           
+          # Check if there are any commits at all
+          if [ -z "$COMMITS" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No commits since last tag"
+            exit 0
+          fi
+          
           # Check if we should skip (only skip if ALL commits have [skip ci])
           # grep -v filters out lines WITH [skip ci], if any remain, we have changes
           FILTERED_COMMITS=$(echo "$COMMITS" | grep -v "\[skip ci\]" || true)
