@@ -1,9 +1,16 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import VideoJobService from './videojobs.service';
-import requestService from './request-service/ApiRequestService';
+import VideoJobService from '@/services/videojobs.service';
+import requestService from '@/services/request-service/ApiRequestService';
+
+// Mock env module
+vi.mock('@/utils/env', () => ({
+  default: {
+    VITE_API_URL: 'http://localhost:3000'
+  }
+}));
 
 // Mock the request service
-vi.mock('./request-service/ApiRequestService', () => ({
+vi.mock('@/services/request-service/ApiRequestService', () => ({
   default: {
     post: vi.fn(),
     get: vi.fn(),
@@ -170,6 +177,63 @@ describe('VideoJobService', () => {
       requestService.post.mockRejectedValue(mockError);
       
       await expect(VideoJobService.upload(mockFile, 'deforum', null)).rejects.toThrow('Upload failed');
+    });
+  });
+
+  describe('finalize methods', () => {
+    const mockParams = {
+      jobId: '123',
+      settings: { quality: 'high' }
+    };
+
+    it('should call finalize endpoint using helper', async () => {
+      const mockResponse = { data: { id: '123', status: 'processing' } };
+      requestService.post.mockResolvedValue(mockResponse);
+
+      const result = await VideoJobService.finalize(mockParams);
+
+      expect(requestService.post).toHaveBeenCalledWith(
+        'http://localhost:3000/api/finalize',
+        mockParams,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json'
+          })
+        })
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should call finalizeDeforum using the same helper', async () => {
+      const mockResponse = { data: { id: '456', status: 'processing' } };
+      requestService.post.mockResolvedValue(mockResponse);
+
+      const result = await VideoJobService.finalizeDeforum(mockParams);
+
+      expect(requestService.post).toHaveBeenCalledWith(
+        'http://localhost:3000/api/finalize',
+        mockParams,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json'
+          })
+        })
+      );
+      expect(result).toEqual(mockResponse);
+    });
+
+    it('should handle finalize errors', async () => {
+      const mockError = new Error('Finalize failed');
+      requestService.post.mockRejectedValue(mockError);
+
+      await expect(VideoJobService.finalize(mockParams)).rejects.toThrow('Finalize failed');
+    });
+
+    it('should handle finalizeDeforum errors', async () => {
+      const mockError = new Error('Finalize failed');
+      requestService.post.mockRejectedValue(mockError);
+
+      await expect(VideoJobService.finalizeDeforum(mockParams)).rejects.toThrow('Finalize failed');
     });
   });
 });
