@@ -188,6 +188,10 @@ export default {
   /**
    * Helper function to make finalize API calls
    * Finalize endpoint is at /api/finalize, not /api/v1/finalize
+   * 
+   * Uses requestService for consistent auth handling and error processing.
+   * Previously, finalizeDeforum used axios.post directly, but this unifies
+   * both methods to use the same service for better consistency.
    */
   async _callFinalizeEndpoint(params) {
     const API_URL = env.VITE_API_URL || '';
