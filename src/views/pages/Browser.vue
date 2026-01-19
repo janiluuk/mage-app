@@ -640,8 +640,7 @@ const selectedVideos = computed(() =>
   Array.from(selection.selected.value).map(getById).filter(Boolean)
 );
 
-const metadataFocusToken = ref(0);
-
+// metadataFocusToken is provided by useBrowserMetadata composable (line 390)
 // applyMetadataPatch is provided by useBrowserMetadata composable (line 393)
 
 const handleAddTags = async (tagNames) => {
