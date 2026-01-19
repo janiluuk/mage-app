@@ -331,6 +331,7 @@
   flex-wrap: wrap;
   gap: 0.75rem;
   margin: 0.35rem 1rem 0;
+  margin-top: calc(2.5rem + 0.35rem); /* Account for fixed header + original top margin */
   padding: 0.4rem 0.75rem;
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.04);
@@ -853,6 +854,7 @@
   justify-content: center;
   gap: 1rem;
   padding: 3rem 2rem;
+  padding-top: calc(2.5rem + 3rem); /* Account for fixed header + original padding */
   min-height: 200px;
 }
 
@@ -880,6 +882,7 @@
 
 .video-browser .drop-zone{
   margin: 2rem;
+  margin-top: calc(2.5rem + 2rem); /* Account for fixed header + original top margin */
   padding: 4rem;
   border: 2px dashed var(--color-border);
   border-radius: 12px;
@@ -930,8 +933,9 @@
   overflow-y: auto;
   scrollbar-gutter: stable both-edges;
   overflow-anchor: auto;
-  transition: padding-bottom 0.3s ease;
+  transition: padding-bottom 0.3s ease, padding-top 0.3s ease;
   padding-bottom: 0;
+  padding-top: 3rem; /* Account for fixed header height (~2.5rem) */
 }
 
 .video-browser .content-region--dock-hint .content-region__viewport{
