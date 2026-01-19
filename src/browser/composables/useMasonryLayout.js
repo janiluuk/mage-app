@@ -15,7 +15,7 @@ export function useMasonryLayout({
   filteredVideos,
   sortKey,
   sortDir,
-  groupByFolders,
+  groupByStories,
   randomSeed,
   zoomLevel,
   scrollContainerRef,
@@ -210,7 +210,7 @@ export function useMasonryLayout({
 
   const orderedVideos = computed(() =>
     groupAndSort(filteredVideos.value || [], {
-      groupByFolders: groupByFolders.value,
+      groupByStories: groupByStories.value,
       comparator: comparator.value,
     })
   );

@@ -15,9 +15,13 @@ export const videojobs = {
   actions: {
     list({ commit, dispatch }, params) {
       return VideoJobService.list(params).then(({ list, meta }) => {
-        meta = { page: { total: list.length } };
-        commit("SET_LIST", list);
+        console.log('VideoJobs store - received list:', Array.isArray(list) ? list.length : 'not array', list);
+        meta = { page: { total: Array.isArray(list) ? list.length : 0 } };
+        commit("SET_LIST", Array.isArray(list) ? list : []);
         commit("SET_META", meta);
+      }).catch((error) => {
+        console.error('VideoJobs store - error loading list:', error);
+        commit("SET_LIST", []);
       });
     },
 

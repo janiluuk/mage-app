@@ -40,7 +40,7 @@
             <template #header> View </template>
             <template #body="slotProps">
                 <Button icon="pi pi-search" type="button" class="p-button-text"
-                    @click="$router.push('/edit/' + slotProps.data.generator + '/' + slotProps.data.id);"></Button>
+                    @click="goToEdit(slotProps.data.id, slotProps.data.generator)"></Button>
             </template>
         </Column>
     </DataTable>
@@ -75,6 +75,21 @@ export default {
         }),
         getUpdated(item) {
             return moment(item).fromNow();
+        },
+        // Normalize generator type to ensure it matches router routes
+        normalizeGeneratorType(generator) {
+            if (!generator) return 'vid2vid';
+            const normalized = generator.toLowerCase();
+            // Map common generator types to router routes
+            if (normalized === 'deforum' || normalized.includes('deforum')) {
+                return 'deforum';
+            }
+            // Default to vid2vid for any other type or if it contains vid2vid
+            return 'vid2vid';
+        },
+        goToEdit(id, generator) {
+            const normalizedType = this.normalizeGeneratorType(generator);
+            this.$router.push(`/edit/${normalizedType}/${id}`);
         }
     }
 }

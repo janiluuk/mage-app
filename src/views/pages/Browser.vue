@@ -15,9 +15,9 @@
         :get-minimum-zoom-level="getMinimumZoomLevel"
         :sort-key="sortKey"
         :sort-selection="sortSelection"
-        :group-by-folders="groupByFolders"
+        :group-by-stories="groupByStories"
         :on-sort-change="handleSortChange"
-        :on-group-by-folders-toggle="toggleGroupByFolders"
+        :on-group-by-stories-toggle="toggleGroupByStories"
         :on-reshuffle="reshuffle"
         :filters-active-count="filtersActiveCount"
         :filters-are-open="isFiltersOpen"
@@ -144,7 +144,7 @@
                     :observe-intersection="ioRegistry?.observe"
                     :unobserve-intersection="ioRegistry?.unobserve"
                     :scroll-root-ref="scrollContainerRef"
-                    :selected="selection.selected.has(file.id)"
+                    :selected="selection.selected.value.has(file.id)"
                     :on-select="handleVideoSelect"
                     :on-context-menu="handleCardContextMenu"
                     :show-filenames="showFilenames"
@@ -210,7 +210,7 @@
               :observe-intersection="ioRegistry?.observe"
               :unobserve-intersection="ioRegistry?.unobserve"
               :scroll-root-ref="scrollContainerRef"
-              :selected="selection.selected.has(video.id)"
+              :selected="selection.selected.value.has(video.id)"
               :on-select="handleVideoSelect"
               :on-context-menu="handleCardContextMenu"
               :show-filenames="showFilenames"
@@ -416,7 +416,7 @@ const renderLimitMaxStep = RENDER_LIMIT_STEPS;
 const zoomLevel = ref(1);
 const sortKey = ref(SortKey.NAME);
 const sortDir = ref("asc");
-const groupByFolders = ref(false);
+const groupByStories = ref(false);
 const randomSeed = ref(null);
 
 const availableTags = computed(() => {
@@ -479,7 +479,7 @@ const {
   filteredVideos,
   sortKey,
   sortDir,
-  groupByFolders,
+  groupByStories,
   randomSeed,
   zoomLevel,
   scrollContainerRef,
@@ -507,8 +507,8 @@ const handleSortChange = (value) => {
   }
 };
 
-const toggleGroupByFolders = () => {
-  groupByFolders.value = !groupByFolders.value;
+const toggleGroupByStories = () => {
+  groupByStories.value = !groupByStories.value;
 };
 
 const reshuffle = () => {
@@ -1022,8 +1022,12 @@ const refreshData = async () => {
   }
 };
 
-onMounted(() => {
-  refreshData();
+onMounted(async () => {
+  await refreshData();
+  // Debug logging
+  console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
+  console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
+  console.log('videosToRender:', videosToRender.value.length);
   refreshInterval.value = setInterval(refreshData, 10000);
 });
 

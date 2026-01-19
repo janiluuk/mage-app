@@ -226,17 +226,31 @@ const mapGetters = () => {
         )
     )
 }
+// Normalize generator type to ensure it matches router routes
+const normalizeGeneratorType = (generator) => {
+    if (!generator) return 'vid2vid';
+    const normalized = generator.toLowerCase();
+    // Map common generator types to router routes
+    if (normalized === 'deforum' || normalized.includes('deforum')) {
+        return 'deforum';
+    }
+    // Default to vid2vid for any other type or if it contains vid2vid
+    return 'vid2vid';
+};
+
 const menuClick = (id, type="vid2vid", event) => {
-    router.push(`/edit/${type}/${id}`);
+    const normalizedType = normalizeGeneratorType(type);
+    router.push(`/edit/${normalizedType}/${id}`);
 }
 
 const getMenu = (id, type, status) => {
+    const normalizedType = normalizeGeneratorType(type);
     return [
         {
             label: 'Edit',
             icon: 'pi pi-pencil',
             command: (target) => {
-                router.push(`/edit/${type}/${id}`);
+                router.push(`/edit/${normalizedType}/${id}`);
             }
         },
         {

@@ -43,9 +43,18 @@
         loop
         playsinline
         :style="{ display: localLoaded ? 'block' : 'none' }"
+        :poster="previewImageUrl"
       ></video>
+      <img
+        v-if="previewImageUrl && !localLoaded && !imageError"
+        :src="previewImageUrl"
+        :alt="video?.name || 'Video preview'"
+        class="video-preview-image"
+        @error="handleImageError"
+        @load="imageError = false"
+      />
       <div
-        v-if="!localLoaded"
+        v-if="!localLoaded && !previewImageUrl"
         class="video-placeholder"
         :class="{ 'video-placeholder--static': !isNearViewport }"
         role="status"
@@ -106,6 +115,7 @@ const localLoaded = ref(false);
 const localLoading = ref(false);
 const isNearViewport = ref(true);
 const clickTimeout = ref(null);
+const imageError = ref(false);
 
 let onMeta = null;
 let onLoadedData = null;
@@ -132,6 +142,9 @@ const effectiveAspectRatio = computed(() =>
   aspectRatioHint.value && aspectRatioHint.value > 0 ? aspectRatioHint.value : 16 / 9
 );
 
+// For masonry layout, use a fixed aspect ratio for all cards
+const fixedAspectRatio = 16 / 9;
+
 const cardStyle = computed(() => ({
   userSelect: "none",
   position: "relative",
@@ -141,7 +154,7 @@ const cardStyle = computed(() => ({
   cursor: "pointer",
   border: props.selected ? "3px solid #007acc" : "1px solid #333",
   background: "#1a1a1a",
-  aspectRatio: effectiveAspectRatio.value,
+  aspectRatio: fixedAspectRatio, // Fixed aspect ratio for consistent masonry layout
 }));
 
 const containerStyle = computed(() => ({
@@ -197,6 +210,61 @@ const spinnerClass = computed(() =>
 );
 
 const resolveSrc = () => props.video?.fullPath || props.video?.previewUrl || "";
+
+// Generate preview image URL - use previewUrl if available, otherwise use a local placeholder
+const previewImageUrl = computed(() => {
+  const preview = props.video?.previewUrl;
+  if (preview && typeof preview === 'string' && preview.trim()) {
+    // If it's a relative URL, make it absolute
+    if (preview.startsWith('/')) {
+      return preview;
+    }
+    // If it's already absolute, use it
+    if (preview.startsWith('http://') || preview.startsWith('https://')) {
+      return preview;
+    }
+  }
+  
+  // Use a deterministic placeholder based on video ID/name
+  // This creates a simple colored square with the video name
+  const videoId = props.video?.id || props.video?.name || 'default';
+  const hash = videoId.split('').reduce((acc, char) => {
+    return ((acc << 5) - acc) + char.charCodeAt(0);
+  }, 0);
+  
+  // Generate a color based on the hash
+  const hue = Math.abs(hash % 360);
+  const saturation = 40 + (Math.abs(hash) % 30);
+  const lightness = 25 + (Math.abs(hash) % 20);
+  
+  // Create a data URL for a simple colored square
+  const size = 400;
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  
+  // Fill with gradient background
+  const gradient = ctx.createLinearGradient(0, 0, size, size);
+  gradient.addColorStop(0, `hsl(${hue}, ${saturation}%, ${lightness}%)`);
+  gradient.addColorStop(1, `hsl(${hue}, ${saturation}%, ${lightness - 10}%)`);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, size, size);
+  
+  // Add text in center
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+  ctx.font = 'bold 24px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const name = (props.video?.name || 'Video').substring(0, 20);
+  ctx.fillText(name, size / 2, size / 2);
+  
+  return canvas.toDataURL('image/png');
+});
+
+const handleImageError = () => {
+  imageError.value = true;
+};
 
 const ensureLoad = () => {
   if (!props.isVisible && !isNearViewport.value) return;

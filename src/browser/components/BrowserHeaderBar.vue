@@ -81,11 +81,11 @@
 
         <button
           class="toggle-button"
-          :class="{ active: groupByFolders }"
+          :class="{ active: groupByStories }"
           :disabled="isLoading"
-          title="Group by folders"
+          title="Group by stories"
           type="button"
-          @click="onGroupByFoldersToggle"
+          @click="onGroupByStoriesToggle"
         >
           <GridIcon />
         </button>
@@ -166,9 +166,9 @@ const props = defineProps({
   getMinimumZoomLevel: { type: Function, default: () => 0 },
   sortKey: { type: String, default: SortKey.NAME },
   sortSelection: { type: String, default: "name-asc" },
-  groupByFolders: { type: Boolean, default: false },
+  groupByStories: { type: Boolean, default: false },
   onSortChange: { type: Function, default: () => {} },
-  onGroupByFoldersToggle: { type: Function, default: () => {} },
+  onGroupByStoriesToggle: { type: Function, default: () => {} },
   onReshuffle: { type: Function, default: () => {} },
   filtersActiveCount: { type: Number, default: 0 },
   filtersAreOpen: { type: Boolean, default: false },

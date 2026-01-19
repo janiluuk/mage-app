@@ -42,9 +42,16 @@ export function useProgressiveList(
   watch(
     () => safeItems.value.length,
     (len) => {
+      if (len === 0) {
+        visible.value = 0;
+        prevLen.value = 0;
+        return;
+      }
+      
       if (!didInit.value) {
         didInit.value = true;
-        visible.value = Math.min(initial, len, resolvedMaxVisible.value ?? len);
+        const initialValue = Math.min(initial, len, resolvedMaxVisible.value ?? len);
+        visible.value = initialValue;
         prevLen.value = len;
         return;
       }
@@ -188,6 +195,9 @@ export function useProgressiveList(
     let rafId = 0;
     let ricId = 0;
 
+    let lastUpdate = 0;
+    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates to reduce flickering
+
     const schedule = () => {
       if (cancelled) return;
       if (pauseOnScroll && isScrolling.value) {
@@ -197,6 +207,13 @@ export function useProgressiveList(
 
       const idleCb = () => {
         if (cancelled) return;
+        const now = Date.now();
+        if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
+          rafId = requestAnimationFrame(schedule);
+          return;
+        }
+        lastUpdate = now;
+        
         if (!allVisible.value) {
           const add = computeNextBatch();
           const cap = Math.min(safeItems.value.length, maxVisibleRef.value);
@@ -208,9 +225,9 @@ export function useProgressiveList(
       };
 
       if (typeof window.requestIdleCallback === "function") {
-        ricId = window.requestIdleCallback(idleCb, { timeout: 250 });
+        ricId = window.requestIdleCallback(idleCb, { timeout: 500 });
       } else {
-        idleCb();
+        setTimeout(idleCb, 50); // Throttle to reduce flickering
       }
     };
 
@@ -243,9 +260,16 @@ export function useProgressiveList(
     if (cleanup) onCleanup(cleanup);
   });
 
-  const materialized = computed(() =>
-    materializeAll ? safeItems.value : safeItems.value.slice(0, visible.value)
-  );
+  const materialized = computed(() => {
+    if (materializeAll) {
+      return safeItems.value;
+    }
+    // Ensure visible is at least 1 if there are items
+    const visibleCount = safeItems.value.length > 0 && visible.value === 0 
+      ? Math.min(initial, safeItems.value.length) 
+      : visible.value;
+    return safeItems.value.slice(0, visibleCount);
+  });
 
   const result = computed(() => ({
     items: materialized.value,
