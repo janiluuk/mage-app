@@ -112,7 +112,7 @@ export default function useChunkedMasonry({
       columnCountCache.clear();
     }
     
-    const columnCount = getColumnCount(grid, cs);
+    let columnCount = getColumnCount(grid, cs);
     const columnGap =
       parseFloat(cs.columnGap) || parseFloat(cs.gap) || columnGapFallback;
     const padding =
@@ -128,6 +128,20 @@ export default function useChunkedMasonry({
         clientWidth: grid.clientWidth,
         rectWidth: gridRect.width
       });
+    }
+
+    // Handle single-column case for wide grids - force at least 2 columns
+    // This prevents layout issues when getColumnCount returns 1 for wide grids
+    if (columnCount === 1 && gridWidth > 300) {
+      if (import.meta.env.DEV) {
+        console.warn('Masonry: Forcing 2 columns for wide grid', {
+          gridWidth,
+          availableWidth,
+          originalColumnCount: columnCount
+        });
+      }
+      // Force at least 2 columns by calculating with a reasonable minimum width
+      columnCount = Math.max(2, Math.floor(availableWidth / 200));
     }
 
     const totalGapWidth = columnGap * Math.max(0, columnCount - 1);
@@ -201,35 +215,9 @@ export default function useChunkedMasonry({
         isLayingOut = false;
         return;
       }
-      
-      // Ensure we have at least 2 columns if grid is wide enough
-      if (columnCount === 1 && grid.clientWidth > 300) {
-        if (import.meta.env.DEV) {
-          console.warn('Masonry: Forcing 2 columns for wide grid');
-        }
-        updateCachedGridMeasurements();
-        const updated = cachedGridMeasurements || {};
-        if (updated.columnCount === 1) {
-          // Force recalculation with smaller desired width
-          const cs = window.getComputedStyle(grid);
-          const forcedGridWidth = grid.clientWidth || grid.getBoundingClientRect().width || 0;
-          const padding = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
-          const availableWidth = Math.max(0, forcedGridWidth - padding);
-          const columnGap = parseFloat(cs.columnGap) || parseFloat(cs.gap) || 12;
-          const forcedColumnCount = Math.max(2, Math.floor(availableWidth / 200));
-          const forcedColumnWidth = Math.floor((availableWidth - (columnGap * (forcedColumnCount - 1))) / forcedColumnCount);
-          cachedGridMeasurements = {
-            columnWidth: forcedColumnWidth,
-            columnCount: forcedColumnCount,
-            columnGap,
-            gridWidth: availableWidth,
-          };
-        }
-      }
 
-      // Use the actual column count from cached measurements
-      const { columnCount: actualColumnCount } = cachedGridMeasurements || { columnCount };
-      const effectiveColumnCount = actualColumnCount || columnCount;
+      // Use the column count from cached measurements
+      const effectiveColumnCount = columnCount;
       const columnHeights = new Array(effectiveColumnCount).fill(0);
       const items = Array.from(grid.querySelectorAll(".video-item"));
       const positions = [];
