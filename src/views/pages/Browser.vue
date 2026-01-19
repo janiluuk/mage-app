@@ -87,6 +87,18 @@
         </div>
       </div>
 
+      <!-- Loading Indicator -->
+      <div
+        v-if="isLoading"
+        class="loading-indicator"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading videos"
+      >
+        <div class="loading-indicator__spinner"></div>
+        <div class="loading-indicator__text">Loading videos...</div>
+      </div>
+
       <div
         v-if="videos.length === 0 && !isLoading && !viewGroupedByTags"
         class="drop-zone"

@@ -783,7 +783,7 @@ onBeforeUnmount(() => {
 }
 
 .subtitle {
-  color: #6b7280;
+  color: var(--text-color-secondary);
   font-size: 1rem;
 }
 
@@ -800,7 +800,7 @@ onBeforeUnmount(() => {
 }
 
 .export-section p {
-  color: #6b7280;
+  color: var(--text-color-secondary);
   margin: 0 0 1rem 0;
 }
 
@@ -836,7 +836,7 @@ onBeforeUnmount(() => {
   display: flex;
   justify-content: space-around;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-ground);
   border-radius: 8px;
 }
 
@@ -849,12 +849,12 @@ onBeforeUnmount(() => {
 
 .generation-stats .stat span {
   font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--text-color-secondary);
 }
 
 .generation-stats .stat strong {
   font-size: 1.25rem;
-  color: #1f2937;
+  color: var(--text-color);
 }
 
 .extend-controls {
@@ -865,7 +865,7 @@ onBeforeUnmount(() => {
 
 .extend-description {
   margin: 0;
-  color: #4b5563;
+  color: var(--text-color-secondary);
 }
 
 .extend-actions {
@@ -885,7 +885,7 @@ onBeforeUnmount(() => {
 }
 
 .empty-overview {
-  color: #6b7280;
+  color: var(--text-color-secondary);
   font-size: 0.95rem;
 }
 
@@ -896,10 +896,10 @@ onBeforeUnmount(() => {
 }
 
 .segment-card {
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--surface-border);
   border-radius: 8px;
   padding: 1rem;
-  background: #f9fafb;
+  background: var(--surface-ground);
 }
 
 .segment-header {
@@ -911,15 +911,15 @@ onBeforeUnmount(() => {
 }
 
 .segment-meta {
-  color: #6b7280;
+  color: var(--text-color-secondary);
   font-size: 0.875rem;
 }
 
 .segment-config {
   margin: 0;
   font-size: 0.75rem;
-  background: #111827;
-  color: #f9fafb;
+  background: var(--surface-50);
+  color: var(--text-color);
   padding: 0.75rem;
   border-radius: 6px;
   overflow-x: auto;

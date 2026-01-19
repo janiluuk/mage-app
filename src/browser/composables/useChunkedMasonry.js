@@ -45,7 +45,13 @@ export default function useChunkedMasonry({
         80,
         Math.floor(getTileWidthForLevel(levelIndex) || 200)
       );
-      return Math.max(1, Math.floor(available / desired));
+      // Ensure we get at least 2 columns if possible, but never less than 1
+      const calculated = Math.floor(available / desired);
+      // If we only get 1 column but have enough space for 2 smaller columns, use 2
+      if (calculated === 1 && available >= desired * 1.5) {
+        return 2;
+      }
+      return Math.max(1, calculated);
     }
     const gtc = computedStyle.gridTemplateColumns;
     if (!gtc || gtc === "none") return 1;
@@ -67,14 +73,30 @@ export default function useChunkedMasonry({
     const availableWidth = Math.max(0, gridWidth - padding);
 
     const totalGapWidth = columnGap * Math.max(0, columnCount - 1);
-    const columnWidth = Math.max(
+    // Use Math.floor to ensure consistent column widths and avoid fractional pixels
+    let columnWidth = Math.max(
       1,
       Math.floor((availableWidth - totalGapWidth) / Math.max(1, columnCount))
     );
+    
+    // Ensure columnWidth is reasonable - if it's too small, recalculate with fewer columns
+    let finalColumnCount = columnCount;
+    if (columnWidth < 80 && columnCount > 1) {
+      // Recalculate with one less column if width is too small
+      finalColumnCount = Math.max(1, columnCount - 1);
+      const newTotalGapWidth = columnGap * Math.max(0, finalColumnCount - 1);
+      columnWidth = Math.max(
+        80,
+        Math.floor((availableWidth - newTotalGapWidth) / Math.max(1, finalColumnCount))
+      );
+    }
+    
+    // Recalculate available width to account for rounding, ensuring no wasted space
+    const actualTotalWidth = columnWidth * finalColumnCount + (columnGap * Math.max(0, finalColumnCount - 1));
 
     cachedGridMeasurements = {
       columnWidth,
-      columnCount,
+      columnCount: finalColumnCount,
       columnGap,
       gridWidth: availableWidth,
     };
@@ -150,7 +172,9 @@ export default function useChunkedMasonry({
             }
           }
 
-          const h = Math.max(1, Math.round(columnWidth / ar));
+          // Use fixed 16:9 aspect ratio for consistent grid
+          const fixedAspectRatio = 16 / 9;
+          const h = Math.max(1, Math.round(columnWidth / fixedAspectRatio));
 
           let minIdx = 0;
           let minVal = columnHeights[0];
@@ -162,6 +186,7 @@ export default function useChunkedMasonry({
             }
           }
 
+          // Calculate precise position to avoid alignment issues
           const x = minIdx * (columnWidth + columnGap);
           const y = columnHeights[minIdx];
 
@@ -169,6 +194,7 @@ export default function useChunkedMasonry({
           el.style.width = `${columnWidth}px`;
           el.style.height = `${h}px`;
           el.style.transform = `translate(${x}px, ${y}px)`;
+          el.style.margin = "0"; // Ensure no margin interferes
 
           const vc = el.querySelector(
             ".video-container, .video-placeholder, .error-indicator"
@@ -183,7 +209,7 @@ export default function useChunkedMasonry({
           el.dataset.y = String(y);
           positions.push({ id, x, y });
 
-          columnHeights[minIdx] = y + h + columnGap;
+          columnHeights[minIdx] = Math.round(y + h + columnGap);
         }
 
         if (i < items.length) {

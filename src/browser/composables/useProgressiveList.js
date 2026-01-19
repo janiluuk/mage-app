@@ -196,7 +196,7 @@ export function useProgressiveList(
     let ricId = 0;
 
     let lastUpdate = 0;
-    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates to reduce flickering
+    const MIN_UPDATE_INTERVAL = 200; // Minimum 200ms between updates to reduce flickering
 
     const schedule = () => {
       if (cancelled) return;
@@ -227,7 +227,7 @@ export function useProgressiveList(
       if (typeof window.requestIdleCallback === "function") {
         ricId = window.requestIdleCallback(idleCb, { timeout: 500 });
       } else {
-        setTimeout(idleCb, 50); // Throttle to reduce flickering
+        setTimeout(idleCb, 150); // Throttle to reduce flickering
       }
     };
 

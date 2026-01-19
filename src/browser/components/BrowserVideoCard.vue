@@ -54,22 +54,29 @@
         @load="imageError = false"
       />
       <div
-        v-if="!localLoaded && !previewImageUrl"
+        v-if="!localLoaded && (!previewImageUrl || imageError)"
         class="video-placeholder"
-        :class="{ 'video-placeholder--static': !isNearViewport }"
+        :class="{ 'video-placeholder--static': !isNearViewport, 'video-placeholder--no-preview': imageError || !previewImageUrl }"
         role="status"
         aria-live="polite"
       >
         <div class="video-placeholder__media" aria-hidden="true">
           <div v-if="!isNearViewport" class="video-placeholder__static-block" />
           <template v-else>
-            <div class="video-placeholder__sheen" />
-            <div :class="spinnerClass" />
+            <div v-if="imageError || !previewImageUrl" class="video-placeholder__no-preview-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="currentColor" opacity="0.4"/>
+              </svg>
+            </div>
+            <template v-else>
+              <div class="video-placeholder__sheen" />
+              <div :class="spinnerClass" />
+            </template>
           </template>
         </div>
         <div class="video-placeholder__text">
-          <span class="video-placeholder__message">{{ placeholderText }}</span>
-          <span class="video-placeholder__subtext">{{ placeholderSubtext }}</span>
+          <span class="video-placeholder__message">{{ imageError || !previewImageUrl ? 'No preview available' : placeholderText }}</span>
+          <span class="video-placeholder__subtext">{{ imageError || !previewImageUrl ? 'Preview image not found' : placeholderSubtext }}</span>
         </div>
       </div>
     </div>
@@ -145,17 +152,26 @@ const effectiveAspectRatio = computed(() =>
 // For masonry layout, use a fixed aspect ratio for all cards
 const fixedAspectRatio = 16 / 9;
 
-const cardStyle = computed(() => ({
-  userSelect: "none",
-  position: "relative",
-  width: "100%",
-  borderRadius: "8px",
-  overflow: "hidden",
-  cursor: "pointer",
-  border: props.selected ? "3px solid #007acc" : "1px solid #333",
-  background: "#1a1a1a",
-  aspectRatio: fixedAspectRatio, // Fixed aspect ratio for consistent masonry layout
-}));
+const cardStyle = computed(() => {
+  // For masonry layout, width/height are set by the layout system
+  // Only set aspect ratio if not positioned by masonry
+  const baseStyle = {
+    userSelect: "none",
+    position: "relative",
+    borderRadius: "8px",
+    overflow: "hidden",
+    cursor: "pointer",
+    border: props.selected ? "3px solid #007acc" : "1px solid rgba(255, 255, 255, 0.1)",
+    background: "linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%)",
+    boxSizing: "border-box",
+    transition: "border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease",
+    boxShadow: props.selected 
+      ? "0 4px 12px rgba(0, 122, 204, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.05)"
+      : "0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.03)",
+  };
+  
+  return baseStyle;
+});
 
 const containerStyle = computed(() => ({
   width: "100%",

@@ -188,8 +188,12 @@ export default {
     this.videoId = this.$route.params.id;
     this.fetchVideoJob = this.fetchVideoJob.bind(this);
     this.startPollingVideoJob = this.startPollingVideoJob.bind(this);
+    // Only fetch once on creation, polling will handle subsequent updates
     await this.fetchVideoJob(true);
-    this.startPollingVideoJob();
+    // Delay polling start to avoid duplicate initial fetch
+    setTimeout(() => {
+      this.startPollingVideoJob();
+    }, 100);
     this.formChanged = false;
   },
   components: {
@@ -352,7 +356,10 @@ export default {
     },
     async fetchVideoJob(force) {
       if (!this.videoId) return;
+      // Prevent duplicate fetches - use a flag to track if fetch is in progress
+      if (this.isFetching && !force) return;
       if (force == true || this.isVideoProcessing) {
+        this.isFetching = true;
         try {
           await this.fetchJob(this.videoId);
           // Compare and update only changed properties
@@ -368,6 +375,8 @@ export default {
         } catch (error) {
           if (error?.message)
             this.errorMessage = error.message;
+        } finally {
+          this.isFetching = false;
         }
       }
     },
