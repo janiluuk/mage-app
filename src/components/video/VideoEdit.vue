@@ -112,7 +112,7 @@ import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 import showSwal from "@/mixins/showSwal.js";
 import _ from 'lodash';
 import SimpleVueValidator from 'simple-vue3-validator';
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { parseDuration } from '@/utils/format';
 
@@ -121,8 +121,6 @@ const Validator = SimpleVueValidator.Validator;
 export default {
   name: 'VideoEdit',
   beforeUnmount() {
-    // Set flag to prevent polling from starting during unmount
-    this.isUnmounting = true;
     // Clear polling start timeout if component is destroyed before it executes
     if (this.pollingStartTimeout) {
       clearTimeout(this.pollingStartTimeout);
@@ -137,6 +135,12 @@ export default {
   setup() {
     const op = ref(null);
     const isUnmounting = ref(false);
+    
+    // Set flag immediately when unmount begins to prevent race conditions
+    onBeforeUnmount(() => {
+      isUnmounting.value = true;
+    });
+    
     return { op, isUnmounting };
 
   },
