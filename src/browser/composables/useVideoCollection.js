@@ -50,11 +50,13 @@ export function useVideoCollection({
       : videos.value.length
   );
 
-  const userLimit = computed(() =>
-    renderLimit.value != null && Number.isFinite(renderLimit.value)
-      ? Math.max(0, Math.floor(renderLimit.value))
-      : null
-  );
+  const userLimit = computed(() => {
+    const limit = renderLimit?.value ?? renderLimit;
+    if (limit != null && Number.isFinite(limit)) {
+      return Math.max(0, Math.floor(limit));
+    }
+    return null;
+  });
 
   const videosToRender = computed(() =>
     userLimit.value == null

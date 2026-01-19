@@ -41,19 +41,24 @@ export function buildComparator({ sortKey, sortDir, randomOrderMap }) {
     }) * dir;
 }
 
-export function groupAndSort(items, { groupByFolders, comparator }) {
-  if (!groupByFolders) {
+export function groupAndSort(items, { groupByStories, comparator }) {
+  if (!groupByStories) {
     return [...items].sort(comparator);
   }
   const groups = new Map();
   items.forEach((item) => {
-    const key = item.dirname || "";
+    // Group by story/batch - use the first story name or "No Story" if none
+    const storyName = item.storyName || item.batchName || (item.stories && item.stories.length > 0 ? item.stories[0].name : null) || "No Story";
+    const key = storyName;
     if (!groups.has(key)) groups.set(key, []);
     groups.get(key).push(item);
   });
-  const sortedGroupKeys = Array.from(groups.keys()).sort((a, b) =>
-    a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" })
-  );
+  const sortedGroupKeys = Array.from(groups.keys()).sort((a, b) => {
+    // Put "No Story" at the end
+    if (a === "No Story") return 1;
+    if (b === "No Story") return -1;
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
+  });
   const result = [];
   sortedGroupKeys.forEach((key) => {
     const groupItems = groups.get(key).sort(comparator);

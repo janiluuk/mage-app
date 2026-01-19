@@ -93,8 +93,20 @@ export default {
         deleteJob(id) {
             this.$emit('delete-job', id);
         },
-        editJob(id) {
-            this.$router.push(`/edit/vid2vid/${id}`);
+        // Normalize generator type to ensure it matches router routes
+        normalizeGeneratorType(generator) {
+            if (!generator) return 'vid2vid';
+            const normalized = generator.toLowerCase();
+            // Map common generator types to router routes
+            if (normalized === 'deforum' || normalized.includes('deforum')) {
+                return 'deforum';
+            }
+            // Default to vid2vid for any other type or if it contains vid2vid
+            return 'vid2vid';
+        },
+        editJob(id, generator) {
+            const normalizedType = this.normalizeGeneratorType(generator);
+            this.$router.push(`/edit/${normalizedType}/${id}`);
         },
         retryJob(id) {
             this.$emit('retry-job', id);

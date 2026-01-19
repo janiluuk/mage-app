@@ -27,8 +27,24 @@ export default {
       ? { page: { total: 1 } } 
       : response.data.meta;
     
+    const deserialized = jsona.deserialize(response.data);
+    // jsona.deserialize returns an array for collections
+    // If it's not an array, it might be wrapped in an object
+    let list = [];
+    if (Array.isArray(deserialized)) {
+      list = deserialized;
+    } else if (deserialized && Array.isArray(deserialized.data)) {
+      list = deserialized.data;
+    } else if (deserialized && deserialized.type === 'video-jobs') {
+      // Single item, wrap in array
+      list = [deserialized];
+    } else {
+      console.warn('Unexpected deserialized format:', deserialized);
+      list = [];
+    }
+    
     return {
-      list: jsona.deserialize(response.data),
+      list: list,
       meta: meta,
     };
   },

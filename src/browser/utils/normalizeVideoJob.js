@@ -11,10 +11,22 @@ const pickPlayableUrl = (job) => {
 };
 
 const pickPreviewUrl = (job) => {
-  const candidates = [job?.preview_img, job?.preview_animation, job?.preview_url, job?.thumbnail];
+  const candidates = [
+    job?.preview_img, 
+    job?.preview_animation, 
+    job?.preview_url, 
+    job?.thumbnail,
+    job?.attributes?.preview_img,
+    job?.attributes?.preview_animation,
+    job?.attributes?.preview_url,
+    job?.attributes?.thumbnail
+  ];
   for (const candidate of candidates) {
     if (!candidate || typeof candidate !== "string") continue;
-    return candidate;
+    // Ensure it's a valid URL
+    if (candidate.startsWith('http://') || candidate.startsWith('https://') || candidate.startsWith('/')) {
+      return candidate;
+    }
   }
   return "";
 };
@@ -58,6 +70,11 @@ export function normalizeVideoJob(job) {
   const duration = Number(job?.duration || job?.length) || null;
   const aspectRatio = width && height ? width / height : null;
 
+  // Extract story/batch information
+  const stories = job?.stories || job?.batches || [];
+  const storyName = stories.length > 0 ? (stories[0]?.name || stories[0]?.attributes?.name || null) : null;
+  const batchName = job?.batch?.name || job?.batch?.attributes?.name || null;
+
   return {
     id: job?.id != null ? String(job.id) : name,
     name,
@@ -78,6 +95,9 @@ export function normalizeVideoJob(job) {
     tags: normalizeTags(job?.tags),
     rating: normalizeRating(job?.rating),
     isElectronFile: false,
+    storyName: storyName || batchName,
+    batchName: batchName,
+    stories: stories,
     metadata: {
       createdAt: job?.created_at || null,
       updatedAt: job?.updated_at || null,
