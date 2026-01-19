@@ -4,6 +4,9 @@ import VideoEdit from '@/components/video/VideoEdit.vue';
 import { createStore } from 'vuex';
 import { createRouter, createMemoryHistory } from 'vue-router';
 
+// Constants matching the component implementation
+const POLLING_START_DELAY = 100; // milliseconds - matches VideoEdit.vue timeout
+
 describe('VideoEdit', () => {
   let store;
   let router;
@@ -136,7 +139,7 @@ describe('VideoEdit', () => {
       wrapper.unmount();
       
       // Fast-forward time past the timeout
-      vi.advanceTimersByTime(150);
+      vi.advanceTimersByTime(POLLING_START_DELAY + 50);
       
       // Verify startPollingVideoJob was not called after unmount
       expect(startPollingMock).not.toHaveBeenCalled();
@@ -149,8 +152,8 @@ describe('VideoEdit', () => {
       wrapper = await createWrapper();
       wrapper.vm.startPollingVideoJob = startPollingMock;
       
-      // Fast-forward time past the timeout (100ms)
-      vi.advanceTimersByTime(150);
+      // Fast-forward time past the timeout
+      vi.advanceTimersByTime(POLLING_START_DELAY + 50);
       
       // Verify startPollingVideoJob was called
       expect(startPollingMock).toHaveBeenCalled();
