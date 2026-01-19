@@ -3,7 +3,7 @@ import VideoJobService from "@/services/videojobs.service";
 import _ from "lodash";
 
 const initialState = {
-  list: {},
+  list: [],
   item: {},
   meta: {},
   url: null,
@@ -128,7 +128,11 @@ export const videojobs = {
       state.list = list;
     },
     REMOVE_JOB: (state, id) => {
-      state.list = state.list.filter((job) => job.id != id);
+      if (Array.isArray(state.list)) {
+        state.list = state.list.filter((job) => job.id != id);
+      } else {
+        state.list = [];
+      }
     },
     SET_RESOURCE: (state, item) => {
       state.item = item;
@@ -150,9 +154,13 @@ export const videojobs = {
   },
   getters: {
     list(state) {
-      return state.list;
+      // Ensure we always return an array
+      return Array.isArray(state.list) ? state.list : [];
     },
     findById: (state) => (id) => {
+      if (!Array.isArray(state.list)) {
+        return undefined;
+      }
       return state.list.find((job) => job.id === id);
     },
     listTotal(state) {

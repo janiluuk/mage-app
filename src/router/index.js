@@ -192,6 +192,18 @@ const router = createRouter({
           meta: { requiresAuth: true },
         },
         {
+          path: "/stories",
+          name: "StoryBrowser",
+          component: () => import("@/views/StoryBrowser.vue"),
+          meta: { requiresAuth: true },
+        },
+        {
+          path: "/stories/:id/edit",
+          name: "StoryEditor",
+          component: () => import("@/views/StoryEditor.vue"),
+          meta: { requiresAuth: true },
+        },
+        {
           path: "/oldlibrary",
           name: "OldLibrary",
           component: VideoLibraryTabs,
