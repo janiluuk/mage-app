@@ -8,6 +8,7 @@
  * Normalize error to a standard format
  * @param {Error|string|Object} error - The error to normalize
  * @param {string} context - Context where the error occurred (e.g., 'VideoJobService.list')
+ * @param {boolean} shouldLog - Whether to log the error (default: true in dev)
  * @returns {Object} Normalized error object with message, code, and context
  * @property {string} message - Human-readable error message
  * @property {number|null} code - HTTP status code or error code
@@ -15,7 +16,7 @@
  * @property {Error|Object} original - Original error object
  * @property {string} timestamp - ISO timestamp of when error occurred
  */
-export function normalizeError(error, context = '') {
+export function normalizeError(error, context = '', shouldLog = import.meta.env.DEV) {
   let message = 'An unexpected error occurred';
   let code = null;
   let originalError = error;
@@ -27,22 +28,23 @@ export function normalizeError(error, context = '') {
     code = error.code || error.status || null;
     originalError = error;
   } else if (error && typeof error === 'object') {
-    message = error.message || error.error || error.toString();
-    code = error.code || error.status || null;
-    originalError = error;
-  }
-
-  // Extract message from API error responses
-  if (error?.response?.data) {
-    const data = error.response.data;
-    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-      message = data.errors[0].detail || data.errors[0].title || message;
-    } else if (data.message) {
-      message = data.message;
-    } else if (data.error) {
-      message = data.error;
+    // Extract message from API error responses first
+    if (error.response?.data) {
+      const data = error.response.data;
+      if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        message = data.errors[0].detail || data.errors[0].title || message;
+      } else if (data.message) {
+        message = data.message;
+      } else if (data.error) {
+        message = data.error;
+      }
+      code = error.response.status || code;
+    } else {
+      // Fallback for other objects
+      message = error.message || error.error || message;
+      code = error.code || error.status || null;
     }
-    code = error.response.status || code;
+    originalError = error;
   }
 
   const normalized = {
@@ -53,8 +55,8 @@ export function normalizeError(error, context = '') {
     timestamp: new Date().toISOString()
   };
 
-  // Log in development
-  if (import.meta.env.DEV) {
+  // Log if requested
+  if (shouldLog) {
     console.error(`[ErrorHandler] ${context}:`, normalized);
   }
 
@@ -68,7 +70,37 @@ export function normalizeError(error, context = '') {
  * @returns {string} User-friendly error message
  */
 export function getUserFriendlyMessage(error, defaultMessage = 'Something went wrong. Please try again.') {
-  const normalized = normalizeError(error);
+  // Extract code without normalizing (to avoid logging)
+  let code = null;
+  let message = null;
+
+  if (error?.response?.status) {
+    code = error.response.status;
+  } else if (error?.code) {
+    code = error.code;
+  } else if (error?.status) {
+    code = error.status;
+  }
+
+  // Extract message
+  if (typeof error === 'string') {
+    message = error;
+  } else if (error instanceof Error) {
+    message = error.message;
+  } else if (error?.response?.data) {
+    const data = error.response.data;
+    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+      message = data.errors[0].detail || data.errors[0].title;
+    } else if (data.message) {
+      message = data.message;
+    } else if (data.error) {
+      message = data.error;
+    }
+  } else if (error?.message) {
+    message = error.message;
+  } else if (error?.error) {
+    message = error.error;
+  }
   
   // Map common error codes to user-friendly messages
   const codeMessages = {
@@ -83,13 +115,13 @@ export function getUserFriendlyMessage(error, defaultMessage = 'Something went w
     503: 'Service temporarily unavailable. Please try again later.',
   };
 
-  if (normalized.code && codeMessages[normalized.code]) {
-    return codeMessages[normalized.code];
+  if (code && codeMessages[code]) {
+    return codeMessages[code];
   }
 
   // Return the error message if it's user-friendly, otherwise return default
-  if (normalized.message && normalized.message.length < 200) {
-    return normalized.message;
+  if (message && message.length < 200) {
+    return message;
   }
 
   return defaultMessage;
@@ -113,7 +145,7 @@ export function handleError(error, options = {}) {
     logError = import.meta.env.DEV
   } = options;
 
-  const normalized = normalizeError(error, context);
+  const normalized = normalizeError(error, context, logError);
   const userMessage = getUserFriendlyMessage(error, defaultMessage);
 
   if (toast && typeof toast.add === 'function') {
@@ -125,9 +157,8 @@ export function handleError(error, options = {}) {
     });
   }
 
-  if (logError) {
-    console.error(`[ErrorHandler] ${context}:`, normalized);
-  }
+  // Log if explicitly requested (normalizeError already logged if logError was true)
+  // This is here in case we want separate control, but normalizeError already handles it
 
   return normalized;
 }
