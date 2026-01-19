@@ -157,5 +157,6 @@ class ApiCache {
   }
 }
 
-// Export singleton instance
+// Export both the class and a singleton instance
+export { ApiCache };
 export default new ApiCache(100, 60000); // 100 entries, 60s TTL
