@@ -325,7 +325,8 @@ export default {
       } else {
         formData.append("attachment", blob, filename || this.currentFile.name);
       }
-      formData.append("type", "vid2vid"); // Required by backend
+      const uploadType = this.uploadType || this.type || (this.$route && this.$route.query && this.$route.query.type) || 'vid2vid';
+      formData.append("type", uploadType);
       
       // Optional trim parameters
       if (this.currentTrimRange && this.currentTrimRange.start !== this.currentTrimRange.end) {
