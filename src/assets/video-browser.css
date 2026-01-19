@@ -134,28 +134,31 @@
 
 .video-browser /* ===== Header ===== */
 .header{
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  padding: 0.5rem 0.75rem;
+  background: linear-gradient(180deg, rgba(42, 42, 42, 0.98) 0%, rgba(38, 38, 38, 0.95) 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.03);
+  padding: 0.35rem 0.6rem;
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.5rem;
   position: sticky;
   top: 0;
   z-index: 100;
   overflow-anchor: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(8px);
 }
 
 .video-browser .nav-left{
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .video-browser .controls{
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   margin-left: auto;
 }
 
@@ -171,16 +174,18 @@
 }
 
 .video-browser .file-input-label{
-  background: var(--color-accent);
-  border: none;
+  background: linear-gradient(135deg, var(--color-accent) 0%, #45b85a 100%);
+  border: 1px solid rgba(81, 207, 102, 0.3);
   color: #000;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  border-radius: 8px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(81, 207, 102, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-size: 0.75rem;
 }
 
 .video-browser .file-input-label:disabled{
@@ -189,31 +194,39 @@
 }
 
 .video-browser .file-input-label:hover{
-  background: #40c057;
+  background: linear-gradient(135deg, #40c057 0%, #37a049 100%);
+  box-shadow: 0 2px 4px rgba(81, 207, 102, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
 }
 
 .video-browser .toggle-button{
-  background: transparent;
-  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--color-text);
-  padding: 0.4rem 0.6rem;
+  padding: 0.28rem 0.5rem;
   border-radius: 6px;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
-  gap: 0.35rem;
+  transition: all 0.2s ease;
+  gap: 0.3rem;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
 .video-browser .toggle-button:hover{
-  background: var(--color-border);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .video-browser .toggle-button.active{
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #45b85a 100%);
+  border-color: rgba(81, 207, 102, 0.4);
   color: #000;
+  box-shadow: 0 1px 3px rgba(81, 207, 102, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-weight: 500;
 }
 
 .video-browser .toggle-button:disabled{
@@ -265,33 +278,44 @@
 }
 
 .video-browser .select-control{
-  background: var(--color-surface);
+  background: rgba(255, 255, 255, 0.04);
   color: var(--color-text);
-  border: 1px solid var(--color-border);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  padding: 0.3rem 0.5rem;
+  padding: 0.28rem 0.5rem;
   cursor: pointer;
   appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23f5f5f5' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: right 0.5rem center;
-  background-size: 0.8rem;
-  padding-right: 1.5rem;
+  background-position: right 0.4rem center;
+  background-size: 0.7rem;
+  padding-right: 1.4rem;
+  font-size: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.video-browser .select-control:hover{
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.15);
 }
 
 .video-browser .filters-button-label{
-  font-size: 0.8rem;
+  font-size: 0.7rem;
   font-weight: 500;
 }
 
 .video-browser .filters-button-badge{
-  background: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #45b85a 100%);
   color: #051805;
   border-radius: 999px;
-  padding: 0 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.4;
+  padding: 0.1rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1.3;
+  box-shadow: 0 1px 2px rgba(81, 207, 102, 0.3);
+  min-width: 1.2rem;
+  text-align: center;
 }
 
 .video-browser .filters-summary{
@@ -787,7 +811,14 @@
 .video-browser .video-limit-control, .video-browser .zoom-control{
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+}
+
+.video-browser .video-limit-control input[type="range"], 
+.video-browser .zoom-control input[type="range"]{
+  width: 80px !important;
+  height: 4px;
 }
 
 .video-browser .video-limit-control input[type="range"], .video-browser .zoom-control input[type="range"]{
@@ -822,12 +853,14 @@
 }
 
 .video-browser .selection-info{
-  background: var(--color-accent);
+  background: linear-gradient(135deg, var(--color-accent) 0%, #45b85a 100%);
   color: #000;
-  padding: 0.3rem 0.8rem;
-  border-radius: 12px;
-  font-size: 0.8rem;
+  padding: 0.25rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.7rem;
   font-weight: 500;
+  box-shadow: 0 1px 2px rgba(81, 207, 102, 0.2);
+  border: 1px solid rgba(81, 207, 102, 0.3);
 }
 
 .video-browser /* ===== App frame ===== */
@@ -1405,7 +1438,7 @@
   pointer-events: none;
 }
 
-.video-browser /* ===== Accessibility / reduced motion ===== */
+/* ===== Accessibility / reduced motion ===== */
 @media (prefers-reduced-motion: reduce){
   .video-browser .video-item, .video-browser .video-placeholder, .video-browser .video-placeholder__sheen, .video-browser .video-placeholder__spinner, .video-browser .debug-info{
     animation: none !important;
@@ -1416,7 +1449,7 @@
   .video-browser .virtual-grid-container .video-item:hover{ transform: none !important; }
 }
 
-.video-browser /* ===== Responsive tweaks ===== */
+/* ===== Responsive tweaks ===== */
 @media (max-width: 768px){
   .video-browser .video-grid.grid{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
   .video-browser .video-grid.masonry-vertical{ grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }

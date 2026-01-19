@@ -55,7 +55,7 @@
             :style="{ accentColor: zoomLevel >= minZoomIndex ? '#51cf66' : '#ffa726' }"
             @input="handleZoomInput"
           />
-          <span v-if="zoomLevel < minZoomIndex" style="color: #ffa726; font-size: 0.7rem">!</span>
+          <span v-if="zoomLevel < minZoomIndex" style="color: #ffa726; font-size: 0.65rem">!</span>
         </div>
       </div>
 
@@ -187,10 +187,10 @@ const minZoomIndex = computed(() => props.getMinimumZoomLevel());
 const dividerStyle = {
   display: "flex",
   alignItems: "center",
-  gap: "0.5rem",
-  marginLeft: "1rem",
-  paddingLeft: "1rem",
-  borderLeft: "1px solid #ccc",
+  gap: "0.4rem",
+  marginLeft: "0.6rem",
+  paddingLeft: "0.6rem",
+  borderLeft: "1px solid rgba(255, 255, 255, 0.12)",
 };
 
 const handleRenderLimitChange = (event) => {

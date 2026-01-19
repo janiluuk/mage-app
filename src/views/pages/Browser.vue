@@ -239,7 +239,7 @@
         :is-open="isMetadataPanelOpen"
         :on-toggle="toggleMetadataPanel"
         :show-collapsed-hint="shouldRenderCollapsedHint"
-        :selection-count="selection.size"
+        :selection-count="selection.size.value || 0"
         :selected-videos="selectedVideos"
         :available-tags="availableTags"
         :on-add-tag="handleAddTags"
@@ -270,7 +270,7 @@
         :position="contextMenu.position"
         :context-id="contextMenu.contextId"
         :get-by-id="getById"
-        :selection-count="selection.size"
+        :selection-count="selection.size.value || 0"
         :on-close="hideContextMenu"
         :on-action="runContextAction"
       />
@@ -350,8 +350,15 @@ const metadataPanelRef = ref(null);
 const isLoading = ref(false);
 const refreshInterval = ref(null);
 
-const rawJobs = computed(() => store.getters["videojobs/list"] || []);
-const rawFiles = computed(() => store.getters["files/list"] || []);
+// Ensure we always get arrays from the store
+const rawJobs = computed(() => {
+  const list = store.getters["videojobs/list"];
+  return Array.isArray(list) ? list : [];
+});
+const rawFiles = computed(() => {
+  const list = store.getters["files/list"];
+  return Array.isArray(list) ? list : [];
+});
 const metadataOverrides = ref(new Map());
 
 // Mode: 'videojobs' or 'files'
@@ -375,9 +382,10 @@ const applyMetadataOverrides = (video) => {
 };
 
 // Normalize files from API
-const normalizedFiles = computed(() =>
-  rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides)
-);
+const normalizedFiles = computed(() => {
+  if (!Array.isArray(rawFiles.value)) return [];
+  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+});
 
 // Combine videojobs and files, or use one based on view mode
 // When viewing by tag, use files from the tag endpoint
@@ -395,6 +403,8 @@ const videos = computed(() => {
     }
     return normalizedFiles.value;
   }
+  // Ensure rawJobs.value is an array before mapping
+  if (!Array.isArray(rawJobs.value)) return [];
   return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
 });
 

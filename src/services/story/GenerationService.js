@@ -7,7 +7,7 @@ class GenerationService {
   }
 
   async startGeneration(config) {
-    const response = await this.request.post('/api/story/generate', config)
+    const response = await this.request.post('/story/generate', config)
     return response.data
   }
 
@@ -16,34 +16,34 @@ class GenerationService {
       ...config,
       extendFrom: batchId
     }
-    const response = await this.request.post('/api/story/generate', payload)
+    const response = await this.request.post('/story/generate', payload)
     return response.data
   }
 
   async getBatchStatus(batchId) {
-    const response = await this.request.get(`/api/story/batch/${batchId}`)
+    const response = await this.request.get(`/story/batch/${batchId}`)
     return response.data
   }
 
   async pauseBatch(batchId) {
-    await this.request.post(`/api/story/batch/${batchId}/pause`)
+    await this.request.post(`/story/batch/${batchId}/pause`)
   }
 
   async resumeBatch(batchId) {
-    await this.request.post(`/api/story/batch/${batchId}/resume`)
+    await this.request.post(`/story/batch/${batchId}/resume`)
   }
 
   async cancelBatch(batchId) {
-    await this.request.delete(`/api/story/batch/${batchId}`)
+    await this.request.delete(`/story/batch/${batchId}`)
   }
 
   async persistFrame(batchId, payload) {
-    const response = await this.request.post(`/api/story/batch/${batchId}/frames`, payload)
+    const response = await this.request.post(`/story/batch/${batchId}/frames`, payload)
     return response.data
   }
 
   async createShareLink(payload) {
-    const response = await this.request.post('/api/story/share', payload)
+    const response = await this.request.post('/story/share', payload)
     return response.data
   }
 

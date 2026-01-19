@@ -18,7 +18,7 @@ export default {
       },
     };
     const response = await requestService.get(
-      "/v1/video-jobs",
+      "/video-jobs",
       options,
       {},
       true
@@ -35,7 +35,7 @@ export default {
 
   async get(id) {
     const response = await requestService.get(
-      "/v1/video-jobs/" + id + "?include=" + includeParams,
+      "/video-jobs/" + id + "?include=" + includeParams,
       {},
       {},
       true
@@ -102,7 +102,7 @@ export default {
   },
 
   async destroy(id) {
-    return await requestService.delete(`/v1/video-jobs/${id}`);
+    return await requestService.delete(`/video-jobs/${id}`);
   },
 
   async upload(item, type, onProgress, extraData = {}) {
@@ -180,7 +180,7 @@ export default {
     }
     formData.append('type', 'soundtrack');
     
-    return await requestService.post('/v1/video-jobs/add-soundtrack', formData, {
+    return await requestService.post('/video-jobs/add-soundtrack', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }
@@ -200,7 +200,7 @@ export default {
       includeNames: []
     });
     
-    return await requestService.post('/v1/video-jobs/extend', payload, {
+    return await requestService.post('/video-jobs/extend', payload, {
       headers: authHeader()
     });
   },
