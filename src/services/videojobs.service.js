@@ -4,6 +4,7 @@ import qs from "qs";
 import requestService from "@/services/request-service/ApiRequestService";
 import authHeader from "@/services/auth-header";
 import { API_V1_BASE_URL } from "@/utils/api-base-urls";
+import env from "@/utils/env";
 
 const jsona = new Jsona();
 const url = API_V1_BASE_URL;
@@ -39,7 +40,9 @@ export default {
       // Single item, wrap in array
       list = [deserialized];
     } else {
-      console.warn('Unexpected deserialized format:', deserialized);
+      if (import.meta.env.DEV) {
+        console.warn('Unexpected deserialized format:', deserialized);
+      }
       list = [];
     }
     
@@ -92,7 +95,9 @@ export default {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Download error:", error.message);
+      if (import.meta.env.DEV) {
+        console.error("Download error:", error.message);
+      }
       throw error;
     }
   },
@@ -155,7 +160,15 @@ export default {
   },
 
   async finalize(params) {
-    return await requestService.post("/finalize", params);
+    // Finalize endpoint is at /api/finalize, not /api/v1/finalize
+    const API_URL = env.VITE_API_URL || '';
+    const response = await axios.post(`${API_URL}/api/finalize`, params, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json',
+      },
+    });
+    return response;
   },
 
   async cancelJob(id) {
@@ -174,7 +187,15 @@ export default {
     return await requestService.post("/generate", { ...params, type: "deforum" });
   },
   async finalizeDeforum(params) {
-    return await requestService.post("/finalize", params);
+    // Finalize endpoint is at /api/finalize, not /api/v1/finalize
+    const API_URL = env.VITE_API_URL || '';
+    const response = await axios.post(`${API_URL}/api/finalize`, params, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json',
+      },
+    });
+    return response;
   },
 
   async queue() {

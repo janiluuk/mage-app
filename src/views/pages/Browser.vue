@@ -287,6 +287,8 @@
         :on-action="runContextAction"
       />
 
+      <ConfirmDialog />
+
       <SoundtrackDialog
         v-if="selectedVideoForSoundtrack"
         v-model:visible="showSoundtrackDialog"
@@ -313,6 +315,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { useConfirm } from 'primevue/useconfirm';
 import BrowserHeaderBar from "@/browser/components/BrowserHeaderBar.vue";
 import BrowserFiltersPopover from "@/browser/components/BrowserFiltersPopover.vue";
 import BrowserVideoCard from "@/browser/components/BrowserVideoCard.vue";
@@ -351,6 +354,11 @@ import "@/assets/video-browser.css";
 
 const router = useRouter();
 const store = useStore();
+const confirm = useConfirm();
+
+// Request cancellation for API calls
+const activeRequestIds = ref(new Set());
+const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
@@ -1036,16 +1044,30 @@ const refreshData = async () => {
 
 onMounted(async () => {
   await refreshData();
-  // Debug logging
-  console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
-  console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
-  console.log('videosToRender:', videosToRender.value.length);
+  // Debug logging (dev only)
+  if (import.meta.env.DEV) {
+    console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
+    console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
+    console.log('videosToRender:', videosToRender.value.length);
+  }
   refreshInterval.value = setInterval(refreshData, 10000);
 });
 
 onBeforeUnmount(() => {
+  // Cancel all active API requests
+  if (activeRequestIds.value && activeRequestIds.value.size > 0) {
+    import('@/services/request-service/ApiRequestService').then(({ default: requestService }) => {
+      activeRequestIds.value.forEach(requestId => {
+        requestService.cancelRequest(requestId);
+      });
+      activeRequestIds.value.clear();
+    });
+  }
+  
+  // Clear refresh interval if it exists
   if (refreshInterval.value) {
     clearInterval(refreshInterval.value);
+    refreshInterval.value = null;
   }
 });
 
@@ -1157,14 +1179,26 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
     case "delete":
     case "move-to-trash": {
       if (!targets.length) return;
-      const label =
+      const message =
         targets.length === 1
-          ? `Delete "${targets[0].name || "this video"}"?`
-          : `Delete ${targets.length} videos?`;
-      if (!window.confirm(label)) return;
-      targets.forEach((video) => {
-        if (video?.job?.id) {
-          store.dispatch("videojobs/destroy", video.job.id);
+          ? `Are you sure you want to delete "${targets[0].name || "this video"}"?`
+          : `Are you sure you want to delete ${targets.length} videos?`;
+      const header = targets.length === 1 ? "Delete Video" : "Delete Videos";
+      
+      confirm.require({
+        message,
+        header,
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+          targets.forEach((video) => {
+            if (video?.job?.id) {
+              store.dispatch("videojobs/destroy", video.job.id);
+            }
+          });
+        },
+        reject: () => {
+          // User cancelled, do nothing
         }
       });
       break;

@@ -140,9 +140,11 @@
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 100;
+  left: 0;
+  right: 0;
+  z-index: 1000;
   overflow-anchor: none;
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -1109,7 +1111,7 @@
   contain: layout paint size;
   will-change: transform;
   transform: translateZ(0);
-  transition: opacity 0.3s ease !important; /* Slower transition to reduce flickering */
+  transition: opacity 0.4s ease !important; /* Slower transition to reduce flickering */
   aspect-ratio: 16 / 9 !important; /* Fixed aspect ratio for consistent masonry layout */
   /* Width will be set by masonry layout, don't force 100% */
 }

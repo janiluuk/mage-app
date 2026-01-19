@@ -61,12 +61,14 @@
                   <InputNumber min="0.2" :max="0.8" :step="0.025" v-model.number="job.denoising" showButtons
                     :disabled="isVideoProcessing" />
                   <Slider v-model="job.denoising" :class="{ denoisingColor }" :min="0.2" :max="0.8" :step="0.025"
-                    :disabled="isVideoProcessing" /><br/>
-                   <label class="mb-1 ms-0 mt-2">Debugging controlnet 1 weight:{{ controlnet[0].weight }}</label>
-                  <Slider v-model="controlnet[0].weight" :min="0.2" :max="0.8" :step="0.025"/>
-                  <label class="mb-1 ms-0 mt-2">Debugging controlnet 2 weight:{{ controlnet[1].weight }}</label>
-                  <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
-            
+                    :disabled="isVideoProcessing" />
+                  <!-- Controlnet weights - Advanced settings (hidden by default, can be enabled via dev mode) -->
+                  <div v-if="false" class="mt-3">
+                    <label class="mb-1 ms-0 mt-2">Controlnet 1 weight: {{ controlnet[0].weight }}</label>
+                    <Slider v-model="controlnet[0].weight" :min="0.2" :max="0.8" :step="0.025"/>
+                    <label class="mb-1 ms-0 mt-2">Controlnet 2 weight: {{ controlnet[1].weight }}</label>
+                    <Slider v-model="controlnet[1].weight" :min="0.2" :max="1.5" :step="0.025"/>
+                  </div>
                 </div>
                 <div class="field col-12 md:col-6 md:mb-2 mb-3">
                   <label class="mb-1 ms-0 mt-2">Seed</label>
@@ -119,6 +121,12 @@ const Validator = SimpleVueValidator.Validator;
 export default {
   name: 'VideoEdit',
   beforeUnmount() {
+    // Clear polling start timeout if component is destroyed before it executes
+    if (this.pollingStartTimeout) {
+      clearTimeout(this.pollingStartTimeout);
+      this.pollingStartTimeout = null;
+    }
+    // Clear polling interval
     if (this.interval) {
       clearInterval(this.interval);
       this.interval = false;
@@ -141,6 +149,7 @@ export default {
       switchValue: false,
       formChanged: false,
       interval: false,
+      pollingStartTimeout: null,
 
       job: {
         status: null,
@@ -191,10 +200,27 @@ export default {
     // Only fetch once on creation, polling will handle subsequent updates
     await this.fetchVideoJob(true);
     // Delay polling start to avoid duplicate initial fetch
-    setTimeout(() => {
+    // Store timeout ID so it can be cleared if component is destroyed
+    this.pollingStartTimeout = setTimeout(() => {
+      if (this.$options._componentTag !== undefined || this._isBeingDestroyed) {
+        // Component is being destroyed, don't start polling
+        return;
+      }
       this.startPollingVideoJob();
     }, 100);
     this.formChanged = false;
+  },
+  beforeUnmount() {
+    // Clear polling start timeout if component is destroyed before it executes
+    if (this.pollingStartTimeout) {
+      clearTimeout(this.pollingStartTimeout);
+      this.pollingStartTimeout = null;
+    }
+    // Clear polling interval
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = false;
+    }
   },
   components: {
     VideoEntry,
@@ -352,32 +378,44 @@ export default {
     },
     async startPollingVideoJob() {
       if (this.interval) clearInterval(this.interval);
-      this.interval = setInterval(this.fetchVideoJob, 2500); // Poll every 3 seconds
+      // Poll continuously to monitor status changes in all states
+      this.interval = setInterval(() => {
+        this.fetchVideoJob(false); // false = polling call, not forced
+      }, 2500);
     },
-    async fetchVideoJob(force) {
+    async fetchVideoJob(force = false) {
       if (!this.videoId) return;
-      // Prevent duplicate fetches - use a flag to track if fetch is in progress
+      
+      // Prevent duplicate fetches unless forced
       if (this.isFetching && !force) return;
-      if (force == true || this.isVideoProcessing) {
-        this.isFetching = true;
-        try {
-          await this.fetchJob(this.videoId);
-          // Compare and update only changed properties
-          for (let key in this.getJob) {
-            let val = this.getJob[key];
-            if (this.job[key] !== val && val !== null) {
-              if (this.job.model_id > 0 && key == 'model_id' && val !== this.job.model_id) {
-              } else {
-                this.job[key] = val;
-              }
+      
+      // Always fetch - polling should work regardless of processing state
+      // This ensures we catch status changes even after processing completes
+      this.isFetching = true;
+      try {
+        await this.fetchJob(this.videoId);
+        // Compare and update only changed properties
+        for (let key in this.getJob) {
+          let val = this.getJob[key];
+          if (this.job[key] !== val && val !== null) {
+            if (this.job.model_id > 0 && key == 'model_id' && val !== this.job.model_id) {
+            } else {
+              this.job[key] = val;
             }
           }
-        } catch (error) {
-          if (error?.message)
-            this.errorMessage = error.message;
-        } finally {
-          this.isFetching = false;
         }
+        
+        // Stop polling if job reaches a final state to avoid unnecessary requests
+        const finalStates = ['finished', 'error', 'cancelled'];
+        if (finalStates.includes(this.job.status) && this.interval) {
+          clearInterval(this.interval);
+          this.interval = false;
+        }
+      } catch (error) {
+        if (error?.message)
+          this.errorMessage = error.message;
+      } finally {
+        this.isFetching = false;
       }
     },
   }

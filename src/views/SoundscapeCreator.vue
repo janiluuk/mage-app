@@ -75,7 +75,8 @@ async function generate() {
   try {
     errorMessage.value = ''
     
-    if (!prompt.value.trim()) {
+    // Validate that either prompt or mood is provided
+    if (!prompt.value.trim() && !selectedMood.value) {
       errorMessage.value = 'Please enter a prompt or select a mood'
       return
     }
@@ -99,11 +100,15 @@ async function generate() {
       audioSrc.value = streamUrl
     } catch (urlError) {
       errorMessage.value = 'Invalid API URL configuration'
-      console.error('Invalid URL:', urlError)
+      if (import.meta.env.DEV) {
+        console.error('Invalid URL:', urlError)
+      }
     }
   } catch (error) {
     errorMessage.value = error.message || 'Failed to generate soundscape'
-    console.error('Generate error:', error)
+    if (import.meta.env.DEV) {
+      console.error('Generate error:', error)
+    }
   }
 }
 

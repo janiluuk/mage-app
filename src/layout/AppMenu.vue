@@ -21,8 +21,8 @@ const model = ref([
         label: 'AI Tools',
         items: [
             { label: 'Story Creator', icon: 'pi pi-fw pi-book', to: '/story' },
-            { label: 'Vid2Vid Editor', icon: 'pi pi-fw pi-sparkles', to: '/edit/vid2vid/:id', disabled: true },
-            { label: 'Deforum Editor', icon: 'pi pi-fw pi-image', to: '/edit/deforum/:id', disabled: true },
+            // Vid2Vid and Deforum editors are accessed via direct routes (/edit/vid2vid/:id, /edit/deforum/:id)
+            // They are not shown in menu as they require a video ID parameter
             { label: 'Soundscape Creator', icon: 'pi pi-fw pi-volume-up', to: '/soundscape' }
         ]
     },

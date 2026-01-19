@@ -54,7 +54,7 @@
         @load="imageError = false"
       />
       <div
-        v-if="!localLoaded && (!previewImageUrl || imageError)"
+        v-if="!localLoaded"
         class="video-placeholder"
         :class="{ 'video-placeholder--static': !isNearViewport, 'video-placeholder--no-preview': imageError || !previewImageUrl }"
         role="status"
@@ -63,12 +63,14 @@
         <div class="video-placeholder__media" aria-hidden="true">
           <div v-if="!isNearViewport" class="video-placeholder__static-block" />
           <template v-else>
+            <!-- Show no-preview icon only when there's an error or no preview URL -->
             <div v-if="imageError || !previewImageUrl" class="video-placeholder__no-preview-icon">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M21 19V5C21 3.9 20.1 3 19 3H5C3.9 3 3 3.9 3 5V19C3 20.1 3.9 21 5 21H19C20.1 21 21 20.1 21 19ZM8.5 13.5L11 16.51L14.5 12L19 18H5L8.5 13.5Z" fill="currentColor" opacity="0.4"/>
               </svg>
             </div>
-            <template v-else>
+            <!-- Show shimmer/spinner when preview URL exists and no error (image is loading) -->
+            <template v-else-if="previewImageUrl && !imageError">
               <div class="video-placeholder__sheen" />
               <div :class="spinnerClass" />
             </template>

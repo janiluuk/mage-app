@@ -56,6 +56,7 @@ import { createFFmpeg, fetchFile } from "@ffmpeg/ffmpeg";
 import MediaInfoFactory from 'mediainfo.js'
 import VideoClipper from '@/components/video/VideoClipper.vue';
 import { API_URL } from '@/utils/domains';
+import env from '@/utils/env';
 
 export default {
   name: 'VideoUpload',
@@ -188,7 +189,8 @@ export default {
       this.uploadVideo(trimmedVideo, file.name);
       this.isLoading = false;
      } catch (error) {
-      alert("error");
+      this.errorMessage = error.message || "An error occurred while trimming the video. Please try again.";
+      console.error("Trim video error:", error);
     }
     },
     cancel() {
@@ -259,7 +261,10 @@ export default {
       const reader = new FileReader();
       
       reader.addEventListener('progress', function(progress) { 
-          console.log(progress);
+          // Progress tracking - only log in dev mode
+          if (import.meta.env.DEV) {
+            console.log(progress);
+          }
       });
   
       if (this.currentFile.size > 1024 * 1024 * this.filesizeLimit) {
@@ -314,32 +319,55 @@ export default {
 
       let formData = new FormData();
 
+      // Backend expects 'attachment' not 'video', and requires 'type'
       if (blob == false) {
-        formData.append("video", this.videoFile);
+        formData.append("attachment", this.videoFile);
       } else {
-        formData.append("video", blob, this.currentFile.name);
+        formData.append("attachment", blob, filename || this.currentFile.name);
       }
-      formData.append("start", this.secondsToFFmpegTime(this.currentTrimRange.end));
-      formData.append("end", this.secondsToFFmpegTime(this.currentTrimRange.end));
+      formData.append("type", "vid2vid"); // Required by backend
+      
+      // Optional trim parameters
+      if (this.currentTrimRange && this.currentTrimRange.start !== this.currentTrimRange.end) {
+        formData.append("start", this.secondsToFFmpegTime(this.currentTrimRange.start));
+        formData.append("end", this.secondsToFFmpegTime(this.currentTrimRange.end));
+      }
 
       try {
-        const response = await
-          axios.post(`${this.apiBaseUrl}/upload`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              'Authorization': 'Bearer ' + this.getToken()
-            }
-          });
-        this.videoUrl = response.data.url;
-
-        this.videoId = response.data.id;
-        this.status = response.data.status;
+        // The upload endpoint is at /api/upload (not /api/v1/upload)
+        const baseApiUrl = (env && env.VITE_API_URL) || API_URL || '';
+        const uploadUrl = baseApiUrl ? `${baseApiUrl}/api/upload` : '/api/upload';
+        
+        const response = await axios.post(uploadUrl, formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'Authorization': 'Bearer ' + this.getToken()
+          }
+        });
+        
+        if (response.data && response.data.id) {
+          this.videoUrl = response.data.url;
+          this.videoId = response.data.id;
+          this.status = response.data.status || 'pending';
+        } else {
+          throw new Error('Upload failed: Invalid response format');
+        }
 
       } catch (error) {
-        this.errorMessage = error.message;
+        if (import.meta.env.DEV) {
+          console.error('Upload error:', error);
+        }
+        this.errorMessage = error.message || 'Upload failed';
         if (error.response?.data?.message) {
           this.errorMessage = error.response.data.message;
+        } else if (error.response?.data?.error?.message) {
+          this.errorMessage = error.response.data.error.message;
+        } else if (error.response?.status === 404) {
+          this.errorMessage = 'Upload endpoint not found. Please check API configuration.';
+        } else if (error.response?.status === 401) {
+          this.errorMessage = 'Authentication required. Please log in.';
         }
+        this.status = 'error';
       }
       this.isLoading = false;
     },

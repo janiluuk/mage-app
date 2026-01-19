@@ -77,37 +77,116 @@ function buildConfig(params = {}, config = {}) {
 
 /**
  * Lightweight wrapper around axios to keep call sites concise and consistent.
+ * Supports request cancellation via AbortController.
  */
 const requestService = {
+  // Store active requests for cancellation
+  _activeRequests: new Map(),
+  
+  /**
+   * Create an AbortController for request cancellation
+   */
+  createAbortController(requestId) {
+    const controller = new AbortController();
+    if (requestId) {
+      this._activeRequests.set(requestId, controller);
+    }
+    return controller;
+  },
+  
+  /**
+   * Cancel a specific request by ID
+   */
+  cancelRequest(requestId) {
+    const controller = this._activeRequests.get(requestId);
+    if (controller) {
+      controller.abort();
+      this._activeRequests.delete(requestId);
+    }
+  },
+  
+  /**
+   * Cancel all active requests
+   */
+  cancelAllRequests() {
+    this._activeRequests.forEach((controller) => controller.abort());
+    this._activeRequests.clear();
+  },
+  
   /**
    * Perform a GET request with optional query parameters and config overrides.
    */
-  get(url, params = {}, config = {}) {
-    return apiClient.get(url, buildConfig(params, config));
+  get(url, params = {}, config = {}, requestId = null) {
+    const abortController = requestId ? this.createAbortController(requestId) : null;
+    const requestConfig = {
+      ...buildConfig(params, config),
+      ...(abortController && { signal: abortController.signal }),
+    };
+    const promise = apiClient.get(url, requestConfig);
+    if (requestId) {
+      promise.finally(() => this._activeRequests.delete(requestId));
+    }
+    return promise;
   },
   /**
    * Perform a POST request.
    */
-  post(url, body = {}, config = {}) {
-    return apiClient.post(url, body, config);
+  post(url, body = {}, config = {}, requestId = null) {
+    const abortController = requestId ? this.createAbortController(requestId) : null;
+    const requestConfig = {
+      ...config,
+      ...(abortController && { signal: abortController.signal }),
+    };
+    const promise = apiClient.post(url, body, requestConfig);
+    if (requestId) {
+      promise.finally(() => this._activeRequests.delete(requestId));
+    }
+    return promise;
   },
   /**
    * Perform a PUT request.
    */
-  put(url, body = {}, config = {}) {
-    return apiClient.put(url, body, config);
+  put(url, body = {}, config = {}, requestId = null) {
+    const abortController = requestId ? this.createAbortController(requestId) : null;
+    const requestConfig = {
+      ...config,
+      ...(abortController && { signal: abortController.signal }),
+    };
+    const promise = apiClient.put(url, body, requestConfig);
+    if (requestId) {
+      promise.finally(() => this._activeRequests.delete(requestId));
+    }
+    return promise;
   },
   /**
    * Perform a PATCH request.
    */
-  patch(url, body = {}, config = {}) {
-    return apiClient.patch(url, body, config);
+  patch(url, body = {}, config = {}, requestId = null) {
+    const abortController = requestId ? this.createAbortController(requestId) : null;
+    const requestConfig = {
+      ...config,
+      ...(abortController && { signal: abortController.signal }),
+    };
+    const promise = apiClient.patch(url, body, requestConfig);
+    if (requestId) {
+      promise.finally(() => this._activeRequests.delete(requestId));
+    }
+    return promise;
   },
   /**
    * Perform a DELETE request.
    */
-  delete(url, config = {}) {
-    return apiClient.delete(url, config);
+  delete(url, config = {}, requestId = null) {
+    const abortController = requestId ? this.createAbortController(requestId) : null;
+    const requestConfig = {
+      ...config,
+      ...(abortController && { signal: abortController.signal }),
+    };
+    const promise = apiClient.delete(url, requestConfig);
+    if (requestId) {
+      promise.finally(() => this._activeRequests.delete(requestId));
+    }
+    return promise;
   },
 };
 
