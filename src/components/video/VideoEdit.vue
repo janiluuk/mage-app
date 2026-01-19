@@ -121,6 +121,8 @@ const Validator = SimpleVueValidator.Validator;
 export default {
   name: 'VideoEdit',
   beforeUnmount() {
+    // Set flag to prevent polling from starting during unmount
+    this.isUnmounting = true;
     // Clear polling start timeout if component is destroyed before it executes
     if (this.pollingStartTimeout) {
       clearTimeout(this.pollingStartTimeout);
@@ -134,7 +136,8 @@ export default {
   },
   setup() {
     const op = ref(null);
-    return { op };
+    const isUnmounting = ref(false);
+    return { op, isUnmounting };
 
   },
   data() {
@@ -202,7 +205,7 @@ export default {
     // Delay polling start to avoid duplicate initial fetch
     // Store timeout ID so it can be cleared if component is destroyed
     this.pollingStartTimeout = setTimeout(() => {
-      if (this.$options._componentTag !== undefined || this._isBeingDestroyed) {
+      if (this.isUnmounting) {
         // Component is being destroyed, don't start polling
         return;
       }
