@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import ApiCache from '@/utils/apiCache';
+import { ApiCache } from '@/utils/apiCache';
 
 describe('ApiCache', () => {
   let cache;
@@ -109,15 +109,13 @@ describe('ApiCache', () => {
     });
 
     it('should remove pending request after rejection', async () => {
-      const promise = Promise.reject(new Error('Test error'));
+      const promise = Promise.reject(new Error('Test error')).catch(() => {
+        // Catch immediately to prevent unhandled rejection
+      });
       
       cache.setPending('/api/test', {}, promise);
       
-      try {
-        await promise;
-      } catch (e) {
-        // Expected
-      }
+      await promise;
       
       // Wait a bit for finally to execute
       await new Promise(resolve => setTimeout(resolve, 10));

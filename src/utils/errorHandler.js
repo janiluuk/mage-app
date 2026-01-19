@@ -8,6 +8,7 @@
  * Normalize error to a standard format
  * @param {Error|string|Object} error - The error to normalize
  * @param {string} context - Context where the error occurred (e.g., 'VideoJobService.list')
+ * @param {boolean} skipLogging - Skip console logging (used internally to prevent duplicate logs)
  * @returns {Object} Normalized error object with message, code, and context
  * @property {string} message - Human-readable error message
  * @property {number|null} code - HTTP status code or error code
@@ -15,7 +16,7 @@
  * @property {Error|Object} original - Original error object
  * @property {string} timestamp - ISO timestamp of when error occurred
  */
-export function normalizeError(error, context = '') {
+export function normalizeError(error, context = '', skipLogging = false) {
   let message = 'An unexpected error occurred';
   let code = null;
   let originalError = error;
@@ -27,22 +28,26 @@ export function normalizeError(error, context = '') {
     code = error.code || error.status || null;
     originalError = error;
   } else if (error && typeof error === 'object') {
-    message = error.message || error.error || error.toString();
-    code = error.code || error.status || null;
-    originalError = error;
-  }
-
-  // Extract message from API error responses
-  if (error?.response?.data) {
-    const data = error.response.data;
-    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-      message = data.errors[0].detail || data.errors[0].title || message;
-    } else if (data.message) {
-      message = data.message;
-    } else if (data.error) {
-      message = data.error;
+    // Extract message from API error responses first
+    if (error.response?.data) {
+      const data = error.response.data;
+      if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+        message = data.errors[0].detail || data.errors[0].title || message;
+      } else if (data.message) {
+        message = data.message;
+      } else if (data.error) {
+        message = data.error;
+      }
+      code = error.response.status || code;
+    } else {
+      // Only use toString() as last resort for non-API errors with actual content
+      const errorStr = error.error || error.message;
+      if (errorStr) {
+        message = errorStr;
+      }
     }
-    code = error.response.status || code;
+    code = code || error.code || error.status || null;
+    originalError = error;
   }
 
   const normalized = {
@@ -53,8 +58,8 @@ export function normalizeError(error, context = '') {
     timestamp: new Date().toISOString()
   };
 
-  // Log in development
-  if (import.meta.env.DEV) {
+  // Log in development (unless explicitly skipped to prevent duplicates)
+  if (!skipLogging && import.meta.env.DEV) {
     console.error(`[ErrorHandler] ${context}:`, normalized);
   }
 
@@ -68,7 +73,8 @@ export function normalizeError(error, context = '') {
  * @returns {string} User-friendly error message
  */
 export function getUserFriendlyMessage(error, defaultMessage = 'Something went wrong. Please try again.') {
-  const normalized = normalizeError(error);
+  // Extract status code directly if available
+  const statusCode = error?.response?.status || error?.status || error?.code;
   
   // Map common error codes to user-friendly messages
   const codeMessages = {
@@ -83,12 +89,16 @@ export function getUserFriendlyMessage(error, defaultMessage = 'Something went w
     503: 'Service temporarily unavailable. Please try again later.',
   };
 
-  if (normalized.code && codeMessages[normalized.code]) {
-    return codeMessages[normalized.code];
+  // Return code-specific message if available
+  if (statusCode && codeMessages[statusCode]) {
+    return codeMessages[statusCode];
   }
 
+  // Normalize error to extract message
+  const normalized = normalizeError(error, '', true); // Skip logging here to avoid duplicates
+  
   // Return the error message if it's user-friendly, otherwise return default
-  if (normalized.message && normalized.message.length < 200) {
+  if (normalized.message && normalized.message !== 'An unexpected error occurred' && normalized.message.length < 200) {
     return normalized.message;
   }
 
@@ -113,7 +123,8 @@ export function handleError(error, options = {}) {
     logError = import.meta.env.DEV
   } = options;
 
-  const normalized = normalizeError(error, context);
+  // Normalize error (skip internal logging, we'll log once below)
+  const normalized = normalizeError(error, context, true);
   const userMessage = getUserFriendlyMessage(error, defaultMessage);
 
   if (toast && typeof toast.add === 'function') {
@@ -125,6 +136,7 @@ export function handleError(error, options = {}) {
     });
   }
 
+  // Log once, respecting the logError option
   if (logError) {
     console.error(`[ErrorHandler] ${context}:`, normalized);
   }
