@@ -1,6 +1,8 @@
 import { onMounted, onBeforeUnmount } from "vue";
 import { zoomClassForLevel } from "../zoom/utils.js";
 
+const FIXED_ASPECT_RATIO = 16 / 9;
+
 export default function useChunkedMasonry({
   gridRef,
   zoomClassForLevel: zoomClassForLevelProp = zoomClassForLevel,
@@ -248,8 +250,7 @@ export default function useChunkedMasonry({
           }
 
           // Use fixed 16:9 aspect ratio for consistent grid
-          const fixedAspectRatio = 16 / 9;
-          const h = Math.max(1, Math.round(columnWidth / fixedAspectRatio));
+          const h = Math.max(1, Math.round(columnWidth / FIXED_ASPECT_RATIO));
 
           let minIdx = 0;
           let minVal = columnHeights[0];
