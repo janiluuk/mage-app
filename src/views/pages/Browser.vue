@@ -360,7 +360,7 @@ const confirm = useConfirm();
 
 // Request cancellation for API calls
 const activeRequestIds = ref(new Set());
-const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
