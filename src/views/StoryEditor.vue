@@ -325,7 +325,6 @@ const removeJob = async (jobId) => {
     }
   })
 }
-}
 
 const goBack = () => {
   router.push('/stories')
