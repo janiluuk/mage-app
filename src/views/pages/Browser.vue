@@ -857,37 +857,6 @@ const {
   showOnEmpty,
 });
 
-const isMetadataPanelOpen = ref(false);
-const metadataPanelDismissed = ref(false);
-const metadataDockHeight = ref(280);
-const MIN_METADATA_DOCK_HEIGHT = 200;
-const MAX_METADATA_DOCK_HEIGHT = 520;
-
-const openMetadataPanel = () => {
-  isMetadataPanelOpen.value = true;
-  metadataPanelDismissed.value = false;
-  metadataFocusToken.value += 1;
-};
-
-const toggleMetadataPanel = () => {
-  const next = !isMetadataPanelOpen.value;
-  isMetadataPanelOpen.value = next;
-  if (!next) {
-    metadataPanelDismissed.value = true;
-  } else {
-    metadataPanelDismissed.value = false;
-    metadataFocusToken.value += 1;
-  }
-};
-
-const handleMetadataDockHeightChange = (height) => {
-  metadataDockHeight.value = height;
-};
-
-const shouldRenderCollapsedHint = computed(
-  () => metadataPanelDismissed.value || selection.size.value > 0
-);
-
 watch(
   () => selection.size.value,
   (size) => {
