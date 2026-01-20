@@ -1,96 +1,114 @@
 <template>
-    <div class="seek" @mousedown="moveStart" ref="seek">
-        <v-sheet color="softBackground" class="seek-background">
-            <v-sheet color="secondary" class="seek-progress" :style="{
-                width: percentage + '%',
-            }"></v-sheet>
-            <v-sheet color="primary" class="seek-thumb" :style="{
-                left: `calc(${percentage}% - 0.25em)`,
-            }"></v-sheet>
-        </v-sheet>
+  <div class="seek" @mousedown="moveStart" ref="seek">
+    <div class="seek-background">
+      <div class="seek-progress" :style="{
+        width: percentage + '%',
+      }"></div>
+      <div class="seek-thumb" :style="{
+        left: `calc(${percentage}% - 0.25em)`,
+      }"></div>
     </div>
+  </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
-import Utils from "@/js/Utils";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import { clamp } from '@/utils/videoEditorUtils';
 
 export default {
-    name: "SeekBar",
-    data: () => ({
-        seekDown: false,
-    }),
-    beforeDestroy() {
-        document.removeEventListener('mousemove', this.move);
-        document.removeEventListener('mouseup', this.moveEnd);
-    },
-    mounted() {
-        document.addEventListener('mousemove', this.move, false);
-        document.addEventListener('mouseup', this.moveEnd, false);
-    },
-    methods: {
-        progressFromEvent(e) {
-            let bounds = this.$refs.seek.getBoundingClientRect();
-            let x = e.pageX - bounds.left;
-            return Math.max(Math.min(x / bounds.width, 1), 0);
-        },
-        moveStart(e) {
-            this.seekDown = true;
-            this.seek(this.progressFromEvent(e));
-        },
-        move(e) {
-            if (this.seekDown)
-                this.seek(this.progressFromEvent(e));
-        },
-        moveEnd(e) {
-            if (this.seekDown)
-                this.seek(this.progressFromEvent(e));
-            this.seekDown = false;
-        },
-        ...mapActions(['seek']),
-    },
-    computed: {
-        percentage() {
-            let p = Math.round(this.progress * 100000) / 1000;
-            return Utils.clamp(isNaN(p) ? 0 : p, 0, 100);
-        },
-        ...mapState({
-            progress: state => state.player.progress,
-        }),
-    },
-}
+  name: 'SeekBar',
+  setup() {
+    const store = useStore();
+    const seek = ref(null);
+    const seekDown = ref(false);
+
+    const progress = computed(() => store.state.videoeditor.player.progress);
+
+    const percentage = computed(() => {
+      const p = Math.round(progress.value * 100000) / 1000;
+      return clamp(isNaN(p) ? 0 : p, 0, 100);
+    });
+
+    const progressFromEvent = (e) => {
+      if (!seek.value) return 0;
+      const bounds = seek.value.getBoundingClientRect();
+      const x = e.pageX - bounds.left;
+      return clamp(x / bounds.width, 0, 1);
+    };
+
+    const moveStart = (e) => {
+      seekDown.value = true;
+      store.dispatch('videoeditor/seek', progressFromEvent(e));
+    };
+
+    const move = (e) => {
+      if (seekDown.value) {
+        store.dispatch('videoeditor/seek', progressFromEvent(e));
+      }
+    };
+
+    const moveEnd = (e) => {
+      if (seekDown.value) {
+        store.dispatch('videoeditor/seek', progressFromEvent(e));
+      }
+      seekDown.value = false;
+    };
+
+    onMounted(() => {
+      document.addEventListener('mousemove', move, false);
+      document.addEventListener('mouseup', moveEnd, false);
+    });
+
+    onBeforeUnmount(() => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', moveEnd);
+    });
+
+    return {
+      seek,
+      percentage,
+      moveStart,
+    };
+  },
+};
 </script>
 
 <style scoped>
 .seek {
-    width: 100%;
-    padding: 5px 0;
-    cursor: pointer;
+  width: 100%;
+  padding: 5px 0;
+  cursor: pointer;
 }
 
 .seek > * {
-    pointer-events: none;
+  pointer-events: none;
 }
 
 .seek-background {
-    width: 100%;
-    height: 0.5em;
-    border-radius: 0.15em;
+  width: 100%;
+  height: 0.5em;
+  border-radius: 0.15em;
+  background-color: var(--surface-ground);
+  position: relative;
 }
 
 .seek-progress {
-    width: 0;
-    height: 100%;
-    border-bottom-left-radius: 0.15em;
-    border-top-left-radius: 0.15em;
+  width: 0;
+  height: 100%;
+  border-bottom-left-radius: 0.15em;
+  border-top-left-radius: 0.15em;
+  background-color: var(--primary-color);
+  opacity: 0.6;
 }
 
 .seek-thumb {
-    left: 0;
-    top: -0.75em;
-    position: relative;
-    width: 0.5em;
-    height: 1em;
-    border-radius: 0.15em;
+  left: 0;
+  top: -0.75em;
+  position: relative;
+  width: 0.5em;
+  height: 1em;
+  border-radius: 0.15em;
+  background-color: var(--primary-color);
 }
 </style>

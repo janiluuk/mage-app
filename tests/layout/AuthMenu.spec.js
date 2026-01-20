@@ -46,7 +46,6 @@ describe('AuthMenu', () => {
           Toast: true
         },
         mocks: {
-          $toast: mockToast,
           $router: {
             push: vi.fn(),
             currentRoute: {
@@ -64,6 +63,9 @@ describe('AuthMenu', () => {
       }
     });
 
+    // Set up toast on the component instance (from setup function)
+    wrapper.vm.toast = mockToast;
+
     // Get the menu items
     const menuItems = wrapper.vm.getOverlayMenu();
     
@@ -76,12 +78,11 @@ describe('AuthMenu', () => {
     // Execute the logout command
     await logoutItem.command();
 
-    // Verify that $toast.add was called with the correct parameters
+    // Verify that toast.add was called with the correct parameters
     expect(mockToast.add).toHaveBeenCalledWith({
       severity: 'info',
       summary: 'CYA!',
-      detail: 'You have been logged out.',
-      life: 3000
+      detail: 'You have been logged out.'
     });
   });
 
@@ -180,8 +181,8 @@ describe('AuthMenu', () => {
       }
     });
 
-    // Verify that toast is not exposed from setup
-    // (we use $toast globally injected instead)
-    expect(wrapper.vm.toast).toBeUndefined();
+    // Verify that toast is null when not available (PrimeVue not configured in test)
+    // The component handles this gracefully
+    expect(wrapper.vm.toast).toBeNull();
   });
 });

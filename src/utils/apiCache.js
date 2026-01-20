@@ -137,7 +137,11 @@ class ApiCache {
     this.pendingRequests.set(key, promise);
 
     // Clean up when promise resolves/rejects
+    // Add catch handler to prevent unhandled rejections
     promise
+      .catch(() => {
+        // Silently catch errors - they should be handled by the caller
+      })
       .finally(() => {
         this.pendingRequests.delete(key);
       });

@@ -1,405 +1,243 @@
 <template>
-    <perfect-scrollbar class="timeline">
-        <div class="timeline-inner" ref="timeline">
-            <div :title="fragment.fragment.video.fileName"
-                 class="fragment"
-                 v-for="(fragment, i) in visualFragments" :style="{
-                     width: fragment.width + 'px',
-                 }"
-                 :class="{
-                     'continues-right': fragment.continuesRight,
-                     'continues-left': fragment.continuesLeft,
-                     'active': fragment.fragment === activeFragment,
-                     'audio': fragment.fragment.video.isAudio,
-                 }"
-                 ref="fragments"
-                 @mousemove="switchFragment($event, i)"
-                 @mousedown="moveStart($event, i)">
-                <div class="visual-fragment">
-                    <div class="fragment-background"
-                         v-if="!fragment.fragment.video.isAudio"
-                         :style="{
-                backgroundImage: `url(${fragment.screenshots.merged})`,
-                backgroundPositionX: (-1 * (fragment.startPixel + fragment.leftPixels)) + 'px'
-            }"></div>
-                    <canvas class="audio-wave" ref="audioCanvases"></canvas>
-                </div>
-                <div v-show="activeVisualFragmentIndex === i" :style="{
-                left: seekLeft + 'px',
-            }" class="seek-thumb"></div>
-            </div>
+  <div class="timeline" ref="timeline">
+    <div class="timeline-inner">
+      <div
+        v-for="(fragment, i) in timelineFragments"
+        :key="fragment.id"
+        :title="fragment.video.fileName"
+        class="fragment"
+        :class="{
+          active: fragment === activeFragment,
+          audio: fragment.video.isAudio,
+        }"
+        :style="{
+          width: fragmentWidth(fragment) + 'px',
+        }"
+        @mousedown="moveStart($event, i)"
+      >
+        <div class="visual-fragment">
+          <div
+            v-if="!fragment.video.isAudio"
+            class="fragment-background"
+          >
+            {{ fragment.video.fileName }}
+          </div>
+          <div v-else class="audio-wave">
+            Audio
+          </div>
         </div>
-    </perfect-scrollbar>
+        <div
+          v-if="fragment === activeFragment"
+          class="seek-thumb"
+          :style="{
+            left: seekPosition(fragment) + 'px',
+          }"
+        ></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import {mapGetters, mapState} from "vuex";
-import Utils from "@/js/Utils";
+import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
+import { useStore } from 'vuex';
 
 export default {
-    name: "Timeline",
-    data: () => ({
-        bounds: null,
-        visualFragments: [],
-        renderAudioInterval: -1,
-        activeVisualFragmentIndex: null,
-        seekLeft: 0,
-        fragmentIndex: false,
-        contexts: [],
-    }),
-    beforeDestroy() {
-        window.removeEventListener('resize', this.windowResize);
-        clearInterval(this.renderAudioInterval);
-        document.removeEventListener('mousemove', this.move);
-        document.removeEventListener('mouseup', this.moveEnd);
-    },
-    mounted() {
-        this.windowResize();
-        window.addEventListener('resize', this.windowResize, false);
-        // Increased interval from 500ms to 2000ms to reduce CPU usage
-        // This triggers layout updates which include audio waveform rendering
-        this.renderAudioInterval = setInterval(() => this.windowResize(), 2000);
-        document.addEventListener('mousemove', this.move, false);
-        document.addEventListener('mouseup', this.moveEnd, false);
-    },
-    methods: {
-        switchFragment(e, fragmentIndex) {
-            if (this.fragmentIndex !== false && this.fragmentIndex !== fragmentIndex) {
-                this.fragmentIndex = fragmentIndex;
-                this.seekToProgress(e);
-            }
-        },
-        seekToProgress(e) {
-            if (!this.activeFragment.video.canPlay)
-                return;
-            const visualFragment = this.visualFragments[this.fragmentIndex];
-            const bounds = this.$refs.fragments[this.fragmentIndex].getBoundingClientRect();
-            const leftMargin = visualFragment.continuesLeft ? 0 : 10;
-            const rightMargin = visualFragment.continuesRight ? 0 : 10;
-            const left = bounds.left + leftMargin;
-            const width = bounds.width - rightMargin;
-            let visualFragmentProgress = e.pageX - left;
-            visualFragmentProgress = Math.max(Math.min(visualFragmentProgress / width, 1), 0);
-            let fragmentProgress = visualFragment.start + visualFragmentProgress * (visualFragment.end - visualFragment.start);
-            let {fragment} = visualFragment;
-            let videoProgress = Utils.clamp(fragment.start + fragmentProgress * fragment.portion);
-            this.$store.commit('activeFragment', fragment);
-            fragment.video.element.currentTime = videoProgress * fragment.video.element.duration;
-        },
-        moveStart(e, fragmentIndex) {
-            if (this.activeFragment.video.canPlay)
-                this.$store.commit('showContextMenu', true);
-            if (e.button !== 0)
-                return;
-            this.fragmentIndex = fragmentIndex;
-            this.seekToProgress(e);
-        },
-        move(e) {
-            if (this.fragmentIndex !== false) {
-                this.seekToProgress(e);
-            }
-        },
-        moveEnd(e) {
-            if (this.fragmentIndex !== false)
-                this.seekToProgress(e);
-            this.fragmentIndex = false;
-        },
-        calculateSeekPosition() {
-            const fragmentProgress = this.activeFragment.progress;
-            const visualFragmentIndex = this.visualFragments.findIndex(v =>
-                v.fragment === this.activeFragment &&
-                v.start <= fragmentProgress && fragmentProgress <= v.end
-            );
-            if (visualFragmentIndex === -1)
-                return;
+  name: 'Timeline',
+  setup() {
+    const store = useStore();
+    const timeline = ref(null);
+    const bounds = ref(null);
+    const fragmentIndex = ref(false);
 
-            const visualFragment = this.visualFragments[visualFragmentIndex];
-            const margin = (visualFragment.continuesLeft ? 0 : 10) + (visualFragment.continuesRight ? 0 : 10);
-            this.activeVisualFragmentIndex = visualFragmentIndex;
-            let visualFragmentProgress = (fragmentProgress - visualFragment.start) / (visualFragment.end - visualFragment.start);
-            this.seekLeft = Math.round(
-                Utils.clamp(visualFragmentProgress) *
-                (visualFragment.width - margin) * 100
-            ) / 100;
-        },
-        renderAudio() {
-            if (!this.$refs.audioCanvases)
-                return;
-            if (this.$refs.audioCanvases.length !== this.visualFragments.length)
-                return;
+    const timelineFragments = computed(() => store.state.videoeditor.timeline);
+    const activeFragment = computed(() => store.state.videoeditor.activeFragment);
+    const widthPerSecond = computed(() => store.state.videoeditor.configTimeline.widthPerSecond);
+    const minFragmentWidth = computed(() => store.state.videoeditor.configTimeline.minFragmentWidth);
+    const progress = computed(() => store.state.videoeditor.player.progress);
 
-            for (let i = 0; i < this.visualFragments.length; i++) {
-                const visFragment = this.visualFragments[i];
-                const loudness = visFragment.fragment.video.loudness;
-                const fragment = visFragment.fragment;
-                const duration = fragment.video.duration;
-                const visFragStart = visFragment.fragment.start + visFragment.start * visFragment.fragment.portion;
-                const visFragEnd = visFragment.fragment.start + visFragment.end * visFragment.fragment.portion;
+    const fragmentWidth = (fragment) => {
+      const pixelWidth = Math.max(
+        fragment.adjustedDuration * widthPerSecond.value,
+        minFragmentWidth.value
+      );
+      return pixelWidth;
+    };
 
-                const canvas = this.$refs.audioCanvases[i];
-                const context = this.contexts[i];
+    const fullDuration = computed(() => {
+      return timelineFragments.value.reduce((sum, fragment) => {
+        return sum + fragment.adjustedDuration;
+      }, 0);
+    });
 
-                context.fillStyle = this.themeColors.secondary;
-                context.strokeStyle = this.themeColors.primary;
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.beginPath();
-                context.moveTo(0, canvas.height);
+    const seekPosition = (fragment) => {
+      if (!fragment || fragment !== activeFragment.value) return 0;
+      
+      // Calculate the position within the active fragment
+      const fragmentStartOverall = timelineFragments.value
+        .slice(0, timelineFragments.value.indexOf(fragment))
+        .reduce((sum, f) => sum + f.adjustedDuration, 0);
+      
+      const currentPlayTime = progress.value * fullDuration.value;
+      const positionInFragment = currentPlayTime - fragmentStartOverall;
+      
+      // Only show seek thumb if we're within the fragment's time range
+      if (positionInFragment < 0 || positionInFragment > fragment.adjustedDuration) {
+        return 0;
+      }
+      
+      const width = fragmentWidth(fragment);
+      const positionRatio = positionInFragment / fragment.adjustedDuration;
+      return positionRatio * width;
+    };
 
-                let visFragmentProgress;
-                for (let j = 0; j < loudness.data.length; j++) {
-                    let {time, db} = loudness.data[j];
-                    let videoProgress = time / duration;
-                    if (videoProgress < visFragStart)
-                        continue;
-                    if (videoProgress > visFragEnd)
-                        break;
+    const moveStart = (e, fragmentIndex) => {
+      if (e.button !== 0) return; // Only handle left mouse button
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const fragment = timelineFragments.value[fragmentIndex];
+      if (!fragment) return;
+      
+      // Set the fragment as active
+      store.dispatch('videoeditor/setActiveFragment', fragment);
+      
+      // Calculate click position within the fragment
+      const fragmentElement = e.currentTarget;
+      const fragmentRect = fragmentElement.getBoundingClientRect();
+      const clickX = e.clientX - fragmentRect.left;
+      const width = fragmentWidth(fragment);
+      
+      // Calculate position ratio (0-1)
+      const positionRatio = Math.max(0, Math.min(1, clickX / width));
+      
+      // Calculate the overall timeline position
+      const fragmentStartOverall = timelineFragments.value
+        .slice(0, fragmentIndex)
+        .reduce((sum, f) => sum + f.adjustedDuration, 0);
+      
+      const positionInFragment = positionRatio * fragment.adjustedDuration;
+      const overallPosition = fragmentStartOverall + positionInFragment;
+      
+      // Seek to the calculated position
+      const progressValue = fullDuration.value > 0 ? overallPosition / fullDuration.value : 0;
+      store.dispatch('videoeditor/seek', Math.max(0, Math.min(1, progressValue)));
+    };
 
-                    let fragmentProgress = (videoProgress - fragment.start) / fragment.portion;
-                    visFragmentProgress = (fragmentProgress - visFragment.start) / (visFragment.end - visFragment.start);
-                    let height = (db - loudness.dbMin) / (loudness.dbMax - loudness.dbMin) *
-                        Math.log(1 + visFragment.fragment.volume) *
-                        loudness.absLoudness *
-                        canvas.height;
-                    context.lineTo(visFragmentProgress * canvas.width, canvas.height - height);
-                }
-                context.lineTo(visFragmentProgress * canvas.width, canvas.height);
-                context.lineTo(0, canvas.height);
-                context.stroke();
-                context.fill();
-            }
-        },
-        updateFragmentsLayout() {
-            if (this.fragments.length === 0)
-                return;
+    const windowResize = () => {
+      if (timeline.value) {
+        bounds.value = timeline.value.getBoundingClientRect();
+      }
+    };
 
-            let currentOffsetLeft = 0;
-            const visualFragments = [];
-            const fragmentQueue = [...this.fragments];
-            const fullWidth = this.bounds.width;
-            while (fragmentQueue.length > 0) {
-                const fragment = fragmentQueue.shift();
-                const fits = fragment.width + currentOffsetLeft < fullWidth;
-                if (fits) {
-                    currentOffsetLeft += fragment.width;
-                    visualFragments.push(fragment);
-                } else {
-                    const splitSizeLeft = fullWidth - currentOffsetLeft;
-                    const splitSizeRight = fragment.width - splitSizeLeft;
-                    const leftPartExists = splitSizeLeft > 30;
-                    const rightPartExists = splitSizeRight > 30;
+    onMounted(() => {
+      windowResize();
+      window.addEventListener('resize', windowResize, false);
+    });
 
-                    if (leftPartExists)
-                        visualFragments.push({
-                            ...fragment,
-                            width: splitSizeLeft,
-                            continuesRight: rightPartExists,
-                            end: (fragment.leftPixels + splitSizeLeft) / fragment.fullWidth,
-                        });
+    onBeforeUnmount(() => {
+      window.removeEventListener('resize', windowResize);
+    });
 
-                    if (rightPartExists) {
-                        const leftPixels = fragment.leftPixels + (leftPartExists ? splitSizeLeft : 0);
-                        fragmentQueue.unshift({
-                            ...fragment,
-                            width: splitSizeRight,
-                            continuesLeft: leftPartExists,
-                            leftPixels,
-                            start: leftPixels / fragment.fullWidth
-                        });
-                    }
-                    currentOffsetLeft = 0;
-                }
-            }
-            this.$nextTick(() => {
-                this.calculateSeekPosition();
-                if (this.$refs.audioCanvases) {
-                    this.contexts = this.$refs.audioCanvases.map(c => c.getContext('2d'));
-                    for (const canvas of this.$refs.audioCanvases) {
-                        const bounds = canvas.getBoundingClientRect();
-                        canvas.width = bounds.width;
-                    }
-                    this.renderAudio();
-                }
-            });
-            this.visualFragments = visualFragments;
-        },
-        windowResize() {
-            this.bounds = this.$refs.timeline.getBoundingClientRect();
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-    },
-    watch: {
-        playerWidth() {
-            this.windowResize();
-        },
-        fullscreen() {
-            this.windowResize();
-        },
-        activeFragment() {
-            requestAnimationFrame(() => this.calculateSeekPosition());
-        },
-        widthPerSecond() {
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-        progress() {
-            requestAnimationFrame(() => this.calculateSeekPosition());
-        },
-        'activeFragment.end'() {
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-        'activeFragment.start'() {
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-        'activeFragment.playbackRate'() {
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-        'activeFragment.volume'() {
-            requestAnimationFrame(() => this.renderAudio());
-        },
-        timeline() {
-            requestAnimationFrame(() => this.updateFragmentsLayout());
-        },
-    },
-    computed: {
-        fragments() {
-            return this.timeline.map(fragment => {
-                const pixelWidth = Math.max(fragment.adjustedDuration * this.widthPerSecond, this.minFragmentWidth);
-                const videoWidth = this.widthPerSecond * fragment.video.duration;
-                return {
-                    fragment,
-                    fullWidth: pixelWidth,
-                    width: pixelWidth,
-                    screenshots: fragment.video.screenshots,
-                    continuesRight: false,
-                    continuesLeft: false,
-                    start: 0,
-                    end: 1,
-                    leftPixels: 0,
-                    startPixel: fragment.start * videoWidth,
-                };
-            });
-        },
-        ...mapGetters(['timelineVideos', 'fragmentAtProgress', 'themeColors', 'progressAtFragmentProgress']),
-        ...mapState({
-            activeFragment: state => state.activeFragment,
-            timeline: state => state.timeline,
-            minFragmentWidth: state => state.configTimeline.minFragmentWidth,
-            widthPerSecond: state => state.configTimeline.widthPerSecond,
-            progress: state => state.player.progress,
-            playerWidth: state => state.player.widthPercent,
-            fullscreen: state => state.player.fullscreen,
-        }),
-    },
-}
+    watch(widthPerSecond, () => {
+      windowResize();
+    });
+
+    watch(timelineFragments, () => {
+      windowResize();
+    });
+
+    return {
+      timeline,
+      timelineFragments,
+      activeFragment,
+      fragmentWidth,
+      seekPosition,
+      moveStart,
+    };
+  },
+};
 </script>
 
 <style scoped>
 .timeline {
-    --border-radius: 10px;
-    max-height: 100%;
-    padding: 10px;
-    overflow-y: auto;
+  max-height: 100%;
+  padding: 10px;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.timeline-inner {
+  display: flex;
+  gap: 10px;
+  min-height: 125px;
 }
 
 .fragment {
-    vertical-align: top;
-    height: 125px;
-    display: inline-block;
-    margin-bottom: 10px;
-    padding: 10px;
-    border-radius: calc(var(--border-radius) * 1.7);
-    cursor: pointer;
-    box-shadow: inset 0 0px 0px 0 #5b5b5b;
-    transition: box-shadow 0.3s;
+  height: 125px;
+  display: inline-block;
+  padding: 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: inset 0 0 0 1px var(--surface-border);
+  transition: box-shadow 0.3s, background-color 0.2s;
+  position: relative;
+  background-color: var(--surface-card);
+  min-width: 90px;
+}
+
+.fragment:hover {
+  background-color: var(--surface-hover);
+}
+
+.fragment.active {
+  box-shadow: inset 0 0 0 2px var(--primary-color);
+  background-color: var(--surface-hover);
 }
 
 .visual-fragment {
-    width: 100%;
-    height: 105px;
-    display: inline-flex;
-    flex-direction: column;
-}
-
-.continues-left.fragment {
-    padding-left: 0;
-}
-
-.continues-right.fragment {
-    padding-right: 0;
-}
-
-.fragment > * {
-    pointer-events: none;
-}
-
-.audio .fragment-background {
-    min-height: 0;
-    height: 0;
+  width: 100%;
+  height: 105px;
+  display: flex;
+  flex-direction: column;
 }
 
 .fragment-background {
-    /*box-shadow: 0 0 0 1px grey;*/
-    border-radius: var(--border-radius) var(--border-radius) 0 0;
-    width: 100%;
-    min-height: 80px;
-    background-color: var(--soft-background);
-    background-repeat: repeat;
-    background-size: auto 100%;
-    background-position: left;
-}
-
-.active {
-    /*box-shadow: inset 0 -4px 10px 0 #5b5b5b;*/
-    /*box-shadow: inset 0 -8px 15px -5px var(--secondary);*/
-    /*box-shadow: inset 0 -8px 15px -5px #5b5b5b;*/
-    box-shadow: inset 0 0 0 2px var(--softer-background);
-}
-
-.continues-right.active {
-    clip-path: inset(0px 2px 0px 0px);
-}
-
-.continues-left.active {
-    clip-path: inset(0px 0px 0px 2px);
-}
-
-.continues-left.continues-right.active {
-    clip-path: inset(0px 2px 0px 2px);
-}
-
-.continues-right .fragment-background, .continues-right .audio-wave, .continues-right.fragment {
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-}
-
-.continues-left .fragment-background, .continues-left .audio-wave, .continues-left.fragment {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
-}
-
-.audio .audio-wave {
-    min-height: 105px;
-    max-height: 105px;
-    border-radius: var(--border-radius);
+  width: 100%;
+  min-height: 80px;
+  background-color: var(--surface-ground);
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-color-secondary);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .audio-wave {
-    width: 100%;
-    min-height: 25px;
-    background-color: rgba(80, 80, 80, 0.4);
-    border-radius: 0 0 var(--border-radius) var(--border-radius);
-}
-
-.audio .seek-thumb{
-    margin-top: -113px;
+  width: 100%;
+  min-height: 105px;
+  background-color: var(--surface-ground);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-color-secondary);
 }
 
 .seek-thumb {
-    width: 4px;
-    height: 105px;
-    position: relative;
-    background-color: var(--primary);
-    box-shadow: 0 0 10px 0 rgba(255, 255, 255, 0.5);
-    margin-top: -105px;
-    border-radius: 2px;
+  width: 4px;
+  height: 105px;
+  position: absolute;
+  top: 10px;
+  background-color: var(--primary-color);
+  box-shadow: 0 0 10px 0 var(--primary-color);
+  border-radius: 2px;
+  pointer-events: none;
+  opacity: 0.8;
 }
 </style>

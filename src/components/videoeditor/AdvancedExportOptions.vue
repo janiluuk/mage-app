@@ -1,80 +1,126 @@
 <template>
-    <div>
-        <InputText prepend-icon="mdi-magnify"
-                      dense
-                      clearable
-                      outlined hide-details="auto"
-                      type="search"
-                      label="Search filters" v-model="term"></InputText>
-        <VirtualScroller
-            :bench="1"
-            :items="filteredFilters"
-            height="300"
-            item-height="64">
-            <template v-slot:default="{ item: filter }">
-                <ListItem :key="filter.name">
-                    <ListItem-content>
-                        <p>{{ filter.name }}</p>
-                        <p>{{ filter.description }}</p>
-                    </ListItemContent>
-                        <Button
-                            :title="`Show information about ${filter.name}`"
-                            icon
-                            @click="openFile('https://ffmpeg.org/ffmpeg-filters.html#'+filter.name)">
-                            <i className="pi pi-information-outline">
-                        </Button>
-                        <Button
-                            title="Add filter"
-                            icon
-                            @click="selectFilter(filter)">
-                            <i className="pi pi-plus">
-                        </Button>
-                </ListItem>
-            </template>
-        </VirtualScroller>
+  <div>
+    <div class="mb-3">
+      <InputText 
+        v-model="term"
+        placeholder="Search filters"
+        class="w-full"
+      >
+        <template #prefix>
+          <i class="pi pi-search" />
+        </template>
+      </InputText>
     </div>
+    
+    <div class="filter-list" style="max-height: 300px; overflow-y: auto;">
+      <div 
+        v-for="filter in filteredFilters" 
+        :key="filter.name"
+        class="filter-item p-3 mb-2 border-round surface-border border-1 flex align-items-center justify-content-between"
+      >
+        <div class="flex-1">
+          <p class="font-semibold mb-1">{{ filter.name }}</p>
+          <p class="text-sm text-color-secondary">{{ filter.description }}</p>
+        </div>
+        <div class="flex gap-2">
+          <Button
+            :title="`Show information about ${filter.name}`"
+            icon="pi pi-info-circle"
+            severity="secondary"
+            text
+            @click="openFilterInfo(filter)"
+          />
+          <Button
+            title="Add filter"
+            icon="pi pi-plus"
+            @click="selectFilter(filter)"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import {mapActions} from "vuex";
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
+import InputText from 'primevue/inputtext';
+import Button from 'primevue/button';
 
 export default {
-    name: "AdvancedExportOptions",
-    data: () => ({
-        filters: [],
-        term: '',
-    }),
-    async mounted() {
-        this.filters = await this.getFilters();
-    },
-    methods: {
-        async selectFilter(filter) {
-            let {confirmed, value} = await this.showTextPrompt({
-                title: `Add filter - ${filter.name}`,
-                subtitle: `${filter.description}<br>Discover options by clicking the (i) next to the filter.`,
-                value: filter.options,
-                label: "Options (optional)",
-                confirmText: "Add",
-            });
-
-            if (confirmed) {
-                this.$store.commit('addExportFilter', {...filter, options: value});
-            }
-        },
-        ...mapActions(['getFilters', 'openFile', 'showTextPrompt']),
-    },
-    computed: {
-        filteredFilters() {
-            if (this.term === '' || this.term === null)
-                return this.filters;
-            return this.filters
-                .filter(f => f.name.includes(this.term) || f.description.includes(this.term))
-                .sort((a, b) => b.name.includes(this.term) - a.name.includes(this.term))
-        },
-    }
-}
+  name: 'AdvancedExportOptions',
+  components: {
+    InputText,
+    Button,
+  },
+  setup() {
+    const store = useStore();
+    const filters = ref([]);
+    const term = ref('');
+    
+    const filteredFilters = computed(() => {
+      if (!term.value || term.value === '') {
+        return filters.value;
+      }
+      const searchTerm = term.value.toLowerCase();
+      return filters.value
+        .filter(f => 
+          f.name.toLowerCase().includes(searchTerm) || 
+          f.description.toLowerCase().includes(searchTerm)
+        )
+        .sort((a, b) => {
+          // Prioritize matches in name
+          const aNameMatch = a.name.toLowerCase().includes(searchTerm);
+          const bNameMatch = b.name.toLowerCase().includes(searchTerm);
+          return bNameMatch - aNameMatch;
+        });
+    });
+    
+    const getFilters = async () => {
+      // TODO: Implement filter fetching from store or API
+      // For now, return empty array
+      return [];
+    };
+    
+    const openFilterInfo = (filter) => {
+      window.open(`https://ffmpeg.org/ffmpeg-filters.html#${filter.name}`, '_blank');
+    };
+    
+    const selectFilter = async (filter) => {
+      // TODO: Implement filter selection with prompt
+      // For now, just add the filter
+      store.dispatch('videoeditor/addExportFilter', {
+        ...filter,
+        options: filter.options || '',
+      });
+    };
+    
+    onMounted(async () => {
+      filters.value = await getFilters();
+    });
+    
+    return {
+      filters,
+      term,
+      filteredFilters,
+      openFilterInfo,
+      selectFilter,
+    };
+  },
+};
 </script>
 
 <style scoped>
+.filter-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
 
+.filter-item {
+  transition: background-color 0.2s;
+}
+
+.filter-item:hover {
+  background-color: var(--surface-hover);
+}
 </style>

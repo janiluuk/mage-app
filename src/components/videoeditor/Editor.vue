@@ -1,5 +1,6 @@
 <template>
     <div class="editor">
+        <VideoInfoHeader class="info-panel" />
         <EditButtons class="top-panel" />
         <div class="bottom-panel" ref="panel">
             <div class="left-panel" :style="{
@@ -16,26 +17,61 @@
                 <Timeline class="timeline" />
             </div>
         </div>
+        <VideoInfoFooter class="footer-panel" />
+        <ExportDialog />
+        <ExportStatus />
+        <SaveProjectDialog 
+          v-model:visible="showSaveProjectDialog" 
+          @saved="onProjectSaved"
+        />
+        <LoadProjectDialog 
+          v-model:visible="showLoadProjectDialog"
+          @loaded="onProjectLoaded"
+        />
     </div>
 </template>
 
 <script>
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useStore } from 'vuex';
-import VideoPlayer from "@/components/videoeditor/VideoPlayer";
-import Timeline from "@/components/videoeditor/Timeline";
-import EditButtons from "@/components/videoeditor/EditButtons";
+import VideoPlayer from "@/components/videoeditor/VideoPlayer.vue";
+import Timeline from "@/components/videoeditor/Timeline.vue";
+import EditButtons from "@/components/videoeditor/EditButtons.vue";
+import VideoInfoHeader from "@/components/videoeditor/VideoInfoHeader.vue";
+import VideoInfoFooter from "@/components/videoeditor/VideoInfoFooter.vue";
+import ExportDialog from "@/components/videoeditor/ExportDialog.vue";
+import ExportStatus from "@/components/videoeditor/ExportStatus.vue";
+import SaveProjectDialog from "@/components/videoeditor/SaveProjectDialog.vue";
+import LoadProjectDialog from "@/components/videoeditor/LoadProjectDialog.vue";
 
 export default {
     name: "Editor",
-    components: { EditButtons, Timeline, VideoPlayer },
+    components: { 
+        EditButtons, 
+        Timeline, 
+        VideoPlayer, 
+        VideoInfoHeader, 
+        VideoInfoFooter, 
+        ExportDialog, 
+        ExportStatus,
+        SaveProjectDialog,
+        LoadProjectDialog,
+    },
     setup() {
         const store = useStore();
         const mouseDown = ref(false);
         const panel = ref(null);
         const divider = ref(null);
+        const showSaveProjectDialog = ref(false);
+        const showLoadProjectDialog = ref(false);
 
-        const playerWidth = computed(() => store.state.videoeditor.player.widthPercent);
+        // Default to 75% width for video player (bigger video display)
+        const playerWidth = computed(() => {
+          const stored = store.state.videoeditor.player.widthPercent;
+          // Only use default 0.75 if stored value is null, undefined, or 0
+          // Treat 0.5 as a valid user choice (50/50 split)
+          return stored != null && stored > 0 ? stored : 0.75;
+        });
 
         const startMove = (e) => {
             mouseDown.value = true;
@@ -63,14 +99,36 @@ export default {
             store.commit('videoeditor/SET_PLAYER_WIDTH', newWidth);
         };
 
+        const handleShowSaveProject = () => {
+            showSaveProjectDialog.value = true;
+        };
+
+        const handleShowLoadProject = () => {
+            showLoadProjectDialog.value = true;
+        };
+
+        const onProjectSaved = () => {
+            // Project saved successfully
+            console.log('Project saved');
+        };
+
+        const onProjectLoaded = () => {
+            // Project loaded successfully
+            console.log('Project loaded');
+        };
+
         onMounted(() => {
             document.addEventListener('mousemove', move, false);
             document.addEventListener('mouseup', endMove, false);
+            window.addEventListener('show-save-project-dialog', handleShowSaveProject);
+            window.addEventListener('show-load-project-dialog', handleShowLoadProject);
         });
 
         onBeforeUnmount(() => {
             document.removeEventListener('mousemove', move);
             document.removeEventListener('mouseup', endMove);
+            window.removeEventListener('show-save-project-dialog', handleShowSaveProject);
+            window.removeEventListener('show-load-project-dialog', handleShowLoadProject);
         });
 
         return {
@@ -79,6 +137,10 @@ export default {
             divider,
             playerWidth,
             startMove,
+            showSaveProjectDialog,
+            showLoadProjectDialog,
+            onProjectSaved,
+            onProjectLoaded,
         };
     }
 }
@@ -92,15 +154,29 @@ export default {
     flex-direction: column;
 }
 
-.top-panel {
-    height: 110px;
+.info-panel {
+    height: auto;
     width: 100%;
+    flex-shrink: 0;
+}
+
+.top-panel {
+    height: 60px;
+    width: 100%;
+    flex-shrink: 0;
 }
 
 .bottom-panel {
     flex-grow: 1;
     display: flex;
-    max-height: calc(100% - 110px);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.footer-panel {
+    height: auto;
+    width: 100%;
+    flex-shrink: 0;
 }
 
 .left-panel {
@@ -123,8 +199,8 @@ export default {
 
 .divider-inner {
     pointer-events: none;
-    background-color: var(--soft-foreground);
-    opacity: 0.2;
+    background-color: var(--surface-border);
+    opacity: 0.5;
     height: 100%;
     width: 1px;
 }

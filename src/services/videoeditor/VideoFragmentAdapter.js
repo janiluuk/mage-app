@@ -70,9 +70,13 @@ export default class VideoFragmentAdapter {
       return 0;
     }
     
+    if (this.playbackRate === 0 || !isFinite(this.playbackRate)) {
+      return 0;
+    }
+    
     const baseDuration = this.video.duration / this.playbackRate;
     const adjusted = baseDuration * this.portion;
-    return isNaN(adjusted) ? 0 : adjusted;
+    return (isNaN(adjusted) || !isFinite(adjusted)) ? 0 : adjusted;
   }
 
   /**

@@ -1,17 +1,17 @@
 <template>
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
+            <button @click.stop="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
                 class="p-link topbar-button">
                 <i class="pi pi-plus mr-2"></i>
                 <span>Create!</span>
             </button>
-            <button @click="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
+            <button @click.stop="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
                 class="p-link topbar-button">
                 <i class="pi pi-images mr-2"></i>
                 <span>My library</span>
             </button>
             <Menu ref="menu" :model="getOverlayMenu()" :popup="true" />
-            <button icon="pi pi-angle-down" :label="user.email" @click="toggleMenu"
+            <button icon="pi pi-angle-down" :label="user.email" @click.stop="toggleMenu"
                 :class="{ 'active-route': checkActiveRoute('/profile') }" class="p-link topbar-button">
                 <i class="pi pi-user mr-2"></i>
                 <span>Account</span>
@@ -43,7 +43,14 @@ export default {
     setup() {
         const menu = ref(null);
         const topbarMenuActive = ref(false);
-        return { menu, topbarMenuActive };
+        let toast = null;
+        try {
+            toast = useToast();
+        } catch (e) {
+            // Toast not available (e.g., in test environment)
+            toast = null;
+        }
+        return { menu, topbarMenuActive, toast };
     },
     props: {
         user: {
@@ -69,11 +76,15 @@ export default {
   },
     methods: {
         onTopBarActionButton(route) {
-          activeRoute.value = route;
+            activeRoute.value = route;
             this.$router.push(route);
         },
         toggleMenu(event) {
-            this.$refs.menu.toggle(event);
+            event.preventDefault();
+            event.stopPropagation();
+            if (this.$refs.menu) {
+                this.$refs.menu.toggle(event);
+            }
         },
         getOverlayMenu() {
             return ([

@@ -50,21 +50,83 @@ export default class VideoFileAdapter extends EventEmitter {
 
   /**
    * Get video element (creates if needed)
+   * Handles CORS and authentication for video loading
    */
   get element() {
     if (!this._element && this.videoUrl) {
       this._element = document.createElement('video');
+      
+      // Set CORS mode for cross-origin requests
+      // 'anonymous' allows credentials to be sent with CORS requests
+      // 'use-credentials' would require Access-Control-Allow-Credentials header
       this._element.crossOrigin = 'anonymous';
       this._element.preload = 'auto';
-      this._element.src = this.videoUrl;
+      
+      // For authenticated video URLs, we may need to add authorization headers
+      // Since <video> element doesn't support custom headers directly,
+      // we rely on the server to accept authentication via:
+      // 1. Query parameters (token in URL)
+      // 2. Cookies (if same-origin)
+      // 3. Signed URLs (temporary tokens)
+      let videoUrl = this.videoUrl;
+      
+      // If the video URL needs authentication, the backend should provide
+      // a signed URL or include token in query params
+      // For now, we use the URL as-is and rely on cookies/token-in-URL
+      
+      this._element.src = videoUrl;
+      
+      // Handle loading errors
+      this._element.addEventListener('error', (e) => {
+        const error = this._element.error;
+        if (error) {
+          let errorMessage = 'Failed to load video';
+          switch (error.code) {
+            case error.MEDIA_ERR_ABORTED:
+              errorMessage = 'Video loading aborted';
+              break;
+            case error.MEDIA_ERR_NETWORK:
+              errorMessage = 'Network error while loading video. Check CORS and authentication.';
+              break;
+            case error.MEDIA_ERR_DECODE:
+              errorMessage = 'Video decoding error';
+              break;
+            case error.MEDIA_ERR_SRC_NOT_SUPPORTED:
+              errorMessage = 'Video format not supported';
+              break;
+          }
+          console.error('Video load error:', errorMessage, error);
+          this.emit('error', new Error(errorMessage));
+        }
+      }, { once: true });
       
       // Set up audio context when element is ready
       this._element.addEventListener('canplay', () => {
         this.setupAudioContext();
         this.emit('canplay');
       }, { once: true });
+      
+      // Handle CORS errors specifically
+      this._element.addEventListener('loadstart', () => {
+        this.isLoading = true;
+      });
+      
+      this._element.addEventListener('loadedmetadata', () => {
+        this.isLoading = false;
+      });
     }
     return this._element;
+  }
+
+  /**
+   * Get authenticated video URL (if needed)
+   * This method can be extended to add auth tokens to URLs
+   */
+  getAuthenticatedUrl() {
+    // If video needs authentication, backend should provide signed URLs
+    // or we can add token as query parameter here
+    // For now, return the URL as-is
+    return this.videoUrl;
   }
 
   /**
@@ -121,8 +183,10 @@ export default class VideoFileAdapter extends EventEmitter {
   }
 
   get hasAudio() {
-    return this.metadata?.hasAudio !== false && 
-           (this.metadata?.audioStream || this.videoData?.hasAudio !== false);
+    const hasMetadataAudio = this.metadata?.hasAudio !== false;
+    const hasAudioStream = !!this.metadata?.audioStream;
+    const hasVideoDataAudio = this.videoData?.hasAudio !== false;
+    return hasMetadataAudio && (hasAudioStream || hasVideoDataAudio);
   }
 
   get isAudio() {

@@ -1,147 +1,83 @@
 <template>
+  <div class="volume-slider">
+    <label class="slider-label">Volume</label>
     <div class="slider-container">
-        <div class="slider-holder no-drag" @wheel="wheelVolume">
-            <Slider
-                :prepend-icon="volumeIcon"
-                @click:prepend="toggleMute"
-                class="slider"
-                dense
-                hide-details
-                min="0"
-                max="2"
-                step="0.001"
-                v-model="rawVolume"></Slider>
-            <div class="slider-label">
-                <p>Volume: {{ Math.round(activeFragment.volume * 100) }}%</p>
-            </div>
-        </div>
-        <Tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-                <Button x-small icon class="reset-button no-drag"
-                       :style="{
-                                            opacity: activeFragment.volume === 1 ? 0 : 0.5,
-                                            pointerEvents: activeFragment.volume === 1 ? 'none' : 'all',
-                                        }"
-                       @click="rawVolume = 1" v-bind="attrs" v-on="on">
-                    <i className="pi pi-reload">
-                </Button>
-            </template>
-            <span>Set default volume</span>
-        </Tooltip>
+      <Slider
+        v-model="volume"
+        :min="0"
+        :max="1"
+        :step="0.01"
+        class="slider"
+        @update:modelValue="updateVolume"
+      />
+      <span class="slider-value">{{ Math.round(volume * 100) }}%</span>
     </div>
+  </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import Slider from 'primevue/slider';
 
 export default {
-    name: "VolumeSlider",
-    data: () => ({
-        prevVolume: 1,
-        rawVolume: 1,
-        commit: true,
-    }),
-    methods: {
-        updateRawVolume(commit = true) {
-            let vol = this.activeFragment.volume;
-            if (vol > 1)
-                vol = 1 + (vol - 1) / 7;
-            if (vol !== this.rawVolume) {
-                this.commit = commit;
-                this.rawVolume = vol;
-            }
-        },
-        toggleMute() {
-            if (this.rawVolume > 0) {
-                this.prevVolume = this.rawVolume;
-                this.rawVolume = 0;
-            } else {
-                this.rawVolume = this.prevVolume;
-            }
-        },
-        wheelVolume(e) {
-            this.rawVolume -= e.deltaY * 0.0001;
-        },
-        ...mapActions(['setVolume']),
-    },
-    watch: {
-        'activeFragment.volume'() {
-            this.updateRawVolume(false);
-        },
-        activeFragment() {
-            this.updateRawVolume(false);
-        },
-        rawVolume() {
-            let volume = this.rawVolume;
-            if (this.rawVolume > 1)
-                volume = 1 + (this.rawVolume - 1) * 7;
-            if (this.commit) {
-                this.setVolume({volume});
-            } else {
-                this.commit = true;
-            }
-        },
-    },
-    computed: {
-        volumeIcon() {
-            if (this.activeFragment.volume === 0) {
-                return 'mdi-volume-mute';
-            } else if (this.activeFragment.volume < 0.5) {
-                return 'mdi-volume-medium';
-            } else if (this.activeFragment.volume < 4) {
-                return 'mdi-volume-high';
-            } else {
-                return 'mdi-volume-vibrate';
-            }
-        },
-        ...mapState({
-            activeFragment: state => state.activeFragment,
-        }),
-    },
-}
+  name: 'VolumeSlider',
+  components: { Slider },
+  setup() {
+    const store = useStore();
+    
+    const volume = computed({
+      get: () => {
+        const activeFragment = store.state.videoeditor.activeFragment;
+        return activeFragment?.volume ?? 1;
+      },
+      set: (value) => {
+        store.dispatch('videoeditor/setFragmentVolume', { volume: value });
+      }
+    });
+
+    const updateVolume = (value) => {
+      volume.value = value;
+    };
+
+    return {
+      volume,
+      updateVolume,
+    };
+  },
+};
 </script>
 
 <style scoped>
-.slider-container {
-    height: 100%;
-    display: flex;
-    place-items: center;
-}
-
-.slider-holder {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    margin: 0 10px;
+.volume-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 100px;
 }
 
 .slider-label {
-    display: flex;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
 }
 
-.reset-button {
-    margin-top: -2px;
-    opacity: 0;
-}
-
-.reset-button:hover, .reset-button:active {
-    opacity: 1;
-}
-
-.slider-label > p {
-    font-size: 12px;
-    opacity: 0.8;
-    width: 130px;
-    margin: 0;
-    text-align: center;
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .slider {
-    width: 100%;
+  flex: 1;
+  min-width: 80px;
 }
 
-.slider >>> button {
-    font-size: 19px;
-    opacity: 0.8;
+.slider-value {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  min-width: 35px;
+  text-align: right;
 }
 </style>

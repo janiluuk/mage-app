@@ -24,25 +24,36 @@
 </template>
 
 <script>
-import { computed, onMounted, onBeforeUnmount } from 'vue';
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { useStore } from 'vuex';
 import Editor from '@/components/videoeditor/Editor.vue';
+import ProgressSpinner from 'primevue/progressspinner';
+import Message from 'primevue/message';
+import Button from 'primevue/button';
 
 export default {
   name: 'VideoEditor',
   components: {
     Editor,
+    ProgressSpinner,
+    Message,
+    Button,
   },
   setup() {
     const route = useRoute();
     const router = useRouter();
     const store = useStore();
     
-    const isLoading = computed(() => store.state.videoeditor.loading.videoImport);
+    const isLoading = ref(true);
+    const error = ref(null);
+    
     const hasProject = computed(() => store.getters['videoeditor/hasProject']);
     
     const loadVideo = async () => {
+      isLoading.value = true;
+      error.value = null;
+      
       try {
         const type = route.params.type; // 'file' or 'job'
         const id = route.params.id;
@@ -52,11 +63,62 @@ export default {
         }
         
         await store.dispatch('videoeditor/importVideo', { type, id });
-      } catch (error) {
-        console.error('Failed to load video:', error);
-        return error.message || 'Failed to load video';
+      } catch (err) {
+        console.error('Failed to load video:', err);
+        
+        // In development mode, load a test video if the API call fails
+        if (import.meta.env.DEV && err.message?.includes('not found')) {
+          console.log('Loading test video for development...');
+          try {
+            // Use a public test video URL
+            const testVideoData = {
+              id: 'test-1',
+              url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+              duration: 596.48,
+              fps: 24,
+              width: 1280,
+              height: 720,
+              hasAudio: true,
+            };
+            
+            const testMetadata = {
+              format: {
+                duration: 596.48,
+                filename: 'BigBuckBunny.mp4',
+                format_name: 'mp4',
+              },
+              videoStream: {
+                width: 1280,
+                height: 720,
+                codec_name: 'h264',
+                bit_rate: 1000000,
+                avg_frame_rate: '24/1',
+              },
+              audioStream: {},
+              hasAudio: true,
+              fps: 24,
+              duration: 596.48,
+            };
+            
+            // Import the test video directly
+            const VideoFileAdapter = (await import('@/services/videoeditor/VideoFileAdapter')).default;
+            const VideoFragmentAdapter = (await import('@/services/videoeditor/VideoFragmentAdapter')).default;
+            
+            const videoFile = new VideoFileAdapter(testVideoData, testMetadata);
+            const fragment = new VideoFragmentAdapter(videoFile);
+            await store.dispatch('videoeditor/addFragment', fragment);
+            
+            console.log('Test video loaded successfully');
+          } catch (testErr) {
+            console.error('Failed to load test video:', testErr);
+            error.value = err.message || 'Failed to load video';
+          }
+        } else {
+          error.value = err.message || 'Failed to load video';
+        }
+      } finally {
+        isLoading.value = false;
       }
-      return null;
     };
     
     const goBack = () => {
@@ -64,11 +126,7 @@ export default {
     };
     
     onMounted(async () => {
-      const error = await loadVideo();
-      if (error) {
-        // Handle error - could set error state here
-        console.error('Video loading error:', error);
-      }
+      await loadVideo();
     });
     
     onBeforeUnmount(() => {
@@ -78,13 +136,9 @@ export default {
     
     return {
       isLoading,
+      error,
       hasProject,
       goBack,
-    };
-  },
-  data() {
-    return {
-      error: null,
     };
   },
 };
