@@ -124,9 +124,10 @@ describe('SoundscapeCreator', () => {
     it('should not display error when mood is selected', async () => {
       wrapper = await createWrapper();
 
-      // Select a mood
-      const moodButton = wrapper.findAll('.mood-tags button').at(0);
-      await moodButton.trigger('click');
+      // Select a mood by finding the button with 'Relaxing' text
+      const moodButtons = wrapper.findAll('.mood-tags button');
+      const relaxingButton = moodButtons.find(btn => btn.text() === 'Relaxing');
+      await relaxingButton.trigger('click');
       await flushPromises();
 
       expect(wrapper.vm.selectedMood).toBe('Relaxing');
@@ -149,8 +150,9 @@ describe('SoundscapeCreator', () => {
 
       // Set both prompt and mood
       await wrapper.find('textarea').setValue('relaxing ocean waves');
-      const moodButton = wrapper.findAll('.mood-tags button').at(1);
-      await moodButton.trigger('click');
+      const moodButtons = wrapper.findAll('.mood-tags button');
+      const energizingButton = moodButtons.find(btn => btn.text() === 'Energizing');
+      await energizingButton.trigger('click');
       await flushPromises();
 
       expect(wrapper.vm.prompt).toBe('relaxing ocean waves');
@@ -237,9 +239,10 @@ describe('SoundscapeCreator', () => {
     it('should set audioSrc when generate is successful with mood', async () => {
       wrapper = await createWrapper();
 
-      // Select a mood
-      const moodButton = wrapper.findAll('.mood-tags button').at(0);
-      await moodButton.trigger('click');
+      // Select a mood by finding the button with 'Relaxing' text
+      const moodButtons = wrapper.findAll('.mood-tags button');
+      const relaxingButton = moodButtons.find(btn => btn.text() === 'Relaxing');
+      await relaxingButton.trigger('click');
       await flushPromises();
 
       // Find and click the generate button
@@ -257,8 +260,9 @@ describe('SoundscapeCreator', () => {
 
       // Set both prompt and mood
       await wrapper.find('textarea').setValue('calm atmosphere');
-      const moodButton = wrapper.findAll('.mood-tags button').at(1);
-      await moodButton.trigger('click');
+      const moodButtons = wrapper.findAll('.mood-tags button');
+      const energizingButton = moodButtons.find(btn => btn.text() === 'Energizing');
+      await energizingButton.trigger('click');
       await flushPromises();
 
       // Find and click the generate button
