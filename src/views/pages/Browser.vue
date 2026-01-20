@@ -87,6 +87,18 @@
         </div>
       </div>
 
+      <!-- Loading Indicator -->
+      <div
+        v-if="isLoading"
+        class="loading-indicator"
+        role="status"
+        aria-live="polite"
+        aria-label="Loading videos"
+      >
+        <div class="loading-indicator__spinner"></div>
+        <div class="loading-indicator__text">Loading videos...</div>
+      </div>
+
       <div
         v-if="videos.length === 0 && !isLoading && !viewGroupedByTags"
         class="drop-zone"
@@ -275,6 +287,8 @@
         :on-action="runContextAction"
       />
 
+      <ConfirmDialog />
+
       <SoundtrackDialog
         v-if="selectedVideoForSoundtrack"
         v-model:visible="showSoundtrackDialog"
@@ -301,6 +315,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { useStore } from "vuex";
+import { useConfirm } from 'primevue/useconfirm';
 import BrowserHeaderBar from "@/browser/components/BrowserHeaderBar.vue";
 import BrowserFiltersPopover from "@/browser/components/BrowserFiltersPopover.vue";
 import BrowserVideoCard from "@/browser/components/BrowserVideoCard.vue";
@@ -318,6 +333,8 @@ import { useVideoCollection } from "@/browser/composables/useVideoCollection";
 import { useFullScreenModal } from "@/browser/composables/useFullScreenModal";
 import { useZoomControls } from "@/browser/composables/useZoomControls";
 import { useHotkeys } from "@/browser/composables/useHotkeys";
+import { useBrowserData } from "@/browser/composables/useBrowserData";
+import { useBrowserMetadata } from "@/browser/composables/useBrowserMetadata";
 import FileService from "@/services/file.service";
 import { SortKey } from "@/browser/utils/sorting";
 import { parseSortValue, formatSortValue } from "@/browser/utils/sortOption";
@@ -339,6 +356,11 @@ import "@/assets/video-browser.css";
 
 const router = useRouter();
 const store = useStore();
+const confirm = useConfirm();
+
+// Request cancellation for API calls
+const activeRequestIds = ref(new Set());
+const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
@@ -359,7 +381,22 @@ const rawFiles = computed(() => {
   const list = store.getters["files/list"];
   return Array.isArray(list) ? list : [];
 });
-const metadataOverrides = ref(new Map());
+// Use browser metadata composable
+const {
+  metadataOverrides,
+  isMetadataPanelOpen,
+  metadataPanelDismissed,
+  metadataDockHeight,
+  metadataFocusToken,
+  MIN_METADATA_DOCK_HEIGHT,
+  MAX_METADATA_DOCK_HEIGHT,
+  applyMetadataPatch,
+  applyMetadataOverrides,
+  openMetadataPanel,
+  toggleMetadataPanel,
+  handleMetadataDockHeightChange,
+  shouldRenderCollapsedHint,
+} = useBrowserMetadata(selection.size);
 
 // Mode: 'videojobs' or 'files'
 const viewMode = ref('videojobs');
@@ -368,18 +405,8 @@ const selectedTagId = ref(null);
 const expandedTagGroups = ref(new Set());
 const groupedByTags = computed(() => store.getters["files/groupedByTags"] || []);
 
-const applyMetadataOverrides = (video) => {
-  const patch = metadataOverrides.value.get(video.id);
-  if (!patch) return video;
-  const next = { ...video, ...patch };
-  if ("tags" in patch) {
-    next.tags = normalizeTags(patch.tags);
-  }
-  if ("rating" in patch) {
-    next.rating = normalizeRating(patch.rating);
-  }
-  return next;
-};
+// applyMetadataOverrides is provided by useBrowserMetadata composable
+// Normalization is already applied before patches are stored via applyMetadataPatch
 
 // Normalize files from API
 const normalizedFiles = computed(() => {
@@ -613,18 +640,8 @@ const selectedVideos = computed(() =>
   Array.from(selection.selected.value).map(getById).filter(Boolean)
 );
 
-const metadataFocusToken = ref(0);
-
-const applyMetadataPatch = (updates) => {
-  if (!updates || typeof updates !== "object") return;
-  const next = new Map(metadataOverrides.value);
-  Object.entries(updates).forEach(([id, patch]) => {
-    if (!id || !patch) return;
-    const prev = next.get(id) || {};
-    next.set(id, { ...prev, ...patch });
-  });
-  metadataOverrides.value = next;
-};
+// metadataFocusToken is provided by useBrowserMetadata composable (line 390)
+// applyMetadataPatch is provided by useBrowserMetadata composable (line 393)
 
 const handleAddTags = async (tagNames) => {
   const additions = normalizeTags(tagNames);
@@ -840,37 +857,6 @@ const {
   showOnEmpty,
 });
 
-const isMetadataPanelOpen = ref(false);
-const metadataPanelDismissed = ref(false);
-const metadataDockHeight = ref(280);
-const MIN_METADATA_DOCK_HEIGHT = 200;
-const MAX_METADATA_DOCK_HEIGHT = 520;
-
-const openMetadataPanel = () => {
-  isMetadataPanelOpen.value = true;
-  metadataPanelDismissed.value = false;
-  metadataFocusToken.value += 1;
-};
-
-const toggleMetadataPanel = () => {
-  const next = !isMetadataPanelOpen.value;
-  isMetadataPanelOpen.value = next;
-  if (!next) {
-    metadataPanelDismissed.value = true;
-  } else {
-    metadataPanelDismissed.value = false;
-    metadataFocusToken.value += 1;
-  }
-};
-
-const handleMetadataDockHeightChange = (height) => {
-  metadataDockHeight.value = height;
-};
-
-const shouldRenderCollapsedHint = computed(
-  () => metadataPanelDismissed.value || selection.size.value > 0
-);
-
 watch(
   () => selection.size.value,
   (size) => {
@@ -1024,26 +1010,35 @@ const refreshData = async () => {
 
 onMounted(async () => {
   await refreshData();
-  // Debug logging
-  console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
-  console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
-  console.log('videosToRender:', videosToRender.value.length);
-  refreshInterval.value = setInterval(refreshData, 10000);
+  // Debug logging (dev only)
+  if (import.meta.env.DEV) {
+    console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
+    console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
+    console.log('videosToRender:', videosToRender.value.length);
+  }
+  startAutoRefresh(10000);
 });
 
 onBeforeUnmount(() => {
-  if (refreshInterval.value) {
-    clearInterval(refreshInterval.value);
+  // Cancel all active API requests
+  if (activeRequestIds.value && activeRequestIds.value.size > 0) {
+    import('@/services/request-service/ApiRequestService').then(({ default: requestService }) => {
+      activeRequestIds.value.forEach(requestId => {
+        requestService.cancelRequest(requestId);
+      });
+      activeRequestIds.value.clear();
+    });
   }
+  
+  // Stop auto-refresh
+  stopAutoRefresh();
 });
 
-// Watch for sort changes and reload files if in files mode
+// Watch for sort changes - handled by useBrowserData composable
+// Additional watch for layout updates
 watch(
   () => [sortKey.value, sortDir.value, viewMode.value, selectedTagId.value],
-  async () => {
-    if (viewMode.value === 'files' && !viewGroupedByTags.value) {
-      await loadFiles();
-    }
+  () => {
     onItemsChanged();
   }
 );
@@ -1145,14 +1140,26 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
     case "delete":
     case "move-to-trash": {
       if (!targets.length) return;
-      const label =
+      const message =
         targets.length === 1
-          ? `Delete "${targets[0].name || "this video"}"?`
-          : `Delete ${targets.length} videos?`;
-      if (!window.confirm(label)) return;
-      targets.forEach((video) => {
-        if (video?.job?.id) {
-          store.dispatch("videojobs/destroy", video.job.id);
+          ? `Are you sure you want to delete "${targets[0].name || "this video"}"?`
+          : `Are you sure you want to delete ${targets.length} videos?`;
+      const header = targets.length === 1 ? "Delete Video" : "Delete Videos";
+      
+      confirm.require({
+        message,
+        header,
+        icon: 'pi pi-exclamation-triangle',
+        acceptClass: 'p-button-danger',
+        accept: () => {
+          targets.forEach((video) => {
+            if (video?.job?.id) {
+              store.dispatch("videojobs/destroy", video.job.id);
+            }
+          });
+        },
+        reject: () => {
+          // User cancelled, do nothing
         }
       });
       break;

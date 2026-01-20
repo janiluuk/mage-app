@@ -1,7 +1,7 @@
 
 <script>
 
-import VideoUpload from "@/components/VideoUpload.vue";
+import VideoUpload from "@/components/video/VideoUpload.vue";
 export default {
     name: "Upload",
     components: {

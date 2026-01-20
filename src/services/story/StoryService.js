@@ -1,4 +1,5 @@
 import requestService from '@/services/request-service/ApiRequestService'
+import { normalizeError, getUserFriendlyMessage } from '@/utils/errorHandler'
 
 class StoryService {
   constructor({ request = requestService } = {}) {
@@ -15,8 +16,8 @@ class StoryService {
       const response = await this.request.get('/story', { params })
       return response.data
     } catch (error) {
-      console.error('Failed to list stories:', error)
-      throw new Error(error.message || 'Failed to load stories')
+      const normalized = normalizeError(error, 'StoryService.listStories');
+      throw new Error(getUserFriendlyMessage(normalized, 'Failed to load stories'));
     }
   }
 
@@ -30,11 +31,11 @@ class StoryService {
       const response = await this.request.get(`/story/${id}`)
       return response.data
     } catch (error) {
-      console.error(`Failed to get story ${id}:`, error)
+      const normalized = normalizeError(error, `StoryService.getStory(${id})`);
       if (error.response?.status === 404) {
-        throw new Error('Story not found')
+        throw new Error('Story not found');
       }
-      throw new Error(error.message || 'Failed to load story')
+      throw new Error(getUserFriendlyMessage(normalized, 'Failed to load story'));
     }
   }
 

@@ -196,7 +196,9 @@ export function useProgressiveList(
     let ricId = 0;
 
     let lastUpdate = 0;
-    const MIN_UPDATE_INTERVAL = 100; // Minimum 100ms between updates to reduce flickering
+    let isFirstUpdate = true;
+    // Leading-edge debounce: respond immediately on first update, then throttle
+    const MIN_UPDATE_INTERVAL = 150; // Minimum 150ms between subsequent updates
 
     const schedule = () => {
       if (cancelled) return;
@@ -208,11 +210,15 @@ export function useProgressiveList(
       const idleCb = () => {
         if (cancelled) return;
         const now = Date.now();
-        if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
+        
+        // Allow immediate first update, then throttle subsequent updates
+        if (!isFirstUpdate && now - lastUpdate < MIN_UPDATE_INTERVAL) {
           rafId = requestAnimationFrame(schedule);
           return;
         }
+        
         lastUpdate = now;
+        isFirstUpdate = false;
         
         if (!allVisible.value) {
           const add = computeNextBatch();
@@ -227,7 +233,7 @@ export function useProgressiveList(
       if (typeof window.requestIdleCallback === "function") {
         ricId = window.requestIdleCallback(idleCb, { timeout: 500 });
       } else {
-        setTimeout(idleCb, 50); // Throttle to reduce flickering
+        setTimeout(idleCb, 150); // Balanced throttle for fallback
       }
     };
 

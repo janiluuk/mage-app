@@ -1,5 +1,7 @@
 <template>
   <div class="story-editor">
+    <ConfirmDialog />
+    
     <div v-if="loading && !story" class="flex justify-content-center align-items-center" style="min-height: 400px;">
       <ProgressSpinner />
     </div>
@@ -168,12 +170,14 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import { useConfirm } from 'primevue/useconfirm'
 import StoryService from '@/services/story/StoryService'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import InputText from 'primevue/inputtext'
 import Textarea from 'primevue/textarea'
 import Message from 'primevue/message'
+import ConfirmDialog from 'primevue/confirmdialog'
 import ProgressSpinner from 'primevue/progressspinner'
 import Badge from 'primevue/badge'
 import Dialog from 'primevue/dialog'
@@ -295,16 +299,31 @@ const saveStory = async () => {
   }
 }
 
-const removeJob = async (jobId) => {
-  if (!story.value || !confirm('Remove this job from the story?')) return
+const confirm = useConfirm()
 
-  try {
-    await storyService.removeJobs(story.value.id, [jobId])
-    await loadStory()
-  } catch (err) {
-    console.error('Error removing job:', err)
-    saveError.value = err.message || 'Failed to remove job'
-  }
+const removeJob = async (jobId) => {
+  if (!story.value) return
+  
+  confirm.require({
+    message: 'Are you sure you want to remove this job from the story?',
+    header: 'Remove Job',
+    icon: 'pi pi-exclamation-triangle',
+    acceptClass: 'p-button-danger',
+    accept: async () => {
+      try {
+        await storyService.removeJobs(story.value.id, [jobId])
+        await loadStory()
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('Error removing job:', err)
+        }
+        saveError.value = err.message || 'Failed to remove job'
+      }
+    },
+    reject: () => {
+      // User cancelled, do nothing
+    }
+  })
 }
 
 const goBack = () => {

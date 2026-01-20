@@ -5,17 +5,16 @@
                 <i class="pi pi-plus mr-2"></i>
                 <span>Create!</span>
             </button>
-            <button @click="onTopBarActionButton('/library/');" :class="{ 'active-route': checkActiveRoute('/library/') }"
+            <button @click="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
                 class="p-link topbar-button">
                 <i class="pi pi-images mr-2"></i>
                 <span>My library</span>
             </button>
             <Menu ref="menu" :model="getOverlayMenu()" :popup="true" />
             <button icon="pi pi-angle-down" :label="user.email" @click="toggleMenu"
-                :class="{ 'active-route': checkActiveRoute('/profile/') }" class="p-link topbar-button">
+                :class="{ 'active-route': checkActiveRoute('/profile') }" class="p-link topbar-button">
                 <i class="pi pi-user mr-2"></i>
                 <span>Account</span>
-
             </button>
         </div>
     <Toast/>
@@ -25,7 +24,7 @@
 import * as authActions from '@/store/modules/auth/types/actions';
 import * as authGetters from '@/store/modules/auth/types/getters';
 import * as notificationActions from '@/store/modules/notification/types/actions';
-import { useToast } from 'primevue/usetoast';
+import Menu from 'primevue/menu';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
@@ -37,11 +36,13 @@ const router = useRouter();
 export default {
 
     name: 'AuthorizedMenu',
+    components: {
+        Menu
+    },
     setup() {
         const menu = ref(null);
-        const toast = useToast();
         const topbarMenuActive = ref(false);
-        return { menu, toast, topbarMenuActive };
+        return { menu, topbarMenuActive };
     },
     props: {
         user: {
@@ -76,19 +77,34 @@ export default {
         getOverlayMenu() {
             return ([
                 {
+                    label: 'Profile',
+                    icon: 'pi pi-user',
+                    command: () => {
+                        activeRoute.value = '/profile';
+                        this.$router.push('/profile');
+                    }
+                },
+                {
+                    separator: true
+                },
+                {
                     label: 'Logout',
                     icon: 'pi pi-sign-out',
                     command: () => {
                         this.exit();
                         this.signOut();
-                        toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.' });
+                        // Use $toast (globally injected) for reliable access in callbacks
+                        if (this.$toast) {
+                            this.$toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.', life: 3000 });
+                        }
                     }
                 }
-
             ]);
         },
         checkActiveRoute(item) {
-            return activeRoute.value === item;
+            // Check if current route matches (with or without trailing slash)
+            const currentPath = this.$router.currentRoute.value.path;
+            return currentPath === item || currentPath === item + '/' || currentPath + '/' === item;
         },
         ...mapActions('AuthService', {
             signOut: authActions.SIGN_OUT
@@ -101,7 +117,6 @@ export default {
         async exit() {
             try {
                 await this.signOut();
-                alert("signed out");
             } catch (error) {
                 this.setErrorNotification(error);
             }

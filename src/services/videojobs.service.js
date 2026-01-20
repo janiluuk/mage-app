@@ -4,6 +4,9 @@ import qs from "qs";
 import requestService from "@/services/request-service/ApiRequestService";
 import authHeader from "@/services/auth-header";
 import { API_V1_BASE_URL } from "@/utils/api-base-urls";
+import env from "@/utils/env";
+import { normalizeError, getUserFriendlyMessage } from "@/utils/errorHandler";
+import apiCache from "@/utils/apiCache";
 
 const jsona = new Jsona();
 const url = API_V1_BASE_URL;
@@ -11,42 +14,70 @@ const includeParams = "modelfile,user";
 
 export default {
   async list(params) {
+    // Check cache first
+    const cacheKey = "/video-jobs";
+    const cached = apiCache.get(cacheKey, params);
+    if (cached) {
+      return cached;
+    }
+
+    // Check if request is already pending (deduplication)
+    const pending = apiCache.getPending(cacheKey, params);
+    if (pending) {
+      return pending;
+    }
+
     const options = {
       params: params,
       paramsSerializer: function (params) {
         return qs.stringify(params, { encode: false });
       },
     };
-    const response = await requestService.get(
+    
+    const requestPromise = requestService.get(
       "/video-jobs",
       options,
       {},
       true
-    );
-    const meta = response.data.meta === undefined 
-      ? { page: { total: 1 } } 
-      : response.data.meta;
-    
-    const deserialized = jsona.deserialize(response.data);
-    // jsona.deserialize returns an array for collections
-    // If it's not an array, it might be wrapped in an object
-    let list = [];
-    if (Array.isArray(deserialized)) {
-      list = deserialized;
-    } else if (deserialized && Array.isArray(deserialized.data)) {
-      list = deserialized.data;
-    } else if (deserialized && deserialized.type === 'video-jobs') {
-      // Single item, wrap in array
-      list = [deserialized];
-    } else {
-      console.warn('Unexpected deserialized format:', deserialized);
-      list = [];
-    }
-    
-    return {
-      list: list,
-      meta: meta,
-    };
+    ).then(response => {
+      const meta = response.data.meta === undefined 
+        ? { page: { total: 1 } } 
+        : response.data.meta;
+      
+      const deserialized = jsona.deserialize(response.data);
+      // jsona.deserialize returns an array for collections
+      // If it's not an array, it might be wrapped in an object
+      let list = [];
+      if (Array.isArray(deserialized)) {
+        list = deserialized;
+      } else if (deserialized && Array.isArray(deserialized.data)) {
+        list = deserialized.data;
+      } else if (deserialized && deserialized.type === 'video-jobs') {
+        // Single item, wrap in array
+        list = [deserialized];
+      } else {
+        if (import.meta.env.DEV) {
+          console.warn('Unexpected deserialized format:', deserialized);
+        }
+        list = [];
+      }
+      
+      const result = {
+        list: list,
+        meta: meta,
+      };
+      
+      // Cache the result
+      apiCache.set(cacheKey, params, result, 30000); // 30s cache for lists
+      
+      return result;
+    }).catch(error => {
+      // Don't cache errors
+      throw error;
+    });
+
+    // Mark as pending and return promise
+    return apiCache.setPending(cacheKey, params, requestPromise);
   },
 
   async get(id) {
@@ -92,8 +123,8 @@ export default {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(blobUrl);
     } catch (error) {
-      console.error("Download error:", error.message);
-      throw error;
+        const normalized = normalizeError(error, 'VideoJobService.download');
+        throw new Error(getUserFriendlyMessage(normalized));
     }
   },
   async update(item) {
@@ -154,8 +185,27 @@ export default {
     });
   },
 
+  /**
+   * Helper function to make finalize API calls
+   * Finalize endpoint is at /api/finalize, not /api/v1/finalize
+   * 
+   * Uses requestService for consistent auth handling and error processing.
+   * Previously, finalizeDeforum used axios.post directly, but this unifies
+   * both methods to use the same service for better consistency.
+   */
+  async _callFinalizeEndpoint(params) {
+    const API_URL = env.VITE_API_URL || '';
+    const response = await requestService.post(`${API_URL}/api/finalize`, params, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json',
+      },
+    });
+    return response;
+  },
+
   async finalize(params) {
-    return await requestService.post("/finalize", params);
+    return await this._callFinalizeEndpoint(params);
   },
 
   async cancelJob(id) {
@@ -174,7 +224,7 @@ export default {
     return await requestService.post("/generate", { ...params, type: "deforum" });
   },
   async finalizeDeforum(params) {
-    return await requestService.post("/finalize", params);
+    return await this._callFinalizeEndpoint(params);
   },
 
   async queue() {

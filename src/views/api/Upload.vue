@@ -28,7 +28,7 @@
 </template>
 
 <script>
-import VideoUpload from "@/components/VideoUpload.vue";
+import VideoUpload from "@/components/video/VideoUpload.vue";
 import showSwal from "@/mixins/showSwal";
 import { mapMutations } from "vuex";
 //import * as Yup from 'yup';

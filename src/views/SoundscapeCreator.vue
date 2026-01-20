@@ -71,13 +71,45 @@ const queueItems = ref([])
 const errorMessage = ref('')
 let intervalId
 
-function generate() {
-  const API_URL = env.VITE_API_URL || ''
-  const params = new URLSearchParams({
-    text: prompt.value,
-    mood: selectedMood.value
-  })
-  audioSrc.value = `${API_URL}/api/stream?${params.toString()}`
+async function generate() {
+  try {
+    errorMessage.value = ''
+    
+    // Validate that either prompt or mood is provided
+    if (!prompt.value.trim() && !selectedMood.value) {
+      errorMessage.value = 'Please enter a prompt or select a mood'
+      return
+    }
+    
+    const API_URL = env.VITE_API_URL || ''
+    if (!API_URL) {
+      errorMessage.value = 'API URL is not configured'
+      return
+    }
+    
+    const params = new URLSearchParams({
+      text: prompt.value,
+      mood: selectedMood.value
+    })
+    
+    const streamUrl = `${API_URL}/api/stream?${params.toString()}`
+    
+    // Validate URL before setting
+    try {
+      new URL(streamUrl)
+      audioSrc.value = streamUrl
+    } catch (urlError) {
+      errorMessage.value = 'Invalid API URL configuration'
+      if (import.meta.env.DEV) {
+        console.error('Invalid URL:', urlError)
+      }
+    }
+  } catch (error) {
+    errorMessage.value = error.message || 'Failed to generate soundscape'
+    if (import.meta.env.DEV) {
+      console.error('Generate error:', error)
+    }
+  }
 }
 
 async function refreshQueue() {
