@@ -46,8 +46,13 @@ export default defineConfig({
       },
     },
     
-    // Test file patterns
-    include: ['tests/**/*.test.js', 'tests/**/*.spec.js'],
+    // Test file patterns - include tests in both tests/ and src/ directories
+    include: [
+      'tests/**/*.test.js',
+      'tests/**/*.spec.js',
+      'src/**/*.test.js',
+      'src/**/*.spec.js',
+    ],
     
     // Exclude patterns
     exclude: ['node_modules', 'dist', 'build'],
