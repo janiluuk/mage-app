@@ -405,33 +405,20 @@ const selectedTagId = ref(null);
 const expandedTagGroups = ref(new Set());
 const groupedByTags = computed(() => store.getters["files/groupedByTags"] || []);
 
-// applyMetadataOverrides is now provided by useBrowserMetadata composable
-// But we need to extend it to handle tags and rating normalization
-const applyMetadataOverridesWithNormalization = (video) => {
-  const patched = applyMetadataOverrides(video);
-  const patch = metadataOverrides.value.get(video.id);
-  if (!patch) return patched;
-  const next = { ...patched };
-  if ("tags" in patch) {
-    next.tags = normalizeTags(patch.tags);
-  }
-  if ("rating" in patch) {
-    next.rating = normalizeRating(patch.rating);
-  }
-  return next;
-};
+// applyMetadataOverrides is provided by useBrowserMetadata composable
+// Normalization is already applied before patches are stored via applyMetadataPatch
 
 // Normalize files from API
 const normalizedFiles = computed(() => {
   if (!Array.isArray(rawFiles.value)) return [];
-  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
+  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
 });
 
 // Combine videojobs and files, or use one based on view mode
 // When viewing by tag, use files from the tag endpoint
 const tagFiles = computed(() => {
   if (selectedTagId.value && viewMode.value === 'files') {
-    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
+    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
   }
   return [];
 });
@@ -445,7 +432,7 @@ const videos = computed(() => {
   }
   // Ensure rawJobs.value is an array before mapping
   if (!Array.isArray(rawJobs.value)) return [];
-  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverridesWithNormalization);
+  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
 });
 
 const selection = useSelectionState();
@@ -652,6 +639,9 @@ const selectedIds = computed(() => Array.from(selection.selected.value));
 const selectedVideos = computed(() =>
   Array.from(selection.selected.value).map(getById).filter(Boolean)
 );
+
+// metadataFocusToken is provided by useBrowserMetadata composable (line 390)
+// applyMetadataPatch is provided by useBrowserMetadata composable (line 393)
 
 const handleAddTags = async (tagNames) => {
   const additions = normalizeTags(tagNames);
