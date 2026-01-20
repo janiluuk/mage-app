@@ -27,22 +27,45 @@ export function normalizeError(error, context = '') {
     code = error.code || error.status || null;
     originalError = error;
   } else if (error && typeof error === 'object') {
-    message = error.message || error.error || error.toString();
-    code = error.code || error.status || null;
-    originalError = error;
-  }
-
-  // Extract message from API error responses
-  if (error?.response?.data) {
-    const data = error.response.data;
-    if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
-      message = data.errors[0].detail || data.errors[0].title || message;
-    } else if (data.message) {
-      message = data.message;
-    } else if (data.error) {
-      message = data.error;
+    // Check for API error response structure first (before toString)
+    if (error.response) {
+      // Extract status code
+      if (error.response.status) {
+        code = error.response.status;
+      }
+      
+      // Extract message from response data
+      if (error.response.data) {
+        const data = error.response.data;
+        if (data.errors && Array.isArray(data.errors) && data.errors.length > 0) {
+          message = data.errors[0].detail || data.errors[0].title || message;
+        } else if (data.message) {
+          message = data.message;
+        } else if (data.error) {
+          message = data.error;
+        }
+      }
+      
+      // If no message found in data, try error object properties
+      if (message === 'An unexpected error occurred') {
+        message = error.message || error.error || message;
+      }
+    } else {
+      // Regular object error (no response property)
+      message = error.message || error.error;
+      if (!message && typeof error.toString === 'function') {
+        const str = error.toString();
+        // Only use toString if it's not the default [object Object]
+        if (str !== '[object Object]') {
+          message = str;
+        }
+      }
+      if (!message) {
+        message = 'An unexpected error occurred';
+      }
+      code = error.code || error.status || null;
     }
-    code = error.response.status || code;
+    originalError = error;
   }
 
   const normalized = {
@@ -52,11 +75,6 @@ export function normalizeError(error, context = '') {
     original: originalError,
     timestamp: new Date().toISOString()
   };
-
-  // Log in development
-  if (import.meta.env.DEV) {
-    console.error(`[ErrorHandler] ${context}:`, normalized);
-  }
 
   return normalized;
 }
@@ -125,8 +143,11 @@ export function handleError(error, options = {}) {
     });
   }
 
+  // Log in development or if explicitly requested
   if (logError) {
-    console.error(`[ErrorHandler] ${context}:`, normalized);
+    if (import.meta.env.DEV) {
+      console.error(`[ErrorHandler] ${context}:`, normalized);
+    }
   }
 
   return normalized;

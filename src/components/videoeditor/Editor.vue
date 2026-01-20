@@ -1,11 +1,11 @@
 <template>
     <div class="editor">
-        <edit-buttons class="top-panel"></edit-buttons>
+        <EditButtons class="top-panel" />
         <div class="bottom-panel" ref="panel">
             <div class="left-panel" :style="{
                 width: Math.round(playerWidth * 10000) / 100 + '%',
             }">
-                <video-player></video-player>
+                <VideoPlayer />
             </div>
             <div class="divider" @mousedown="startMove">
                 <div ref="divider" class="divider-inner"></div>
@@ -13,58 +13,73 @@
             <div class="right-panel" :style="{
                 width: Math.round((1-playerWidth) * 10000) / 100 + '%',
             }">
-                <timeline class="timeline"></timeline>
+                <Timeline class="timeline" />
             </div>
         </div>
     </div>
 </template>
 
 <script>
-import VideoPlayer from "@/components/VideoPlayer";
-import Timeline from "@/components/Timeline";
-import VolumeSlider from "@/components/VolumeSlider";
-import PlaybackRateSlider from "@/components/PlaybackRateSlider";
-import EditButtons from "@/components/EditButtons";
-import {mapState} from "vuex";
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+import { useStore } from 'vuex';
+import VideoPlayer from "@/components/videoeditor/VideoPlayer";
+import Timeline from "@/components/videoeditor/Timeline";
+import EditButtons from "@/components/videoeditor/EditButtons";
 
 export default {
     name: "Editor",
-    components: {EditButtons, Timeline, VideoPlayer},
-    data: () => ({
-        mouseDown: false,
-    }),
-    beforeDestroy() {
-        document.removeEventListener('mousemove', this.move);
-        document.removeEventListener('mouseup', this.endMove);
-    },
-    mounted() {
-        document.addEventListener('mousemove', this.move, false);
-        document.addEventListener('mouseup', this.endMove, false);
-    },
-    methods: {
-        startMove(e) {
-            this.mouseDown = true;
-            this.resize(e);
-        },
-        move(e) {
-            if (this.mouseDown)
-                this.resize(e);
-        },
-        endMove(e) {
-            if (this.mouseDown)
-                this.resize(e);
-            this.mouseDown = false;
-        },
-        resize(e) {
-            let bounds = this.$refs.panel.getBoundingClientRect();
-            let x = e.pageX - bounds.left;
-            this.$store.commit('playerWidth', x / bounds.width);
-        },
-    },
-    computed: {
-        ...mapState({
-            playerWidth: state => state.player.widthPercent,
-        }),
+    components: { EditButtons, Timeline, VideoPlayer },
+    setup() {
+        const store = useStore();
+        const mouseDown = ref(false);
+        const panel = ref(null);
+        const divider = ref(null);
+
+        const playerWidth = computed(() => store.state.videoeditor.player.widthPercent);
+
+        const startMove = (e) => {
+            mouseDown.value = true;
+            resize(e);
+        };
+
+        const move = (e) => {
+            if (mouseDown.value) {
+                resize(e);
+            }
+        };
+
+        const endMove = (e) => {
+            if (mouseDown.value) {
+                resize(e);
+            }
+            mouseDown.value = false;
+        };
+
+        const resize = (e) => {
+            if (!panel.value) return;
+            const bounds = panel.value.getBoundingClientRect();
+            const x = e.pageX - bounds.left;
+            const newWidth = x / bounds.width;
+            store.commit('videoeditor/SET_PLAYER_WIDTH', newWidth);
+        };
+
+        onMounted(() => {
+            document.addEventListener('mousemove', move, false);
+            document.addEventListener('mouseup', endMove, false);
+        });
+
+        onBeforeUnmount(() => {
+            document.removeEventListener('mousemove', move);
+            document.removeEventListener('mouseup', endMove);
+        });
+
+        return {
+            mouseDown,
+            panel,
+            divider,
+            playerWidth,
+            startMove,
+        };
     }
 }
 </script>

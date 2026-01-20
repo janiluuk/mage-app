@@ -4,7 +4,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import ApiCache from '@/utils/apiCache';
+import { ApiCache } from '@/utils/apiCache';
 
 describe('ApiCache', () => {
   let cache;

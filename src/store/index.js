@@ -8,6 +8,7 @@ import { videojobs } from './videojobs.module';
 import { tags } from './tags.module';
 import { items } from './items.module';
 import { files } from './files.module';
+import { videoeditor } from './videoeditor.module';
 import {
   alertsModule,
   authServiceModule,
@@ -105,6 +106,7 @@ const featureModules = {
   tags,
   items,
   files,
+  videoeditor,
   CategoriesV2: categoriesModule,
   TagsV2: tagsModule,
   RolesV2: rolesModule,

@@ -1173,7 +1173,15 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
   switch (actionId) {
     case "edit":
       if (primaryVideo) {
-        router.push(`/edit/${primaryVideo.generator || "vid2vid"}/${primaryVideo.id}`);
+        // Route to new video editor
+        if (primaryVideo.file?.id) {
+          router.push(`/editor/file/${primaryVideo.file.id}`);
+        } else if (primaryVideo.job?.id) {
+          router.push(`/editor/job/${primaryVideo.job.id}`);
+        } else {
+          // Fallback to old editor for video jobs
+          router.push(`/edit/${primaryVideo.generator || "vid2vid"}/${primaryVideo.id}`);
+        }
       }
       break;
     case "download":

@@ -158,4 +158,8 @@ class ApiCache {
 }
 
 // Export singleton instance
-export default new ApiCache(100, 60000); // 100 entries, 60s TTL
+const apiCacheInstance = new ApiCache(100, 60000); // 100 entries, 60s TTL
+
+// Export both the class and the singleton instance
+export { ApiCache };
+export default apiCacheInstance;
