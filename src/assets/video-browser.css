@@ -1126,10 +1126,10 @@
   /* Width is set by masonry layout via inline style */
 }
 .video-browser /* Prevent transform/height animations during masonry passes */
-.video-grid.masonry-vertical .video-item, .video-browser .video-grid.masonry-horizontal .video-item{ 
+.video-grid.masonry-vertical .video-item.video-item, .video-browser .video-grid.masonry-horizontal .video-item.video-item{
   transition-property: opacity !important; 
   box-sizing: border-box;
-  margin: 0 !important; /* Remove any margin that could cause misalignment */
+  margin: 0; /* Remove any margin that could cause misalignment; increased selector specificity avoids needing !important */
   /* Width and height are set by masonry layout via inline styles */
 }
 

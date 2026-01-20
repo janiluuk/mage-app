@@ -360,7 +360,7 @@ const confirm = useConfirm();
 
 // Request cancellation for API calls
 const activeRequestIds = ref(new Set());
-const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
@@ -856,6 +856,18 @@ const {
   showOnItem,
   showOnEmpty,
 });
+
+watch(
+  () => selection.size.value,
+  (size) => {
+    if (size > 0 && !isMetadataPanelOpen.value && !metadataPanelDismissed.value) {
+      isMetadataPanelOpen.value = true;
+    }
+    if (size === 0) {
+      metadataPanelDismissed.value = false;
+    }
+  }
+);
 
 const contentRegionClassName = computed(() => [
   "content-region",
