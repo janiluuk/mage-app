@@ -435,7 +435,7 @@ describe('MyComponent', () => {
 
 ### Test Configuration
 - **Vitest config**: `vitest.config.js` - test environment, setup files, coverage settings
-- **Test setup**: `src/test/setup.js` - global mocks and configuration
+- **Test setup**: `tests/setup.js` - global mocks and configuration
 - **CI/CD**: `.github/workflows/ci.yml` - automated testing on each PR
 
 ### Coverage

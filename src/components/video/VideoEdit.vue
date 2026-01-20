@@ -112,7 +112,7 @@ import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 import showSwal from "@/mixins/showSwal.js";
 import _ from 'lodash';
 import SimpleVueValidator from 'simple-vue3-validator';
-import { ref } from 'vue';
+import { ref, onBeforeUnmount } from 'vue';
 import { mapActions, mapGetters } from 'vuex';
 import { parseDuration } from '@/utils/format';
 
@@ -134,7 +134,14 @@ export default {
   },
   setup() {
     const op = ref(null);
-    return { op };
+    const isUnmounting = ref(false);
+    
+    // Set flag immediately when unmount begins to prevent race conditions
+    onBeforeUnmount(() => {
+      isUnmounting.value = true;
+    });
+    
+    return { op, isUnmounting };
 
   },
   data() {

@@ -42,9 +42,8 @@ export default {
     },
     setup() {
         const menu = ref(null);
-        const toast = useToast();
         const topbarMenuActive = ref(false);
-        return { menu, toast, topbarMenuActive };
+        return { menu, topbarMenuActive };
     },
     props: {
         user: {

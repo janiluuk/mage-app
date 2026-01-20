@@ -208,11 +208,15 @@ export function useProgressiveList(
       const idleCb = () => {
         if (cancelled) return;
         const now = Date.now();
-        if (now - lastUpdate < MIN_UPDATE_INTERVAL) {
+        
+        // Allow immediate first update, then throttle subsequent updates
+        if (!isFirstUpdate && now - lastUpdate < MIN_UPDATE_INTERVAL) {
           rafId = requestAnimationFrame(schedule);
           return;
         }
+        
         lastUpdate = now;
+        isFirstUpdate = false;
         
         if (!allVisible.value) {
           const add = computeNextBatch();

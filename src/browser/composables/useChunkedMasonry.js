@@ -1,6 +1,12 @@
 import { onMounted, onBeforeUnmount } from "vue";
 import { zoomClassForLevel } from "../zoom/utils.js";
 
+/**
+ * Fixed aspect ratio (16:9) used for consistent grid layout.
+ * Applied to all items to ensure uniform height calculations regardless of actual video dimensions.
+ */
+const FIXED_ASPECT_RATIO = 16 / 9;
+
 export default function useChunkedMasonry({
   gridRef,
   zoomClassForLevel: zoomClassForLevelProp = zoomClassForLevel,
