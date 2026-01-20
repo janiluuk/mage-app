@@ -281,3 +281,4 @@ export default class VideoFileAdapter extends EventEmitter {
 // Static audio context (shared across all video files)
 VideoFileAdapter.audioContext = null;
 
+

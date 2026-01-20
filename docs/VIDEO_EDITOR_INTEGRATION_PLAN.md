@@ -458,3 +458,4 @@ src/
 - Maintain backward compatibility with existing video editors
 - Document API changes needed on backend (if any)
 
+

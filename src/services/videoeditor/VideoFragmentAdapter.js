@@ -105,3 +105,4 @@ export default class VideoFragmentAdapter {
 // Static ID counter
 VideoFragmentAdapter.id = 0;
 
+
