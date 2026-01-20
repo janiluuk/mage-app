@@ -653,19 +653,6 @@ const selectedVideos = computed(() =>
   Array.from(selection.selected.value).map(getById).filter(Boolean)
 );
 
-const metadataFocusToken = ref(0);
-
-const applyMetadataPatch = (updates) => {
-  if (!updates || typeof updates !== "object") return;
-  const next = new Map(metadataOverrides.value);
-  Object.entries(updates).forEach(([id, patch]) => {
-    if (!id || !patch) return;
-    const prev = next.get(id) || {};
-    next.set(id, { ...prev, ...patch });
-  });
-  metadataOverrides.value = next;
-};
-
 const handleAddTags = async (tagNames) => {
   const additions = normalizeTags(tagNames);
   if (!additions.length) return;
@@ -879,49 +866,6 @@ const {
   showOnItem,
   showOnEmpty,
 });
-
-const isMetadataPanelOpen = ref(false);
-const metadataPanelDismissed = ref(false);
-const metadataDockHeight = ref(280);
-const MIN_METADATA_DOCK_HEIGHT = 200;
-const MAX_METADATA_DOCK_HEIGHT = 520;
-
-const openMetadataPanel = () => {
-  isMetadataPanelOpen.value = true;
-  metadataPanelDismissed.value = false;
-  metadataFocusToken.value += 1;
-};
-
-const toggleMetadataPanel = () => {
-  const next = !isMetadataPanelOpen.value;
-  isMetadataPanelOpen.value = next;
-  if (!next) {
-    metadataPanelDismissed.value = true;
-  } else {
-    metadataPanelDismissed.value = false;
-    metadataFocusToken.value += 1;
-  }
-};
-
-const handleMetadataDockHeightChange = (height) => {
-  metadataDockHeight.value = height;
-};
-
-const shouldRenderCollapsedHint = computed(
-  () => metadataPanelDismissed.value || selection.size.value > 0
-);
-
-watch(
-  () => selection.size.value,
-  (size) => {
-    if (size > 0 && !isMetadataPanelOpen.value && !metadataPanelDismissed.value) {
-      isMetadataPanelOpen.value = true;
-    }
-    if (size === 0) {
-      metadataPanelDismissed.value = false;
-    }
-  }
-);
 
 const contentRegionClassName = computed(() => [
   "content-region",
