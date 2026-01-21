@@ -79,6 +79,9 @@ describe('Timeline', () => {
         currentTarget: {
           getBoundingClientRect: () => ({ left: 0, width: 200 }),
         },
+        clientX: 100,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
       };
       
       // Create a mock element with the necessary structure
@@ -86,11 +89,11 @@ describe('Timeline', () => {
       mockElement.style.width = '200px';
       mockEvent.currentTarget = mockElement;
       
-      wrapper.vm.moveStart(mockEvent);
+      wrapper.vm.moveStart(mockEvent, 0);
       
-      // Check that dispatch was called (indirectly through seek)
-      // The actual implementation may vary, so we just check the component works
-      expect(wrapper.exists()).toBe(true);
+      // Verify preventDefault and stopPropagation were called
+      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      expect(mockEvent.stopPropagation).toHaveBeenCalled();
     }
   });
 

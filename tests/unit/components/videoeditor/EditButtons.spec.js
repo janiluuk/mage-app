@@ -71,16 +71,59 @@ describe('EditButtons', () => {
   });
 
   it('calls split action when split button is clicked', async () => {
-    // Mock getter
-    Object.defineProperty(store.getters, 'videoeditor/canCut', {
-      get: () => true,
-      configurable: true,
+    // Create a new store with canCut = true
+    const testStore = createStore({
+      modules: {
+        videoeditor: {
+          namespaced: true,
+          state: {
+            timeline: [],
+            activeFragment: null,
+          },
+          getters: {
+            canUndo: () => false,
+            canRedo: () => false,
+            canMoveRight: () => false,
+            canMoveLeft: () => false,
+            canCut: () => true, // Set to true for this test
+            hasProject: () => true,
+          },
+          actions: {
+            split: vi.fn(),
+            setStartPoint: vi.fn(),
+            setEndPoint: vi.fn(),
+            removeFragment: vi.fn(),
+            shiftFragment: vi.fn(),
+            undo: vi.fn(),
+            redo: vi.fn(),
+            showExportDialog: vi.fn(),
+          },
+        },
+      },
     });
     
-    wrapper = createWrapper();
+    wrapper = mount(EditButtons, {
+      global: {
+        plugins: [testStore],
+        stubs: {
+          Button: {
+            template: '<button><slot /></button>',
+            props: ['disabled', 'icon', 'size', 'text', 'severity', 'label'],
+          },
+          Divider: {
+            template: '<div class="divider" />',
+          },
+          VolumeSlider: true,
+          PlaybackRateSlider: true,
+        },
+        directives: {
+          tooltip: {},
+        },
+      },
+    });
 
     const splitSpy = vi.fn();
-    store.dispatch = vi.fn().mockImplementation((action) => {
+    testStore.dispatch = vi.fn().mockImplementation((action) => {
       if (action === 'videoeditor/split') {
         splitSpy();
       }
@@ -89,48 +132,129 @@ describe('EditButtons', () => {
     // Find and trigger split action
     wrapper.vm.split();
     
-    expect(store.dispatch).toHaveBeenCalledWith('videoeditor/split');
+    expect(testStore.dispatch).toHaveBeenCalledWith('videoeditor/split');
   });
 
   it('calls setStartPoint action when set start button is clicked', async () => {
-    // Mock getter
-    Object.defineProperty(store.getters, 'videoeditor/canCut', {
-      get: () => true,
-      configurable: true,
+    // Create a new store with canCut = true
+    const testStore = createStore({
+      modules: {
+        videoeditor: {
+          namespaced: true,
+          state: {
+            timeline: [],
+            activeFragment: null,
+          },
+          getters: {
+            canUndo: () => false,
+            canRedo: () => false,
+            canMoveRight: () => false,
+            canMoveLeft: () => false,
+            canCut: () => true, // Set to true for this test
+            hasProject: () => true,
+          },
+          actions: {
+            split: vi.fn(),
+            setStartPoint: vi.fn(),
+            setEndPoint: vi.fn(),
+            removeFragment: vi.fn(),
+            shiftFragment: vi.fn(),
+            undo: vi.fn(),
+            redo: vi.fn(),
+            showExportDialog: vi.fn(),
+          },
+        },
+      },
     });
     
-    wrapper = createWrapper();
+    wrapper = mount(EditButtons, {
+      global: {
+        plugins: [testStore],
+        stubs: {
+          Button: {
+            template: '<button><slot /></button>',
+            props: ['disabled', 'icon', 'size', 'text', 'severity', 'label'],
+          },
+          Divider: {
+            template: '<div class="divider" />',
+          },
+          VolumeSlider: true,
+          PlaybackRateSlider: true,
+        },
+        directives: {
+          tooltip: {},
+        },
+      },
+    });
 
-    store.dispatch = vi.fn();
+    testStore.dispatch = vi.fn();
     
     wrapper.vm.setStartPoint();
     
-    expect(store.dispatch).toHaveBeenCalledWith('videoeditor/setStartPoint');
+    expect(testStore.dispatch).toHaveBeenCalledWith('videoeditor/setStartPoint');
   });
 
   it('calls setEndPoint action when set end button is clicked', async () => {
-    // Mock getter
-    Object.defineProperty(store.getters, 'videoeditor/canCut', {
-      get: () => true,
-      configurable: true,
+    // Create a new store with canCut = true
+    const testStore = createStore({
+      modules: {
+        videoeditor: {
+          namespaced: true,
+          state: {
+            timeline: [],
+            activeFragment: null,
+          },
+          getters: {
+            canUndo: () => false,
+            canRedo: () => false,
+            canMoveRight: () => false,
+            canMoveLeft: () => false,
+            canCut: () => true, // Set to true for this test
+            hasProject: () => true,
+          },
+          actions: {
+            split: vi.fn(),
+            setStartPoint: vi.fn(),
+            setEndPoint: vi.fn(),
+            removeFragment: vi.fn(),
+            shiftFragment: vi.fn(),
+            undo: vi.fn(),
+            redo: vi.fn(),
+            showExportDialog: vi.fn(),
+          },
+        },
+      },
     });
     
-    wrapper = createWrapper();
+    wrapper = mount(EditButtons, {
+      global: {
+        plugins: [testStore],
+        stubs: {
+          Button: {
+            template: '<button><slot /></button>',
+            props: ['disabled', 'icon', 'size', 'text', 'severity', 'label'],
+          },
+          Divider: {
+            template: '<div class="divider" />',
+          },
+          VolumeSlider: true,
+          PlaybackRateSlider: true,
+        },
+        directives: {
+          tooltip: {},
+        },
+      },
+    });
 
-    store.dispatch = vi.fn();
+    testStore.dispatch = vi.fn();
     
     wrapper.vm.setEndPoint();
     
-    expect(store.dispatch).toHaveBeenCalledWith('videoeditor/setEndPoint');
+    expect(testStore.dispatch).toHaveBeenCalledWith('videoeditor/setEndPoint');
   });
 
   it('disables buttons when conditions are not met', () => {
-    // Mock getter to return false
-    Object.defineProperty(store.getters, 'videoeditor/canCut', {
-      get: () => false,
-      configurable: true,
-    });
-    
+    // Use default store which has canCut = false
     wrapper = createWrapper();
 
     expect(wrapper.vm.canCut).toBe(false);

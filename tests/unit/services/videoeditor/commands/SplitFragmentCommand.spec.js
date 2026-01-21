@@ -26,7 +26,18 @@ describe('SplitFragmentCommand', () => {
           progress: 0.5,
         },
       },
-      commit: vi.fn(),
+      commit: vi.fn((mutation, payload) => {
+        // Simulate actual mutations to make tests more realistic
+        if (mutation === 'ADD_TO_TIMELINE') {
+          const { fragment: newFragment, index } = payload;
+          mockStore.state.timeline.splice(index, 0, newFragment);
+        } else if (mutation === 'REMOVE_FROM_TIMELINE') {
+          const index = mockStore.state.timeline.indexOf(payload);
+          if (index !== -1) {
+            mockStore.state.timeline.splice(index, 1);
+          }
+        }
+      }),
       getters: {},
     };
   });
