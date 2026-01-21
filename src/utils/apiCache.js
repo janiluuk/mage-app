@@ -137,11 +137,7 @@ class ApiCache {
     this.pendingRequests.set(key, promise);
 
     // Clean up when promise resolves/rejects
-    // Add catch handler to prevent unhandled rejections
     promise
-      .catch(() => {
-        // Silently catch errors - they should be handled by the caller
-      })
       .finally(() => {
         this.pendingRequests.delete(key);
       });
@@ -161,9 +157,6 @@ class ApiCache {
   }
 }
 
-// Export singleton instance
-const apiCacheInstance = new ApiCache(100, 60000); // 100 entries, 60s TTL
-
-// Export both the class and the singleton instance
+// Export both the class and a singleton instance
 export { ApiCache };
-export default apiCacheInstance;
+export default new ApiCache(100, 60000); // 100 entries, 60s TTL

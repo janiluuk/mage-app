@@ -360,7 +360,7 @@ const confirm = useConfirm();
 
 // Request cancellation for API calls
 const activeRequestIds = ref(new Set());
-const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
@@ -405,21 +405,8 @@ const selectedTagId = ref(null);
 const expandedTagGroups = ref(new Set());
 const groupedByTags = computed(() => store.getters["files/groupedByTags"] || []);
 
-// applyMetadataOverrides is now provided by useBrowserMetadata composable
-// But we need to extend it to handle tags and rating normalization
-const applyMetadataOverridesWithNormalization = (video) => {
-  const patched = applyMetadataOverrides(video);
-  const patch = metadataOverrides.value.get(video.id);
-  if (!patch) return patched;
-  const next = { ...patched };
-  if ("tags" in patch) {
-    next.tags = normalizeTags(patch.tags);
-  }
-  if ("rating" in patch) {
-    next.rating = normalizeRating(patch.rating);
-  }
-  return next;
-};
+// applyMetadataOverrides is provided by useBrowserMetadata composable
+// Normalization is already applied before patches are stored via applyMetadataPatch
 
 // Normalize files from API
 const normalizedFiles = computed(() => {

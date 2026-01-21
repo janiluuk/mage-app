@@ -5,13 +5,13 @@
                 <i class="pi pi-plus mr-2"></i>
                 <span>Create!</span>
             </button>
-            <button @click.stop="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
+            <button @click="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
                 class="p-link topbar-button">
                 <i class="pi pi-images mr-2"></i>
                 <span>My library</span>
             </button>
             <Menu ref="menu" :model="getOverlayMenu()" :popup="true" />
-            <button icon="pi pi-angle-down" :label="user.email" @click.stop="toggleMenu"
+            <button icon="pi pi-angle-down" :label="user.email" @click="toggleMenu"
                 :class="{ 'active-route': checkActiveRoute('/profile') }" class="p-link topbar-button">
                 <i class="pi pi-user mr-2"></i>
                 <span>Account</span>
@@ -24,7 +24,6 @@
 import * as authActions from '@/store/modules/auth/types/actions';
 import * as authGetters from '@/store/modules/auth/types/getters';
 import * as notificationActions from '@/store/modules/notification/types/actions';
-import { useToast } from 'primevue/usetoast';
 import Menu from 'primevue/menu';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -43,14 +42,7 @@ export default {
     setup() {
         const menu = ref(null);
         const topbarMenuActive = ref(false);
-        let toast = null;
-        try {
-            toast = useToast();
-        } catch (e) {
-            // Toast not available (e.g., in test environment)
-            toast = null;
-        }
-        return { menu, topbarMenuActive, toast };
+        return { menu, topbarMenuActive };
     },
     props: {
         user: {
@@ -105,9 +97,9 @@ export default {
                     command: () => {
                         this.exit();
                         this.signOut();
-                        // Toast is handled in setup, access via this.toast
-                        if (this.toast && this.toast.add) {
-                            this.toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.' });
+                        // Use $toast (globally injected) for reliable access in callbacks
+                        if (this.$toast) {
+                            this.$toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.', life: 3000 });
                         }
                     }
                 }
@@ -129,7 +121,6 @@ export default {
         async exit() {
             try {
                 await this.signOut();
-                // Toast notification is handled in getOverlayMenu command
             } catch (error) {
                 this.setErrorNotification(error);
             }

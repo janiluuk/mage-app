@@ -155,12 +155,25 @@ describe('errorHandler', () => {
       );
     });
 
-    it('should not log when logError is false', () => {
+    it('should not log in production', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      const originalEnv = import.meta.env.DEV;
+      
+      // Simulate production
+      Object.defineProperty(import.meta, 'env', {
+        value: { ...import.meta.env, DEV: false },
+        writable: true
+      });
       
       handleError(new Error('Test'), { logError: false });
       
       expect(consoleSpy).not.toHaveBeenCalled();
+      
+      // Restore
+      Object.defineProperty(import.meta, 'env', {
+        value: { ...import.meta.env, DEV: originalEnv },
+        writable: true
+      });
       
       consoleSpy.mockRestore();
     });

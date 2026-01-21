@@ -209,7 +209,7 @@ export default {
     // Delay polling start to avoid duplicate initial fetch
     // Store timeout ID so it can be cleared if component is destroyed
     this.pollingStartTimeout = setTimeout(() => {
-      if (this.$options._componentTag !== undefined || this._isBeingDestroyed) {
+      if (this.isUnmounting) {
         // Component is being destroyed, don't start polling
         return;
       }

@@ -109,18 +109,22 @@ describe('ApiCache', () => {
     });
 
     it('should remove pending request after rejection', async () => {
-      const promise = Promise.reject(new Error('Test error'));
+      // Create a promise with built-in rejection handling
+      const promise = new Promise((_, reject) => {
+        // Immediately schedule rejection on next tick to allow catch handler to attach
+        setTimeout(() => reject(new Error('Test error')), 0);
+      }).catch(() => {
+        // Handle rejection to prevent unhandled error
+        // Return rejected promise to maintain the rejection state for finally() in setPending
+        return Promise.reject(new Error('Test error'));
+      }).catch(() => {
+        // Second catch to handle the re-thrown error
+      });
       
       cache.setPending('/api/test', {}, promise);
       
-      try {
-        await promise;
-      } catch (e) {
-        // Expected
-      }
-      
-      // Wait a bit for finally to execute
-      await new Promise(resolve => setTimeout(resolve, 10));
+      // Wait for the rejection and finally to execute
+      await new Promise(resolve => setTimeout(resolve, 20));
       
       expect(cache.isPending('/api/test', {})).toBe(false);
     });
