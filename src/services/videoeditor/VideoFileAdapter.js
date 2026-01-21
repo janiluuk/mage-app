@@ -57,8 +57,8 @@ export default class VideoFileAdapter extends EventEmitter {
       this._element = document.createElement('video');
       
       // Set CORS mode for cross-origin requests
-      // 'anonymous' allows credentials to be sent with CORS requests
-      // 'use-credentials' would require Access-Control-Allow-Credentials header
+      // 'anonymous' loads the resource without sending credentials (no cookies or auth headers)
+      // 'use-credentials' would send credentials and require Access-Control-Allow-Credentials header
       this._element.crossOrigin = 'anonymous';
       this._element.preload = 'auto';
       

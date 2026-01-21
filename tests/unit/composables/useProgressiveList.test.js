@@ -59,47 +59,6 @@ describe('useProgressiveList', () => {
     });
   });
 
-  describe('leading-edge debounce strategy', () => {
-    it.skip('should allow immediate first update when using idle callback', async () => {
-      // TODO: This test is flaky due to timing issues with RAF and fake timers
-      // The composable uses requestAnimationFrame which doesn't work reliably with fake timers
-      // Store original values
-      const originalRequestIdleCallback = global.requestIdleCallback;
-      const originalCancelIdleCallback = global.cancelIdleCallback;
-
-      // Mock requestIdleCallback to be available
-      global.requestIdleCallback = vi.fn((cb) => {
-        setTimeout(() => cb({ didTimeout: false, timeRemaining: () => 50 }), 0);
-        return 1;
-      });
-      global.cancelIdleCallback = vi.fn();
-
-      const items = ref(Array.from({ length: 200 }, (_, i) => i + 1));
-      const result = useProgressiveList(items, 50, 50, 100, { forceInterval: false });
-
-      expect(result.value.visibleCount).toBe(50);
-
-      // First update should happen immediately (leading edge)
-      await vi.advanceTimersByTimeAsync(0);
-      await nextTick();
-
-      // Trigger the idle callback
-      if (global.requestIdleCallback.mock.calls.length > 0) {
-        const callback = global.requestIdleCallback.mock.calls[0][0];
-        callback({ didTimeout: false, timeRemaining: () => 50 });
-        await nextTick();
-      }
-
-      // Should have added items on first update
-      const firstUpdateCount = result.value.visibleCount;
-      expect(firstUpdateCount).toBeGreaterThan(50);
-
-      // Restore original values
-      global.requestIdleCallback = originalRequestIdleCallback;
-      global.cancelIdleCallback = originalCancelIdleCallback;
-    });
-  });
-
   describe('scroll pause behavior', () => {
     it('should pause loading when scrolling', async () => {
       const scrollRef = ref(document.createElement('div'));
@@ -135,27 +94,6 @@ describe('useProgressiveList', () => {
   });
 
   describe('max visible cap', () => {
-    it.skip('should respect maxVisible option', async () => {
-      // TODO: This test is flaky - the watch that sets maxVisibleRef may not execute before the interval
-      // Need to refactor to ensure reactive updates complete before assertions
-      const items = ref(Array.from({ length: 200 }, (_, i) => i + 1));
-      const maxVisible = ref(75);
-      
-      const result = useProgressiveList(items, 50, 50, 100, {
-        forceInterval: true,
-        maxVisible
-      });
-
-      expect(result.value.visibleCount).toBe(50);
-
-      // Advance time multiple times
-      await vi.advanceTimersByTimeAsync(100);
-      await nextTick();
-
-      // Should not exceed maxVisible
-      expect(result.value.visibleCount).toBeLessThanOrEqual(75);
-    });
-
     it('should update when maxVisible changes', async () => {
       const items = ref(Array.from({ length: 200 }, (_, i) => i + 1));
       const maxVisible = ref(100);

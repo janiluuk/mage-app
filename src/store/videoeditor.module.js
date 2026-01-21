@@ -246,6 +246,14 @@ export const videoeditor = {
       state.exportStatus.command = command;
     },
     
+    SET_EXPORT_STATUS_OUTPUT(state, output) {
+      state.exportStatus.output = output;
+    },
+    
+    ADD_EXPORT_STATUS_OUTPUT_LINE(state, line) {
+      state.exportStatus.output.push(line);
+    },
+    
     // Video metadata mutations
     SET_VIDEO_METADATA(state, metadata) {
       state.videoMetadata = metadata;

@@ -620,9 +620,9 @@ class ExportService {
    * @returns {Promise} Export result
    */
   async monitorExportProgressSSE(jobId, onProgress, onOutput) {
-    return new Promise((resolve, reject) => {
-      const { API_V1_BASE_URL } = require('@/utils/api-base-urls');
-      const AuthService = require('@/services/auth/AuthService').default;
+    return new Promise(async (resolve, reject) => {
+      const { API_V1_BASE_URL } = await import('@/utils/api-base-urls');
+      const AuthService = (await import('@/services/auth/AuthService')).default;
       const token = AuthService.getToken();
       
       const url = `${API_V1_BASE_URL}/video-export/${jobId}/stream`;
