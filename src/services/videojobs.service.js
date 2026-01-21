@@ -185,15 +185,7 @@ export default {
     });
   },
 
-  /**
-   * Helper function to make finalize API calls
-   * Finalize endpoint is at /api/finalize, not /api/v1/finalize
-   * 
-   * Uses requestService for consistent auth handling and error processing.
-   * Previously, finalizeDeforum used axios.post directly, but this unifies
-   * both methods to use the same service for better consistency.
-   */
-  async _callFinalizeEndpoint(params) {
+  async finalize(params) {
     const API_URL = env.VITE_API_URL || '';
     const response = await requestService.post(`${API_URL}/api/finalize`, params, {
       headers: {
@@ -202,10 +194,6 @@ export default {
       },
     });
     return response;
-  },
-
-  async finalize(params) {
-    return await this._callFinalizeEndpoint(params);
   },
 
   async cancelJob(id) {
@@ -224,7 +212,14 @@ export default {
     return await requestService.post("/generate", { ...params, type: "deforum" });
   },
   async finalizeDeforum(params) {
-    return await this._callFinalizeEndpoint(params);
+    const API_URL = env.VITE_API_URL || '';
+    const response = await requestService.post(`${API_URL}/api/finalize`, params, {
+      headers: {
+        ...authHeader(),
+        'Content-Type': 'application/json',
+      },
+    });
+    return response;
   },
 
   async queue() {

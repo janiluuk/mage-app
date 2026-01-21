@@ -66,7 +66,9 @@ export default {
       } catch (err) {
         console.error('Failed to load video:', err);
         
-        // In development mode, load a test video if the API call fails
+        // In development mode, load a test video if the API call fails.
+        // This is intentional, development-only fallback behavior to support local testing
+        // when the backend or requested video resource is unavailable (e.g. "not found").
         if (import.meta.env.DEV && err.message?.includes('not found')) {
           console.log('Loading test video for development...');
           try {
