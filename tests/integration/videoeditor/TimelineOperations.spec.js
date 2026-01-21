@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createStore } from 'vuex';
-import videoeditorModule from '@/store/videoeditor.module';
+import { videoeditor } from '@/store/videoeditor.module';
 import VideoLoader from '@/services/videoeditor/VideoLoader';
 import VideoFileAdapter from '@/services/videoeditor/VideoFileAdapter';
 import VideoFragmentAdapter from '@/services/videoeditor/VideoFragmentAdapter';
@@ -18,7 +18,7 @@ describe('Timeline Operations Integration', () => {
   beforeEach(() => {
     store = createStore({
       modules: {
-        videoeditor: videoeditorModule,
+        videoeditor,
       },
     });
   });

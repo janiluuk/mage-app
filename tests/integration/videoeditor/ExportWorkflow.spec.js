@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createStore } from 'vuex';
-import videoeditorModule from '@/store/videoeditor.module';
+import { videoeditor } from '@/store/videoeditor.module';
 import VideoLoader from '@/services/videoeditor/VideoLoader';
 import ExportService from '@/services/videoeditor/ExportService';
 import VideoFileAdapter from '@/services/videoeditor/VideoFileAdapter';
@@ -26,7 +26,7 @@ describe('Export Workflow Integration', () => {
   beforeEach(() => {
     store = createStore({
       modules: {
-        videoeditor: videoeditorModule,
+        videoeditor,
       },
     });
   });
