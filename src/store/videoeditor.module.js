@@ -46,6 +46,9 @@ function getStoredPlayerConfig() {
   }
 }
 
+// Load stored config once at module initialization
+const storedPlayerConfig = getStoredPlayerConfig();
+
 const initialState = {
   timeline: [], // Array of VideoFragmentAdapter instances
   activeFragment: null,
@@ -63,14 +66,14 @@ const initialState = {
     progress: 0, // 0-1, overall timeline progress
     playing: false,
     volume: 1, // Global player volume
-    widthPercent: getStoredPlayerConfig().playerWidth,
+    widthPercent: storedPlayerConfig.playerWidth,
     fullscreen: false,
   },
   
   // Timeline configuration
   configTimeline: {
     minFragmentWidth: 90,
-    widthPerSecond: getStoredPlayerConfig().widthPerSecond,
+    widthPerSecond: storedPlayerConfig.widthPerSecond,
   },
   
   // Export state
@@ -342,16 +345,19 @@ export const videoeditor = {
       // Clean up video files
       state.videoFiles.forEach(v => v.destroy());
       
+      // Reload config from localStorage (user may have changed it in another tab)
+      const currentConfig = getStoredPlayerConfig();
+      
       // Reset to initial state
       Object.assign(state, {
         ...initialState,
         player: {
           ...initialState.player,
-          widthPercent: getStoredPlayerConfig().playerWidth,
+          widthPercent: currentConfig.playerWidth,
         },
         configTimeline: {
           ...initialState.configTimeline,
-          widthPerSecond: getStoredPlayerConfig().widthPerSecond,
+          widthPerSecond: currentConfig.widthPerSecond,
         },
       });
     },
