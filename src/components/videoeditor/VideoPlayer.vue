@@ -277,8 +277,8 @@ export default {
       windowResize();
       window.addEventListener('resize', windowResize, false);
 
-      // Update progress and playing state
-      timeInterval.value = setInterval(() => {
+      // Update progress and playing state using requestAnimationFrame for better performance
+      const updateProgress = () => {
         if (activeFragment.value?.video?.element) {
           const activeVideo = activeFragment.value.video.element;
           store.commit('videoeditor/SET_PLAYER_PLAYING', !activeVideo.paused);
@@ -311,12 +311,18 @@ export default {
             }
           }
         }
-      }, 1000 / 60);
+        
+        // Continue the animation loop
+        timeInterval.value = requestAnimationFrame(updateProgress);
+      };
+      
+      // Start the animation loop
+      timeInterval.value = requestAnimationFrame(updateProgress);
     });
 
     onBeforeUnmount(() => {
       if (timeInterval.value) {
-        clearInterval(timeInterval.value);
+        cancelAnimationFrame(timeInterval.value);
       }
       window.removeEventListener('resize', windowResize);
       store.commit('videoeditor/SET_VIDEOS_CONTAINER', null);
