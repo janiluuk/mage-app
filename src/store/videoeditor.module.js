@@ -19,6 +19,33 @@ import SetPlaybackRateCommand from '@/services/videoeditor/commands/SetPlaybackR
 import MoveFragmentCommand from '@/services/videoeditor/commands/MoveFragmentCommand';
 import DuplicateFragmentCommand from '@/services/videoeditor/commands/DuplicateFragmentCommand';
 
+/**
+ * Get stored player configuration from localStorage with error handling
+ * @returns {Object} Player configuration with safe defaults
+ */
+function getStoredPlayerConfig() {
+  const defaults = {
+    playerWidth: 0.75,
+    widthPerSecond: 3.5,
+  };
+
+  try {
+    const playerWidth = localStorage.getItem('playerWidth');
+    const widthPerSecond = localStorage.getItem('widthPerSecond');
+
+    return {
+      playerWidth: playerWidth ? parseFloat(playerWidth) : defaults.playerWidth,
+      widthPerSecond: widthPerSecond ? parseFloat(widthPerSecond) : defaults.widthPerSecond,
+    };
+  } catch (error) {
+    console.error('Error reading player config from localStorage:', error);
+    return defaults;
+  }
+}
+
+// Load stored config once at module initialization
+const storedPlayerConfig = getStoredPlayerConfig();
+
 const initialState = {
   timeline: [], // Array of VideoFragmentAdapter instances
   activeFragment: null,
@@ -36,17 +63,14 @@ const initialState = {
     progress: 0, // 0-1, overall timeline progress
     playing: false,
     volume: 1, // Global player volume
-    widthPercent: (() => {
-      const stored = localStorage.getItem('playerWidth');
-      return stored ? parseFloat(stored) : 0.75; // Default to 0.75 for better video viewing
-    })(),
+    widthPercent: storedPlayerConfig.playerWidth,
     fullscreen: false,
   },
   
   // Timeline configuration
   configTimeline: {
     minFragmentWidth: 90,
-    widthPerSecond: parseFloat(localStorage.getItem('widthPerSecond') || '3.5'),
+    widthPerSecond: storedPlayerConfig.widthPerSecond,
   },
   
   // Export state
@@ -318,19 +342,19 @@ export const videoeditor = {
       // Clean up video files
       state.videoFiles.forEach(v => v.destroy());
       
+      // Reload config from localStorage (user may have changed it in another tab)
+      const currentConfig = getStoredPlayerConfig();
+      
       // Reset to initial state
       Object.assign(state, {
         ...initialState,
         player: {
           ...initialState.player,
-          widthPercent: (() => {
-            const stored = localStorage.getItem('playerWidth');
-            return stored ? parseFloat(stored) : 0.75; // Default to 0.75 for better video viewing
-          })(),
+          widthPercent: currentConfig.playerWidth,
         },
         configTimeline: {
           ...initialState.configTimeline,
-          widthPerSecond: parseFloat(localStorage.getItem('widthPerSecond') || '3.5'),
+          widthPerSecond: currentConfig.widthPerSecond,
         },
       });
     },

@@ -630,6 +630,28 @@ class ExportService {
   }
 
   /**
+   * Extract job data from API response, handling various response formats
+   * @param {Object} response - API response object
+   * @returns {Object} Normalized job data
+   * @private
+   */
+  extractJobData(response) {
+    // Handle JSON:API format or direct response
+    const jobData = response.data?.data?.attributes || response.data?.data || response.data;
+    const attrs = jobData.attributes || {};
+    
+    return {
+      status: jobData.status || attrs.status,
+      progress: jobData.progress || attrs.progress || 0,
+      error: jobData.error || attrs.error,
+      output: jobData.output || attrs.output || [],
+      fileUrl: jobData.fileUrl || jobData.file_url || attrs.fileUrl || attrs.file_url,
+      outputUrl: jobData.output_url || attrs.output_url,
+      timemark: jobData.timemark || attrs.timemark,
+    };
+  }
+
+  /**
    * Monitor export job progress using Server-Sent Events (SSE)
    * @param {string} jobId - Export job ID
    * @param {Function} onProgress - Progress callback
@@ -648,6 +670,9 @@ class ExportService {
       eventSource.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
+          
+          // Note: SSE provides a simpler data structure compared to the polling REST API,
+          // so we parse it directly rather than using extractJobData()
           
           // Report progress
           if (onProgress && data.progress !== undefined) {
@@ -722,15 +747,15 @@ class ExportService {
                true // requiresAuth
              );
              
-             // Normalize response structure
-             const { status, progress, error, output, fileUrl } = this._normalizeExportResponse(response);
+             // Extract and normalize job data using helper
+             const { status, progress, error, output, fileUrl, outputUrl, timemark } = this.extractJobData(response);
 
                  // Report progress
                  const progressValue = typeof progress === 'number' ? progress / 100 : progress;
                  if (onProgress && progressValue > lastProgress) {
                    onProgress({
                      percent: progressValue,
-                     timemark: jobData.timemark || jobData.attributes?.timemark || this.formatTime(progressValue * 100),
+                     timemark: timemark || this.formatTime(progressValue * 100),
                    });
                    lastProgress = progressValue;
                  }
@@ -749,7 +774,7 @@ class ExportService {
             clearInterval(pollInterval);
             resolve({
               jobId,
-              fileUrl: fileUrl || jobData.output_url || jobData.attributes?.output_url,
+              fileUrl: fileUrl || outputUrl,
               success: true,
             });
           } else if (status === 'failed' || status === 'error') {
