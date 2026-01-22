@@ -106,6 +106,7 @@ export default {
     const prevVolume = ref(1);
     const canvas = ref(null);
     const context = ref(null);
+    const cachedPrimaryColor = ref('#007bff'); // Default fallback
 
     const videoFiles = computed(() => store.state.videoeditor.videoFiles);
     const activeFragment = computed(() => store.state.videoeditor.activeFragment);
@@ -168,11 +169,8 @@ export default {
       const bufferLength = video.analyser.frequencyBinCount;
 
       context.value.lineWidth = 2;
-      // Use CSS variable for primary color, fallback to computed style
-      const primaryColor = getComputedStyle(document.documentElement)
-        .getPropertyValue('--primary-color')
-        .trim() || '#007bff';
-      context.value.strokeStyle = primaryColor;
+      // Use cached CSS variable for primary color
+      context.value.strokeStyle = cachedPrimaryColor.value;
       context.value.beginPath();
 
       const sliceWidth = canvas.value.width * 1.0 / bufferLength;
@@ -267,6 +265,11 @@ export default {
     };
 
     onMounted(() => {
+      // Cache the primary color from CSS variable
+      cachedPrimaryColor.value = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim() || '#007bff';
+
       if (audioCanvas.value) {
         canvas.value = audioCanvas.value;
         context.value = canvas.value.getContext('2d');

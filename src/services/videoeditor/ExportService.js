@@ -23,6 +23,23 @@ class ExportService {
   }
 
   /**
+   * Normalize API response structure to handle JSON:API format or direct response
+   * @param {Object} response - Axios response object
+   * @returns {Object} Normalized job data with status, progress, error, output, fileUrl
+   */
+  _normalizeExportResponse(response) {
+    // Handle JSON:API format or direct response
+    const jobData = response.data?.data?.attributes || response.data?.data || response.data;
+    return {
+      status: jobData.status || jobData.attributes?.status,
+      progress: jobData.progress || jobData.attributes?.progress || 0,
+      error: jobData.error || jobData.attributes?.error,
+      output: jobData.output || jobData.attributes?.output || [],
+      fileUrl: jobData.fileUrl || jobData.file_url || jobData.attributes?.fileUrl || jobData.attributes?.file_url
+    };
+  }
+
+  /**
    * Check if video should be processed client-side or server-side
    * @param {Array} videoFiles - Array of VideoFileAdapter instances
    * @returns {Object} { useClientSide: boolean, reason: string }
@@ -705,13 +722,8 @@ class ExportService {
                true // requiresAuth
              );
              
-             // Handle JSON:API format or direct response
-             const jobData = response.data?.data?.attributes || response.data?.data || response.data;
-             const status = jobData.status || jobData.attributes?.status;
-             const progress = jobData.progress || jobData.attributes?.progress || 0;
-             const error = jobData.error || jobData.attributes?.error;
-             const output = jobData.output || jobData.attributes?.output || [];
-             const fileUrl = jobData.fileUrl || jobData.file_url || jobData.attributes?.fileUrl || jobData.attributes?.file_url;
+             // Normalize response structure
+             const { status, progress, error, output, fileUrl } = this._normalizeExportResponse(response);
 
                  // Report progress
                  const progressValue = typeof progress === 'number' ? progress / 100 : progress;

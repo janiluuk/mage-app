@@ -93,7 +93,6 @@ export default {
 
     const moveStart = (e, fragmentIndex) => {
       if (e.button !== 0) return; // Only handle left mouse button
-      e.preventDefault();
       e.stopPropagation();
       
       const fragment = timelineFragments.value[fragmentIndex];

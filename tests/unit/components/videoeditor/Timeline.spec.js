@@ -91,8 +91,7 @@ describe('Timeline', () => {
       
       wrapper.vm.moveStart(mockEvent, 0);
       
-      // Verify preventDefault and stopPropagation were called
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
+      // Verify only stopPropagation was called (preventDefault removed as per PR review feedback)
       expect(mockEvent.stopPropagation).toHaveBeenCalled();
     }
   });
