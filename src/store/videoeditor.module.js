@@ -305,9 +305,11 @@ export const videoeditor = {
     },
     
     // Command history mutations
-    PUSH_UNDO(state, command) {
+    PUSH_UNDO(state, { command, clearRedo = true }) {
       state.commandHistory.undoStack.push(command);
-      state.commandHistory.redoStack = []; // Clear redo stack
+      if (clearRedo) {
+        state.commandHistory.redoStack = []; // Clear redo stack when executing new commands
+      }
       // Limit undo stack size to prevent memory issues
       if (state.commandHistory.undoStack.length > 100) {
         state.commandHistory.undoStack.shift();
@@ -326,7 +328,6 @@ export const videoeditor = {
     POP_REDO(state) {
       if (state.commandHistory.redoStack.length > 0) {
         const command = state.commandHistory.redoStack.pop();
-        state.commandHistory.undoStack.push(command);
         return command;
       }
       return null;
@@ -761,7 +762,7 @@ export const videoeditor = {
       const result = command.execute(context);
       
       // Push to undo stack
-      commit('PUSH_UNDO', command);
+      commit('PUSH_UNDO', { command, clearRedo: true });
       
       return result;
     },
@@ -770,11 +771,17 @@ export const videoeditor = {
      * Undo last action (using command pattern)
      */
     undo({ state, commit, getters }) {
-      const command = commit('POP_UNDO');
+      if (state.commandHistory.undoStack.length === 0) {
+        return;
+      }
+      
+      const command = state.commandHistory.undoStack[state.commandHistory.undoStack.length - 1];
       if (!command || typeof command.undo !== 'function') {
         return;
       }
 
+      commit('POP_UNDO'); // This moves the command to redo stack
+      
       const context = { state, commit, getters };
       command.undo(context);
     },
@@ -783,16 +790,22 @@ export const videoeditor = {
      * Redo last undone action (using command pattern)
      */
     redo({ state, commit, getters }) {
-      const command = commit('POP_REDO');
+      if (state.commandHistory.redoStack.length === 0) {
+        return;
+      }
+      
+      const command = state.commandHistory.redoStack[state.commandHistory.redoStack.length - 1];
       if (!command || typeof command.execute !== 'function') {
         return;
       }
 
+      commit('POP_REDO'); // This pops from redo stack
+      
       const context = { state, commit, getters };
       command.execute(context);
       
-      // Move back to undo stack
-      commit('PUSH_UNDO', command);
+      // Move back to undo stack without clearing redo stack
+      commit('PUSH_UNDO', { command, clearRedo: false });
     },
     
     /**

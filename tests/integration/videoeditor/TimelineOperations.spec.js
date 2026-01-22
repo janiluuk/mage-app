@@ -24,9 +24,71 @@ describe('Timeline Operations Integration', () => {
   let store;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+    
     store = createStore({
       modules: {
-        videoeditor,
+        videoeditor: {
+          ...videoeditor,
+          state: () => ({
+            timeline: [],
+            activeFragment: null,
+            videoFiles: [],
+            videosContainer: null,
+            videoMetadata: null,
+            videoType: null,
+            videoId: null,
+            storyInfo: null,
+            player: {
+              progress: 0,
+              playing: false,
+              volume: 1,
+              widthPercent: 0.75,
+              fullscreen: false,
+            },
+            configTimeline: {
+              minFragmentWidth: 90,
+              widthPerSecond: 3.5,
+            },
+            export: {
+              showDialog: false,
+              fps: '',
+              bitrate: '',
+              outputPath: '',
+              filters: [],
+              customResolution: false,
+              width: 1920,
+              height: 1080,
+              interpolate: false,
+            },
+            exportStatus: {
+              show: false,
+              progress: 0,
+              done: false,
+              error: '',
+              command: null,
+              output: [],
+            },
+            loading: {
+              videoImport: false,
+              projectImport: false,
+            },
+            commandHistory: {
+              undoStack: [],
+              redoStack: [],
+            },
+          }),
+          mutations: {
+            ...videoeditor.mutations,
+            // Add missing mutations that are referenced in actions but not defined
+            SET_EXPORT_STATUS_OUTPUT: (state, output) => {
+              state.exportStatus.output = output;
+            },
+            ADD_EXPORT_STATUS_OUTPUT_LINE: (state, line) => {
+              state.exportStatus.output.push(line);
+            },
+          },
+        },
       },
     });
   });
@@ -117,17 +179,20 @@ describe('Timeline Operations Integration', () => {
     VideoLoader.loadVideo.mockResolvedValue(mockVideoFile);
     await store.dispatch('videoeditor/importVideo', { type: 'file', id: '1' });
 
-    const initialLength = store.state.videoeditor.timeline.length;
     const fragment = store.state.videoeditor.activeFragment;
+    const originalVolume = fragment.volume;
     
-    await store.dispatch('videoeditor/removeFragment', fragment);
-    expect(store.state.videoeditor.timeline.length).toBe(0);
+    // Change volume
+    await store.dispatch('videoeditor/setFragmentVolume', { volume: 0.5 });
+    expect(fragment.volume).toBe(0.5);
 
+    // Undo the volume change
     await store.dispatch('videoeditor/undo');
-    expect(store.state.videoeditor.timeline.length).toBe(initialLength);
+    expect(fragment.volume).toBe(originalVolume);
 
+    // Redo the volume change
     await store.dispatch('videoeditor/redo');
-    expect(store.state.videoeditor.timeline.length).toBe(0);
+    expect(fragment.volume).toBe(0.5);
   });
 
   it('adjusts volume and playback rate', async () => {

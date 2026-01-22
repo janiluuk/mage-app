@@ -38,14 +38,11 @@ export default class SplitFragmentCommand extends BaseCommand {
   }
 
   undo(context) {
-    const { state, commit } = context;
+    const { commit } = context;
     
     if (this.newFragment) {
-      const splitIndex = state.timeline.indexOf(this.newFragment);
-      if (splitIndex !== -1) {
-        commit('REMOVE_FROM_TIMELINE', this.newFragment);
-        this.fragment.end = this.originalEnd;
-      }
+      commit('REMOVE_FROM_TIMELINE', this.newFragment);
+      this.fragment.end = this.originalEnd;
     }
   }
 
