@@ -65,11 +65,10 @@ export default {
         const showSaveProjectDialog = ref(false);
         const showLoadProjectDialog = ref(false);
 
-        // Default to 75% width for video player (bigger video display)
+        // Use user-configured width when it is a positive value; otherwise default to 75% (bigger video display)
         const playerWidth = computed(() => {
           const stored = store.state.videoeditor.player.widthPercent;
-          // Only use default 0.75 if stored value is null, undefined, or 0
-          // Treat 0.5 as a valid user choice (50/50 split)
+          // Only use the stored value if it is a positive number; treat 0 or negative values as invalid and fall back to 0.75
           return stored != null && stored > 0 ? stored : 0.75;
         });
 
