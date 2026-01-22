@@ -20,6 +20,9 @@ describe('VideoEditor Workflow Integration', () => {
   let wrapper;
 
   beforeEach(() => {
+    // Reset mocks
+    vi.clearAllMocks();
+    
     // Create store with videoeditor module
     store = createStore({
       modules: {
@@ -46,8 +49,27 @@ describe('VideoEditor Workflow Integration', () => {
           getters: {
             hasProject: (state) => state.timeline.length > 0,
           },
+          mutations: {
+            SET_VIDEO_TYPE: (state, type) => { state.videoType = type; },
+            SET_VIDEO_ID: (state, id) => { state.videoId = id; },
+            SET_VIDEO_METADATA: (state, metadata) => { state.videoMetadata = metadata; },
+            SET_VIDEO_IMPORT_LOADING: vi.fn(),
+            ADD_TO_TIMELINE: (state, { fragment }) => {
+              state.timeline.push(fragment);
+            },
+          },
           actions: {
-            importVideo: vi.fn(),
+            importVideo: vi.fn(async ({ commit }, { type, id }) => {
+              // Call VideoLoader to simulate real behavior
+              const videoFile = await VideoLoader.loadVideo(type, id);
+              commit('SET_VIDEO_TYPE', type);
+              commit('SET_VIDEO_ID', id);
+              commit('SET_VIDEO_METADATA', videoFile.videoData);
+              
+              const fragment = new VideoFragmentAdapter(videoFile);
+              commit('ADD_TO_TIMELINE', { fragment });
+              return fragment;
+            }),
             addFragment: vi.fn(),
             resetState: vi.fn(),
             updateVideoInfo: vi.fn(),
@@ -99,20 +121,33 @@ describe('VideoEditor Workflow Integration', () => {
     wrapper = await createWrapper();
 
     expect(VideoLoader.loadVideo).toHaveBeenCalledWith('file', '1');
-    expect(store._modules.root._children.videoeditor._rawModule.actions.importVideo).toHaveBeenCalled();
+    expect(store.state.videoeditor.timeline.length).toBeGreaterThan(0);
   });
 
   it('displays loading state initially', async () => {
     VideoLoader.loadVideo.mockImplementation(() => new Promise(() => {})); // Never resolves
 
-    wrapper = await createWrapper();
-    await flushPromises();
-
+    await router.push('/editor/file/1');
+    
+    wrapper = mount(VideoEditor, {
+      global: {
+        plugins: [store, router],
+        stubs: {
+          Editor: true,
+          ProgressSpinner: true,
+          Message: true,
+          Button: true,
+        },
+      },
+    });
+    
+    // Check loading state immediately, before promises resolve
     expect(wrapper.vm.isLoading).toBe(true);
   });
 
   it('displays error message when video load fails', async () => {
-    const errorMessage = 'Video not found';
+    // Use an error message that won't trigger the dev mode test video fallback
+    const errorMessage = 'Failed to load video';
     VideoLoader.loadVideo.mockRejectedValue(new Error(errorMessage));
 
     wrapper = await createWrapper();

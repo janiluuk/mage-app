@@ -2,13 +2,21 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { createStore } from 'vuex';
 import { videoeditor } from '@/store/videoeditor.module';
 import VideoLoader from '@/services/videoeditor/VideoLoader';
+import ExportService from '@/services/videoeditor/ExportService';
 import VideoFileAdapter from '@/services/videoeditor/VideoFileAdapter';
 import VideoFragmentAdapter from '@/services/videoeditor/VideoFragmentAdapter';
 
-// Mock VideoLoader
+// Mock services
 vi.mock('@/services/videoeditor/VideoLoader', () => ({
   default: {
     loadVideo: vi.fn(),
+  },
+}));
+
+vi.mock('@/services/videoeditor/ExportService', () => ({
+  default: {
+    exportVideo: vi.fn(),
+    cancelExportJob: vi.fn(),
   },
 }));
 

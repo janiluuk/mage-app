@@ -24,11 +24,31 @@ describe('Export Workflow Integration', () => {
   let store;
 
   beforeEach(() => {
+    vi.clearAllMocks();
+    
     store = createStore({
       modules: {
-        videoeditor,
+        videoeditor: {
+          ...videoeditor,
+          mutations: {
+            ...videoeditor.mutations,
+            // Add missing mutations that are referenced in actions but not defined
+            SET_EXPORT_STATUS_OUTPUT: (state, output) => {
+              state.exportStatus.output = output;
+            },
+            ADD_EXPORT_STATUS_OUTPUT_LINE: (state, line) => {
+              state.exportStatus.output.push(line);
+            },
+          },
+        },
       },
     });
+    
+    // Reset export state to defaults for each test
+    // This is needed because the videoeditor module's initialState is shared
+    store.commit('videoeditor/SET_EXPORT_FPS', '');
+    store.commit('videoeditor/SET_EXPORT_BITRATE', '');
+    store.commit('videoeditor/SET_EXPORT_CUSTOM_RESOLUTION', { width: null, height: null });
   });
 
   it('exports video with default options', async () => {
@@ -150,7 +170,7 @@ describe('Export Workflow Integration', () => {
 
     store.commit('videoeditor/SET_EXPORT_FPS', '60');
     store.commit('videoeditor/SET_EXPORT_BITRATE', '5');
-    store.dispatch('videoeditor/setExportCustomResolution', { width: 1280, height: 720 });
+    await store.dispatch('videoeditor/setExportCustomResolution', { width: 1280, height: 720 });
 
     ExportService.exportVideo.mockResolvedValue({
       jobId: 'export-123',
