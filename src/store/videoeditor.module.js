@@ -1031,7 +1031,7 @@ export const videoeditor = {
           commit('SET_PLAYER_WIDTH', deserializedState.player.widthPercent);
         }
         if (deserializedState.configTimeline?.widthPerSecond) {
-          commit('SET_CONFIG_TIMELINE_WIDTH_PER_SECOND', deserializedState.configTimeline.widthPerSecond);
+          commit('SET_WIDTH_PER_SECOND', deserializedState.configTimeline.widthPerSecond);
         }
         if (deserializedState.export) {
           commit('SET_EXPORT_FPS', deserializedState.export.fps || '');
