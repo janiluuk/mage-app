@@ -654,6 +654,9 @@ class ExportService {
         try {
           const data = JSON.parse(event.data);
           
+          // Note: SSE provides a simpler data structure compared to the polling REST API,
+          // so we parse it directly rather than using extractJobData()
+          
           // Report progress
           if (onProgress && data.progress !== undefined) {
             const progressValue = typeof data.progress === 'number' ? data.progress / 100 : parseFloat(data.progress) / 100 || 0;

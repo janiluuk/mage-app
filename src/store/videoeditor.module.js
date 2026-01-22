@@ -27,18 +27,15 @@ function getStoredPlayerConfig() {
   const defaults = {
     playerWidth: 0.75,
     widthPerSecond: 3.5,
-    playerVolume: 1,
   };
 
   try {
     const playerWidth = localStorage.getItem('playerWidth');
     const widthPerSecond = localStorage.getItem('widthPerSecond');
-    const playerVolume = localStorage.getItem('playerVolume');
 
     return {
       playerWidth: playerWidth ? parseFloat(playerWidth) : defaults.playerWidth,
       widthPerSecond: widthPerSecond ? parseFloat(widthPerSecond) : defaults.widthPerSecond,
-      playerVolume: playerVolume ? parseFloat(playerVolume) : defaults.playerVolume,
     };
   } catch (error) {
     console.error('Error reading player config from localStorage:', error);
