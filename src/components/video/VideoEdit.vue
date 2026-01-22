@@ -217,6 +217,18 @@ export default {
     }, 100);
     this.formChanged = false;
   },
+  beforeUnmount() {
+    // Clear polling start timeout if component is destroyed before it executes
+    if (this.pollingStartTimeout) {
+      clearTimeout(this.pollingStartTimeout);
+      this.pollingStartTimeout = null;
+    }
+    // Clear polling interval
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = false;
+    }
+  },
   components: {
     VideoEntry,
     ModelfileSelector,

@@ -72,8 +72,15 @@ const isOutsideClicked = (event) => {
 
     const sidebarEl = document.querySelector('.layout-topbar-menu');
     const topbarEl = document.querySelector('.layout-topbar-menu-button');
+    const menuEl = document.querySelector('.p-menu-overlay'); // PrimeVue menu overlay
 
-    return !(sidebarEl.isSameNode(event.target) || sidebarEl.contains(event.target) || topbarEl.isSameNode(event.target) || topbarEl.contains(event.target));
+    return !(
+        sidebarEl?.isSameNode(event.target) || 
+        sidebarEl?.contains(event.target) || 
+        topbarEl?.isSameNode(event.target) || 
+        topbarEl?.contains(event.target) ||
+        menuEl?.contains(event.target) // Don't close if clicking on menu
+    );
 };
 
 </script>

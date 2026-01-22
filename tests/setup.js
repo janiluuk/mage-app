@@ -76,3 +76,8 @@ Object.defineProperty(import.meta, 'env', {
   },
 });
 
+// Mock HTMLMediaElement methods that are not implemented in jsdom
+HTMLMediaElement.prototype.pause = vi.fn();
+HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+HTMLMediaElement.prototype.load = vi.fn();
+

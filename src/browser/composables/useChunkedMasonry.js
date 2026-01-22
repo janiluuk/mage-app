@@ -221,6 +221,31 @@ export default function useChunkedMasonry({
         isLayingOut = false;
         return;
       }
+      
+      // Ensure we have at least 2 columns if grid is wide enough
+      if (columnCount === 1 && grid.clientWidth > 300) {
+        if (import.meta.env.DEV) {
+          console.warn('Masonry: Forcing 2 columns for wide grid');
+        }
+        updateCachedGridMeasurements();
+        const updated = cachedGridMeasurements || {};
+        if (updated.columnCount === 1) {
+          // Force recalculation with smaller desired width
+          const cs = window.getComputedStyle(grid);
+          const forcedGridWidth = grid.clientWidth || grid.getBoundingClientRect().width || 0;
+          const padding = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+          const availableWidth = Math.max(0, forcedGridWidth - padding);
+          const columnGap = parseFloat(cs.columnGap) || parseFloat(cs.gap) || 12;
+          const forcedColumnCount = Math.max(2, Math.floor(availableWidth / 200));
+          const forcedColumnWidth = Math.floor((availableWidth - (columnGap * (forcedColumnCount - 1))) / forcedColumnCount);
+          cachedGridMeasurements = {
+            columnWidth: forcedColumnWidth,
+            columnCount: forcedColumnCount,
+            columnGap,
+            gridWidth: availableWidth,
+          };
+        }
+      }
 
       // Use the column count from cached measurements
       const effectiveColumnCount = columnCount;

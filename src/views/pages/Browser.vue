@@ -411,14 +411,14 @@ const groupedByTags = computed(() => store.getters["files/groupedByTags"] || [])
 // Normalize files from API
 const normalizedFiles = computed(() => {
   if (!Array.isArray(rawFiles.value)) return [];
-  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
 });
 
 // Combine videojobs and files, or use one based on view mode
 // When viewing by tag, use files from the tag endpoint
 const tagFiles = computed(() => {
   if (selectedTagId.value && viewMode.value === 'files') {
-    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
+    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
   }
   return [];
 });
@@ -432,7 +432,7 @@ const videos = computed(() => {
   }
   // Ensure rawJobs.value is an array before mapping
   if (!Array.isArray(rawJobs.value)) return [];
-  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
+  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverridesWithNormalization);
 });
 
 const selection = useSelectionState();
@@ -1119,7 +1119,15 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
   switch (actionId) {
     case "edit":
       if (primaryVideo) {
-        router.push(`/edit/${primaryVideo.generator || "vid2vid"}/${primaryVideo.id}`);
+        // Route to new video editor
+        if (primaryVideo.file?.id) {
+          router.push(`/editor/file/${primaryVideo.file.id}`);
+        } else if (primaryVideo.job?.id) {
+          router.push(`/editor/job/${primaryVideo.job.id}`);
+        } else {
+          // Fallback to old editor for video jobs
+          router.push(`/edit/${primaryVideo.generator || "vid2vid"}/${primaryVideo.id}`);
+        }
       }
       break;
     case "download":

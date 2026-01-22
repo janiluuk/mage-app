@@ -1,182 +1,324 @@
 <template>
-    <Dialog v-model="$store.state.exportStatus.show" width="700">
-        <Card :loading="true">
-            <template slot="progress">
-                <v-progress-linear
-                    v-if="status.error !== ''"
-                    color="warning"
-                    :value="100"
-                ></v-progress-linear>
-                <v-progress-linear
-                    :indeterminate="exportProgress <= 0"
-                    v-else-if="isExporting || (status.done && !status.youtube) || youtube.done"
-                    color="success"
-                    :value="exportProgress * 100"
-                ></v-progress-linear>
-                <v-progress-linear
-                    :indeterminate="exportProgress <= 0"
-                    v-else-if="isUploading"
-                    color="red"
-                    :value="youtube.progress.percent * 100"
-                ></v-progress-linear>
+  <Dialog 
+    v-model:visible="showStatus" 
+    modal 
+    :style="{ width: '700px' }"
+    :closable="!isExporting && !isUploading"
+    :header="statusTitle"
+  >
+    <div class="export-status-content">
+      <!-- Progress Bar -->
+      <div class="mb-4">
+        <ProgressBar 
+          v-if="hasError"
+          :value="100"
+          severity="warn"
+        />
+        <ProgressBar 
+          v-else-if="isExporting || isUploading"
+          :value="exportProgressPercent"
+          :indeterminate="exportProgressPercent <= 0"
+          :severity="isUploading ? 'danger' : 'success'"
+        />
+      </div>
+      
+      <!-- Status Message -->
+      <div class="status-message mb-3">
+        <p v-if="isUploading" class="text-lg font-semibold">
+          2/2 - Uploading video
+        </p>
+        <p v-else-if="isExporting" class="text-lg font-semibold">
+          {{ statusTitle }}
+        </p>
+        <p v-else-if="hasError" class="text-lg font-semibold text-red-500">
+          <i class="pi pi-exclamation-triangle mr-2"></i>
+          An error occurred during video export!
+        </p>
+        <p v-else-if="isComplete" class="text-lg font-semibold text-green-500">
+          <i class="pi pi-check mr-2"></i>
+          Video export complete!
+        </p>
+      </div>
+      
+      <!-- Output Path -->
+      <div v-if="outputPath && !hasError" class="mb-3">
+        <p class="text-sm text-gray-600">{{ outputPath }}</p>
+      </div>
+      
+      <!-- Speed/Progress Info -->
+      <div v-if="(isUploading || isExporting) && speedText" class="mb-3">
+        <p class="text-sm">{{ speedText }}</p>
+      </div>
+      
+      <!-- Error Message -->
+      <div v-if="hasError" class="mb-4">
+        <Message severity="error" :closable="false">
+          {{ exportStatus.error }}
+        </Message>
+      </div>
+      
+      <!-- Processing Method Info -->
+      <div v-if="isExporting && exportStatus.output && exportStatus.output.length > 0" class="mb-3">
+        <div class="processing-info">
+          <i class="pi pi-info-circle mr-2"></i>
+          <span class="text-sm">
+            {{ processingMethod }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Output Details (if available) -->
+      <div v-if="exportStatus.output && exportStatus.output.length > 0" class="mb-4">
+        <Accordion>
+          <AccordionTab>
+            <template #header>
+              <span>Show details ({{ exportStatus.output.length }} lines)</span>
             </template>
-            <Card-title v-if="isUploading">
-                2/2 - Uploading video
-            </CardTitle>
-            <Card-title v-else-if="isExporting">
-                {{ status.youtube ? '1/2 - ' : '' }}Exporting video
-            </CardTitle>
-            <Card-title v-else-if="status.error !== ''">
-                <i className="pi pi-alert-outline">
-                An error occurred during video export!
-            </CardTitle>
-            <Card-title v-else-if="status.youtube">
-                <i className="pi pi-check">
-                Video upload complete!
-            </CardTitle>
-            <Card-title v-else>
-                <i className="pi pi-check">
-                Video export complete!
-            </CardTitle>
-            <Card-subtitle v-if="!status.youtube">
-                {{ outputPath }}
-            </v-card-subtitle>
-            <Card-text v-if="isUploading || isExporting">
-                {{ speed }}
-            </CardText>
-            <div v-if="status.error !== ''">
-                <Card-text class="error--text">
-                    {{ status.error }}
-                </CardText>
-                <Divider></Divider>
+            <div class="output-details">
+              <p 
+                v-for="(line, index) in exportStatus.output" 
+                :key="index"
+                class="output-line"
+              >
+                {{ line }}
+              </p>
             </div>
-            <perfect-scrollbar class="output" v-if="status.output.length > 0">
-                <Accordions>
-                    <Accordion>
-                        <Accordion-header>Show details</AccordionTabHeader>
-                        <Accordion-content>
-                            <p class="output-line" v-for="line in status.output">{{ line }}</p>
-                        </AccordionTab>
-                    </Accordion>
-                </v-expansion-panels>
-            </perfect-scrollbar>
-            <Divider></Divider>
-            <Card-actions>
-                <v-spacer></v-spacer>
-                <Button text color="error" @click="abort" v-if="(isUploading || isExporting) && status.error === ''">
-                    Abort
-                </Button>
-                <Button text @click="dismiss" v-else-if="status.error !== ''">
-                    Dismiss
-                </Button>
-                <div v-else-if="!status.youtube">
-                    <Tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                            <Button class="mr-2" icon @click="openFolder(outputPath)"
-                                   v-bind="attrs"
-                                   v-on="on">
-                                <i className="pi pi-folder-outline">
-                            </Button>
-                        </template>
-                        <span>Open containing folder</span>
-                    </Tooltip>
-                    <Tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                            <Button class="mr-6" icon @click="openFile(outputPath)"
-                                   v-bind="attrs"
-                                   v-on="on">
-                                <i className="pi pi-play">
-                            </Button>
-                        </template>
-                        <span>Open video</span>
-                    </Tooltip>
-                    <Button text @click="dismiss">
-                        Dismiss
-                    </Button>
-                </div>
-                <div v-else>
-                    <Tooltip top>
-                        <template v-slot:activator="{ on, attrs }">
-                            <Button class="mr-2" icon
-                                   @click="openFile(youtube.url)"
-                                   v-bind="attrs"
-                                   color="red"
-                                   v-on="on">
-                                <i className="pi pi-youtube">
-                            </Button>
-                        </template>
-                        <span>Open on YouTube</span>
-                    </Tooltip>
-                    <Button text @click="dismiss">
-                        Dismiss
-                    </Button>
-                </div>
-            </CardActions>
-        </Card>
-    </Dialog>
+          </AccordionTab>
+        </Accordion>
+      </div>
+    </div>
+    
+    <template #footer>
+      <div class="flex justify-content-end gap-2">
+        <Button 
+          v-if="(isUploading || isExporting) && !hasError"
+          label="Abort" 
+          severity="danger"
+          @click="abort"
+        />
+        <Button 
+          v-else-if="hasError"
+          label="Dismiss" 
+          @click="dismiss"
+        />
+        <div v-else class="flex gap-2">
+          <Button 
+            v-if="outputPath"
+            icon="pi pi-folder"
+            severity="secondary"
+            v-tooltip.top="'Open containing folder'"
+            @click="openFolder"
+          />
+          <Button 
+            v-if="outputPath"
+            icon="pi pi-play"
+            severity="secondary"
+            v-tooltip.top="'Open video'"
+            @click="openFile"
+          />
+          <Button 
+            label="Dismiss" 
+            @click="dismiss"
+          />
+        </div>
+      </div>
+    </template>
+  </Dialog>
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from "vuex";
-import Utils from "@/js/Utils";
+import { computed, watch } from 'vue';
+import { useStore } from 'vuex';
+import Dialog from 'primevue/dialog';
+import ProgressBar from 'primevue/progressbar';
+import Message from 'primevue/message';
+import Button from 'primevue/button';
+import Accordion from 'primevue/accordion';
+import AccordionTab from 'primevue/accordiontab';
+import Tooltip from 'primevue/tooltip';
+import { readableBytes } from '@/utils/videoEditorUtils';
 
 export default {
-    name: "ExportStatus",
-    data: () => ({}),
-    methods: {
-        dismiss() {
-            this.$store.commit('showExportStatus', false);
-        },
-        abort() {
-            if (this.isExporting) {
-                this.status.command.kill();
-            } else if (this.isUploading) {
-                this.cancelUpload();
-            }
-        },
-        ...mapActions(['openFile', 'cancelUpload', 'openFolder', 'showTextPrompt', 'resetYouTubeStatus', 'resetExportStatus']),
-    },
-    watch: {
-        'status.show'() {
-            if (!this.status.show && this.status.error !== '') {
-                // when dismissing error, reset status stuff
-                this.resetYouTubeStatus();
-                this.resetExportStatus();
-            }
-        },
-    },
-    computed: {
-        speed() {
-            if (this.isUploading) {
-                let uploaded = Utils.readableBytes(this.youtube.progress.uploaded);
-                let total = Utils.readableBytes(this.youtube.progress.total);
-                return `Uploaded: ${uploaded} / ${total}`;
-            } else if (this.isExporting) {
-                let time = this.status.progress.timemark?.substr(3) ?? '00:00.00';
-                return `Exported: ${time} / ${this.toHms(this.fullDuration)}`;
-            }
-            return '';
-        },
-        ...mapGetters(['exportProgress', 'isExporting', 'isUploading', 'fullDuration', 'toHms']),
-        ...mapState({
-            status: state => state.exportStatus,
-            outputPath: state => state.export.outputPath,
-            youtube: state => state.youtube,
-        }),
-    },
-}
+  name: 'ExportStatus',
+  components: {
+    Dialog,
+    ProgressBar,
+    Message,
+    Button,
+    Accordion,
+    AccordionTab,
+  },
+  directives: {
+    tooltip: Tooltip,
+  },
+  setup() {
+    const store = useStore();
+    
+    const exportStatus = computed(() => store.state.videoeditor.exportStatus);
+    const exportState = computed(() => store.state.videoeditor.export);
+    const fullDuration = computed(() => store.getters['videoeditor/fullDuration']);
+    const toHms = computed(() => store.getters['videoeditor/toHms']);
+    const exportProgress = computed(() => store.getters['videoeditor/exportProgress']);
+    const isExporting = computed(() => store.getters['videoeditor/isExporting']);
+    const isUploading = computed(() => store.getters['videoeditor/isUploading']);
+    
+    const showStatus = computed({
+      get: () => exportStatus.value.show,
+      set: (value) => store.commit('videoeditor/SET_EXPORT_STATUS_SHOW', value),
+    });
+    
+    const outputPath = computed(() => exportState.value.outputPath);
+    
+    const hasError = computed(() => !!exportStatus.value.error);
+    const isComplete = computed(() => exportStatus.value.done && !hasError.value);
+    
+    const exportProgressPercent = computed(() => {
+      const progress = exportProgress.value;
+      if (typeof progress === 'number') {
+        return Math.round(progress * 100);
+      }
+      return 0;
+    });
+    
+    const statusTitle = computed(() => {
+      if (isUploading.value) {
+        return '2/2 - Uploading video';
+      } else if (isExporting.value) {
+        return 'Exporting video';
+      } else if (hasError.value) {
+        return 'Export Error';
+      } else if (isComplete.value) {
+        return 'Export Complete';
+      }
+      return 'Export Status';
+    });
+    
+    const speedText = computed(() => {
+      if (isUploading.value) {
+        // YouTube upload not implemented yet
+        return '';
+      } else if (isExporting.value) {
+        const progress = exportStatus.value.progress;
+        let time = '00:00.00';
+        if (progress && typeof progress === 'object' && progress.timemark) {
+          time = progress.timemark.substring(3) || '00:00.00';
+        }
+        const totalTime = toHms.value(fullDuration.value);
+        return `Exported: ${time} / ${totalTime}`;
+      }
+      return '';
+    });
+
+    const processingMethod = computed(() => {
+      if (!exportStatus.value.output || exportStatus.value.output.length === 0) {
+        return '';
+      }
+      const firstLine = exportStatus.value.output[0] || '';
+      if (firstLine.includes('Client-side')) {
+        return 'Processing locally in your browser';
+      } else if (firstLine.includes('Server-side')) {
+        return 'Processing on server';
+      }
+      return '';
+    });
+    
+    watch(() => showStatus.value, (newVal) => {
+      if (!newVal && hasError.value) {
+        // When dismissing error, reset status
+        store.dispatch('videoeditor/resetExportStatus');
+      }
+    });
+    
+    const dismiss = () => {
+      store.dispatch('videoeditor/resetExportStatus');
+    };
+    
+    const abort = async () => {
+      if (isExporting.value) {
+        // Cancel export job via backend API
+        try {
+          await store.dispatch('videoeditor/cancelExport');
+        } catch (error) {
+          console.error('Failed to cancel export:', error);
+          // Still reset status even if cancellation fails
+          store.dispatch('videoeditor/resetExportStatus');
+        }
+      } else if (isUploading.value) {
+        // TODO: Implement upload cancellation
+        console.log('Cancel upload');
+        store.dispatch('videoeditor/resetExportStatus');
+      } else {
+        store.dispatch('videoeditor/resetExportStatus');
+      }
+    };
+    
+    const openFile = () => {
+      if (outputPath.value) {
+        // In a web environment, we can't directly open files
+        // Instead, we might want to download or open in a new tab
+        window.open(outputPath.value, '_blank');
+      }
+    };
+    
+    const openFolder = () => {
+      // In a web environment, we can't open folders
+      // This would be an Electron-specific feature
+      console.log('Open folder:', outputPath.value);
+    };
+    
+    return {
+      showStatus,
+      exportStatus,
+      outputPath,
+      hasError,
+      isComplete,
+      isExporting,
+      isUploading,
+      exportProgressPercent,
+      statusTitle,
+      speedText,
+      processingMethod,
+      dismiss,
+      abort,
+      openFile,
+      openFolder,
+    };
+  },
+};
 </script>
 
 <style scoped>
-.output {
-    max-height: 500px;
-    overflow-y: auto;
+.export-status-content {
+  padding: 1rem 0;
+}
+
+.status-message {
+  min-height: 2rem;
+}
+
+.output-details {
+  max-height: 300px;
+  overflow-y: auto;
+  padding: 0.5rem;
+  background-color: var(--surface-ground);
+  border-radius: 4px;
 }
 
 .output-line {
-    margin: 0 10px;
-    font-size: 13px;
-    opacity: 0.8;
-    font-family: monospace;
+  margin: 0.25rem 0;
+  font-size: 0.875rem;
+  color: var(--text-color-secondary);
+  font-family: monospace;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.processing-info {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  background-color: var(--surface-ground);
+  border-radius: 4px;
+  color: var(--text-color-secondary);
 }
 </style>

@@ -1,344 +1,482 @@
 <template>
-    <perfect-scrollbar class="player" ref="player">
-        <div ref="videosContainer" class="videos" :style="{height: maxVideoHeight + 'px'}">
-            <video @canplay.once="canPlay" ref="videos"
-                   @ended="playNextFragment(true)"
-                   v-for="videoFile in videoFiles"
-                   :key="videoFile.filePath"
-                   :id="videoFile.filePath"
-                   v-show="!isAudio"
-                   :src="videoFile.filePath"
-                   :style="{
-                        width: videoWidth + 'px',
-                        height: videoHeight(videoFile) + 'px',
-                        visibility: videoFile === activeFragment.video &&
-                            !isAudio ? 'visible': 'hidden',
-                   }"
-            ></video>
-            <canvas v-show="isAudio" ref="audioCanvas"></canvas>
-        </div>
-        <div class="controls" :class="{fullscreen}">
-            <div class="time-control" v-if="videoFiles.length > 0"
-                 :style="{pointerEvents: activeFragment.video.canPlay ? 'all' : 'none'}">
-                <seek-bar class="seek-bar"></seek-bar>
-                <span class="seek-time">{{ toHms(progress * fullDuration) }} / {{ toHms(fullDuration) }}</span>
+  <div class="player" ref="player">
+    <div ref="videosContainer" class="videos" :style="{ height: maxVideoHeight + 'px' }">
+      <video
+        v-for="videoFile in videoFiles"
+        :key="videoFile.videoUrl"
+        :id="videoFile.videoUrl"
+        v-show="!isAudio"
+        :src="videoFile.videoUrl"
+        :style="{
+          width: videoWidth + 'px',
+          height: videoHeight(videoFile) + 'px',
+          visibility: videoFile === activeFragment?.video && !isAudio ? 'visible' : 'hidden',
+        }"
+        @canplay.once="canPlay"
+        @ended="playNextFragment"
+        crossorigin="anonymous"
+      ></video>
+      <canvas v-show="isAudio" ref="audioCanvas"></canvas>
+    </div>
+    <div class="controls" :class="{ fullscreen }">
+      <div
+        v-if="videoFiles.length > 0"
+        class="time-control"
+        :style="{ pointerEvents: activeFragment?.video?.canPlay ? 'all' : 'none' }"
+      >
+        <SeekBar class="seek-bar" />
+        <span class="seek-time">{{ toHms(progress * fullDuration) }} / {{ toHms(fullDuration) }}</span>
+      </div>
+      <div v-if="videoFiles.length > 0" class="playback-controls">
+        <div v-if="!fullscreen" class="volume-control">
+          <Button
+            :icon="true"
+            text
+            @click="toggleVolumePanel"
+          >
+            <i :class="'pi ' + volumeIcon" />
+          </Button>
+          <OverlayPanel ref="volumePanel">
+            <div class="volume-panel-content">
+              <Slider
+                v-model="playerVolumeValue"
+                :min="0"
+                :max="1"
+                :step="0.01"
+                class="player-volume"
+                @update:modelValue="updateVolume"
+              />
             </div>
-            <div class="playback-controls" v-if="videoFiles.length > 0">
-                <Menu open-on-hover :close-on-content-click="false" v-if="!fullscreen">
-                    <template v-slot:activator="{ on, attrs }">
-                        <v-icon
-                            v-bind="attrs"
-                            v-on="on"
-                            small>
-                            {{ volumeIcon }}
-                        </v-icon>
-                    </template>
-                    <v-list class="player-volume-container">
-                        <Slider
-                            min="0"
-                            max="1"
-                            step="0.01"
-                            v-model="$store.state.player.volume"
-                            @click:prepend="toggleMute"
-                            class="player-volume"
-                            dense
-                            hide-details
-                            :prepend-icon="volumeIcon"></Slider>
-                    </v-list>
-                </Menu>
-                <v-spacer></v-spacer>
-                <div class="center-controls">
-                    <Button icon :disabled="!activeFragment.video.canPlay || !canSkipFrameLeft" @click="skipFrames(-1)">
-                        <i className="pi pi-skip-previous">
-                    </Button>
-                    <Button icon x-large @click="togglePlay" :loading="!activeFragment.video.canPlay">
-                        <i className="pi pi-pause">
-                        <i className="pi pi-play">
-                    </Button>
-                    <Button icon :disabled="!activeFragment.video.canPlay || !canSkipFrameRight" @click="skipFrames(1)">
-                        <i className="pi pi-skip-next">
-                    </Button>
-                </div>
-                <v-spacer></v-spacer>
-                <div class="right-controls">
-                    <Button icon @click="toggleFullScreen">
-                        <i className="pi pi-fullscreen">
-                    </Button>
-                </div>
-            </div>
+          </OverlayPanel>
         </div>
-    </perfect-scrollbar>
+        <div class="spacer"></div>
+        <div class="center-controls">
+          <Button
+            :icon="true"
+            :disabled="!activeFragment?.video?.canPlay || !canSkipFrameLeft"
+            @click="skipFrames(-1)"
+          >
+            <i class="pi pi-step-backward" />
+          </Button>
+          <Button
+            :icon="true"
+            size="large"
+            @click="togglePlay"
+            :loading="!activeFragment?.video?.canPlay"
+          >
+            <i v-if="playing" class="pi pi-pause" />
+            <i v-else class="pi pi-play" />
+          </Button>
+          <Button
+            :icon="true"
+            :disabled="!activeFragment?.video?.canPlay || !canSkipFrameRight"
+            @click="skipFrames(1)"
+          >
+            <i class="pi pi-step-forward" />
+          </Button>
+        </div>
+        <div class="spacer"></div>
+        <div class="right-controls">
+          <Button :icon="true" @click="toggleFullScreen">
+            <i class="pi pi-window-maximize" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
-import {mapActions, mapGetters, mapState} from "vuex";
-import SeekBar from "@/components/SeekBar";
+import { ref, computed, onMounted, onBeforeUnmount, watch, nextTick } from 'vue';
+import { useStore } from 'vuex';
+import SeekBar from './SeekBar.vue';
 
 export default {
-    name: "VideoPlayer",
-    components: {SeekBar},
-    data: () => ({
-        bounds: null,
-        timeInterval: -1,
-        prevVolume: 1,
-        canvas: null,
-        context: null,
-        animationFrame: -1,
-    }),
-    beforeDestroy() {
-        clearInterval(this.timeInterval);
-        window.removeEventListener('resize', this.windowResize);
-        this.$store.commit('videosContainer', null);
-        cancelAnimationFrame(this.animationFrame);
-    },
-    mounted() {
-        this.canvas = this.$refs.audioCanvas;
-        this.context = this.canvas.getContext('2d');
-        this.animationFrame = requestAnimationFrame(() => this.visualizeAudio());
+  name: 'VideoPlayer',
+  components: { SeekBar },
+  setup() {
+    const store = useStore();
+    const player = ref(null);
+    const videosContainer = ref(null);
+    const audioCanvas = ref(null);
+    const volumePanel = ref(null);
+    const bounds = ref(null);
+    const timeInterval = ref(null);
+    const animationFrame = ref(null);
+    const prevVolume = ref(1);
+    const canvas = ref(null);
+    const context = ref(null);
+    const cachedPrimaryColor = ref('#007bff'); // Default fallback
 
-        this.$store.commit('videosContainer', this.$refs.videosContainer);
-        this.windowResize();
-        window.addEventListener('resize', this.windowResize, false);
-        this.timeInterval = setInterval(() => {
-            if (this.$refs.videos) {
-                let activeVideo = this.activeFragment.video.element;
-                this.$store.commit('playing', !activeVideo.paused)
-                let progress = this.progressAtFragmentProgress({
-                    fragment: this.activeFragment,
-                    progress: this.activeFragment.progress
-                });
-                if (!isNaN(progress))
-                    this.$store.commit('progress', progress);
+    const videoFiles = computed(() => store.state.videoeditor.videoFiles);
+    const activeFragment = computed(() => store.state.videoeditor.activeFragment);
+    const progress = computed(() => store.state.videoeditor.player.progress);
+    const playing = computed(() => store.state.videoeditor.player.playing);
+    const playerVolume = computed(() => store.state.videoeditor.player.volume);
+    const fullscreen = computed(() => store.state.videoeditor.player.fullscreen);
+    const fullDuration = computed(() => store.getters['videoeditor/fullDuration']);
+    const toHms = computed(() => store.getters['videoeditor/toHms']);
+    const canSkipFrameLeft = computed(() => store.getters['videoeditor/canSkipFrameLeft']);
+    const canSkipFrameRight = computed(() => store.getters['videoeditor/canSkipFrameRight']);
+    const isAudio = computed(() => store.getters['videoeditor/isAudio']);
+    const progressAtFragmentProgress = computed(() => store.getters['videoeditor/progressAtFragmentProgress']);
 
-                if (this.activeFragment.progress >= 1) {
-                    this.playNextFragment();
-                }
+    const videoWidth = computed(() => {
+      if (!bounds.value) return 0;
+      return bounds.value.width;
+    });
 
-                if (activeVideo.playbackRate !== this.activeFragment.playbackRate)
-                    activeVideo.playbackRate = this.activeFragment.playbackRate;
-                const gainNode = this.activeFragment.video.gainNode;
-                let updatedGain = this.activeFragment.volume * this.playerVolume;
-                if (gainNode && gainNode.gain.value !== updatedGain)
-                    gainNode.gain.value = updatedGain;
-            }
-        }, 1000 / 60);
-    },
-    methods: {
-        resizeCanvas() {
-            this.canvas.width = this.videoWidth;
-            this.canvas.height = this.maxVideoHeight;
-        },
-        visualizeAudio() {
-            this.animationFrame = requestAnimationFrame(() => this.visualizeAudio());
-            if (!this.isAudio)
-                return;
-            this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    const maxVideoHeight = computed(() => {
+      if (!videoFiles.value.length) return 0;
+      const maxRatio = videoFiles.value
+        .filter(v => !v.isAudio)
+        .reduce((a, b) => Math.min(a, b.aspectRatio), 2);
+      return videoWidth.value / maxRatio;
+    });
 
-            let video = this.activeFragment.video;
-            video.analyser.getByteTimeDomainData(video.dataArray);
-            let bufferLength = video.analyser.frequencyBinCount;
+    const playerVolumeValue = computed({
+      get: () => playerVolume.value,
+      set: (value) => store.commit('videoeditor/SET_PLAYER_VOLUME', value)
+    });
 
-            this.context.lineWidth = 2;
-            this.context.strokeStyle = this.themeColors.primary;
+    const volumeIcon = computed(() => {
+      if (playerVolume.value === 0) return 'pi-volume-off';
+      if (playerVolume.value < 0.5) return 'pi-volume-down';
+      return 'pi-volume-up';
+    });
 
-            this.context.beginPath();
+    const videoHeight = (video) => {
+      return videoWidth.value / video.aspectRatio;
+    };
 
-            const sliceWidth = this.canvas.width * 1.0 / bufferLength;
-            let x = 0;
+    const resizeCanvas = () => {
+      if (canvas.value) {
+        canvas.value.width = videoWidth.value;
+        canvas.value.height = maxVideoHeight.value;
+      }
+    };
 
-            for (let i = 0; i < bufferLength; i++) {
+    const visualizeAudio = () => {
+      animationFrame.value = requestAnimationFrame(visualizeAudio);
+      if (!isAudio.value || !canvas.value || !context.value || !activeFragment.value) return;
 
-                const v = video.dataArray[i] / 128.0;
-                const y = v * this.canvas.height / 2;
+      context.value.clearRect(0, 0, canvas.value.width, canvas.value.height);
 
-                if (i === 0) {
-                    this.context.moveTo(x, y);
-                } else {
-                    this.context.lineTo(x, y);
-                }
+      const video = activeFragment.value.video;
+      if (!video.analyser || !video.dataArray) return;
 
-                x += sliceWidth;
-            }
+      video.analyser.getByteTimeDomainData(video.dataArray);
+      const bufferLength = video.analyser.frequencyBinCount;
 
-            this.context.lineTo(this.canvas.width, this.canvas.height / 2);
-            this.context.stroke();
-        },
-        videoHeight(video) {
-            return this.videoWidth / video.aspectRatio
-        },
-        toggleMute() {
-            if (this.playerVolume > 0) {
-                this.prevVolume = this.playerVolume;
-                this.$store.commit('playerVolume', 0);
-            } else {
-                this.$store.commit('playerVolume', this.prevVolume);
-            }
-        },
-        toggleFullScreen() {
-            if (this.fullscreen) {
-                this.$store.commit('fullscreen', false);
-            } else {
-                this.$store.commit('fullscreen', true);
-            }
-        },
-        canPlay(e) {
-            let video = this.videoFiles.find(v => v.filePath === e.target.getAttribute('id'));
-            if (video)
-                video.emit('canplay');
-            this.activeFragment?.reset?.()
-        },
-        togglePlay() {
-            if (this.playing)
-                this.pause();
-            else
-                this.play();
-        },
-        windowResize() {
-            this.bounds = this.$refs.player.$el.getBoundingClientRect();
-            this.resizeCanvas();
-        },
-        ...mapActions(['play', 'pause', 'playNextFragment', 'skipFrames', 'addSnack'])
-    },
-    watch: {
-        async fullscreen() {
-            if (this.fullscreen) {
-                try {
-                    await this.$refs.player.$el.requestFullscreen();
-                } catch (e) {
-                    this.addSnack({text: "Full screen failed"}).then();
-                }
-            } else {
-                try {
-                    await document.exitFullscreen();
-                } catch (e) {
-                    this.addSnack({text: "Exiting full screen failed"}).then();
-                }
-            }
-            this.windowResize();
-        },
-        playerVolume() {
-            localStorage.playerVolume = this.playerVolume;
-        },
-        playerWidth() {
-            this.windowResize();
-        },
-        activeFragment(fragment, previousFragment) {
-            if (previousFragment === null)
-                return;
-            if (fragment.video !== previousFragment.video) {
-                const wasPaused = previousFragment.video.element.paused;
-                previousFragment.reset();
-                if (!wasPaused) {
-                    fragment.video.element.play();
-                }
-            }
+      context.value.lineWidth = 2;
+      // Use cached CSS variable for primary color
+      context.value.strokeStyle = cachedPrimaryColor.value;
+      context.value.beginPath();
+
+      const sliceWidth = canvas.value.width * 1.0 / bufferLength;
+      let x = 0;
+
+      for (let i = 0; i < bufferLength; i++) {
+        const v = video.dataArray[i] / 128.0;
+        const y = v * canvas.value.height / 2;
+
+        if (i === 0) {
+          context.value.moveTo(x, y);
+        } else {
+          context.value.lineTo(x, y);
         }
-    },
-    computed: {
-        volumeIcon() {
-            switch (true) {
-                case this.playerVolume === 0:
-                    return 'mdi-volume-mute';
-                case this.playerVolume < 0.5:
-                    return 'mdi-volume-medium';
-                case this.playerVolume < 4:
-                    return 'mdi-volume-high';
-                default:
-                    return 'mdi-volume-vibrate';
+
+        x += sliceWidth;
+      }
+
+      context.value.lineTo(canvas.value.width, canvas.value.height / 2);
+      context.value.stroke();
+    };
+
+    const toggleMute = () => {
+      if (playerVolume.value > 0) {
+        prevVolume.value = playerVolume.value;
+        store.commit('videoeditor/SET_PLAYER_VOLUME', 0);
+      } else {
+        store.commit('videoeditor/SET_PLAYER_VOLUME', prevVolume.value);
+      }
+    };
+
+    const toggleVolumePanel = (event) => {
+      if (volumePanel.value) {
+        volumePanel.value.toggle(event, event.currentTarget);
+      }
+    };
+
+    const updateVolume = (value) => {
+      store.commit('videoeditor/SET_PLAYER_VOLUME', value);
+    };
+
+    const toggleFullScreen = async () => {
+      if (fullscreen.value) {
+        try {
+          await document.exitFullscreen();
+          store.commit('videoeditor/SET_PLAYER_FULLSCREEN', false);
+        } catch (e) {
+          console.warn('Exiting fullscreen failed:', e);
+        }
+      } else {
+        try {
+          await player.value.requestFullscreen();
+          store.commit('videoeditor/SET_PLAYER_FULLSCREEN', true);
+        } catch (e) {
+          console.warn('Fullscreen failed:', e);
+        }
+      }
+      windowResize();
+    };
+
+    const canPlay = (e) => {
+      const video = videoFiles.value.find(v => v.videoUrl === e.target.getAttribute('id'));
+      if (video) {
+        video.emit('canplay');
+      }
+      if (activeFragment.value) {
+        activeFragment.value.reset();
+      }
+    };
+
+    const togglePlay = () => {
+      if (playing.value) {
+        store.dispatch('videoeditor/pause');
+      } else {
+        store.dispatch('videoeditor/play');
+      }
+    };
+
+    const skipFrames = (frames) => {
+      store.dispatch('videoeditor/skipFrames', frames);
+    };
+
+    const playNextFragment = () => {
+      store.dispatch('videoeditor/playNextFragment', true);
+    };
+
+    const windowResize = () => {
+      if (player.value) {
+        bounds.value = player.value.getBoundingClientRect();
+        resizeCanvas();
+      }
+    };
+
+    onMounted(() => {
+      // Cache the primary color from CSS variable
+      cachedPrimaryColor.value = getComputedStyle(document.documentElement)
+        .getPropertyValue('--primary-color')
+        .trim() || '#007bff';
+
+      if (audioCanvas.value) {
+        canvas.value = audioCanvas.value;
+        context.value = canvas.value.getContext('2d');
+        animationFrame.value = requestAnimationFrame(visualizeAudio);
+      }
+
+      store.commit('videoeditor/SET_VIDEOS_CONTAINER', videosContainer.value);
+      windowResize();
+      window.addEventListener('resize', windowResize, false);
+
+      // Update progress and playing state using requestAnimationFrame for better performance
+      const updateProgress = () => {
+        if (activeFragment.value?.video?.element) {
+          const activeVideo = activeFragment.value.video.element;
+          store.commit('videoeditor/SET_PLAYER_PLAYING', !activeVideo.paused);
+
+          const fragmentProgress = activeFragment.value.progress;
+          const overallProgress = progressAtFragmentProgress.value({
+            fragment: activeFragment.value,
+            progress: fragmentProgress,
+          });
+
+          if (!isNaN(overallProgress)) {
+            store.commit('videoeditor/SET_PLAYER_PROGRESS', overallProgress);
+          }
+
+          if (fragmentProgress >= 1) {
+            playNextFragment();
+          }
+
+          // Update playback rate
+          if (activeVideo.playbackRate !== activeFragment.value.playbackRate) {
+            activeVideo.playbackRate = activeFragment.value.playbackRate;
+          }
+
+          // Update volume
+          const gainNode = activeFragment.value.video.gainNode;
+          if (gainNode) {
+            const updatedGain = activeFragment.value.volume * playerVolume.value;
+            if (gainNode.gain.value !== updatedGain) {
+              gainNode.gain.value = updatedGain;
             }
-        },
-        videoWidth() {
-            if (this.bounds === null)
-                return 0;
-            return this.bounds.width;
-        },
-        maxVideoHeight() {
-            let maxRatio = this.videoFiles
-                .filter(v => !v.isAudio)
-                .reduce((a, b) => Math.min(a, b.aspectRatio), 2);
-            return this.videoWidth / maxRatio;
-        },
-        ...mapGetters([
-            'fullDuration', 'toHms', 'progressAtFragmentProgress',
-            'canSkipFrameLeft', 'canSkipFrameRight', 'isAudio', 'themeColors',
-        ]),
-        ...mapState({
-            videoFiles: state => state.videoFiles,
-            activeFragment: state => state.activeFragment,
-            progress: state => state.player.progress,
-            playing: state => state.player.playing,
-            timeline: state => state.timeline,
-            playerWidth: state => state.player.widthPercent,
-            playerVolume: state => state.player.volume,
-            fullscreen: state => state.player.fullscreen,
-        }),
-    },
-}
+          }
+        }
+        
+        // Continue the animation loop
+        timeInterval.value = requestAnimationFrame(updateProgress);
+      };
+      
+      // Start the animation loop
+      timeInterval.value = requestAnimationFrame(updateProgress);
+    });
+
+    onBeforeUnmount(() => {
+      if (timeInterval.value) {
+        cancelAnimationFrame(timeInterval.value);
+      }
+      window.removeEventListener('resize', windowResize);
+      store.commit('videoeditor/SET_VIDEOS_CONTAINER', null);
+      if (animationFrame.value) {
+        cancelAnimationFrame(animationFrame.value);
+      }
+    });
+
+    watch(fullscreen, async (isFullscreen) => {
+      if (isFullscreen) {
+        try {
+          await player.value?.requestFullscreen();
+        } catch (e) {
+          console.warn('Fullscreen failed:', e);
+        }
+      } else {
+        try {
+          await document.exitFullscreen();
+        } catch (e) {
+          console.warn('Exiting fullscreen failed:', e);
+        }
+      }
+      windowResize();
+    });
+
+    watch(activeFragment, (fragment, previousFragment) => {
+      if (!previousFragment || !fragment) return;
+      if (fragment.video !== previousFragment.video) {
+        const wasPaused = previousFragment.video.element?.paused;
+        previousFragment.reset();
+        if (!wasPaused && fragment.video.element) {
+          fragment.video.element.play().catch(console.error);
+        }
+      }
+    });
+
+    return {
+      player,
+      videosContainer,
+      audioCanvas,
+      volumePanel,
+      videoFiles,
+      activeFragment,
+      progress,
+      playing,
+      playerVolume,
+      playerVolumeValue,
+      fullscreen,
+      fullDuration,
+      toHms,
+      canSkipFrameLeft,
+      canSkipFrameRight,
+      isAudio,
+      videoWidth,
+      maxVideoHeight,
+      volumeIcon,
+      videoHeight,
+      toggleMute,
+      toggleVolumePanel,
+      updateVolume,
+      toggleFullScreen,
+      canPlay,
+      togglePlay,
+      skipFrames,
+      playNextFragment,
+    };
+  },
+};
 </script>
 
 <style scoped>
 .player {
-    width: 100%;
-    max-height: 100%;
-    overflow-y: auto;
+  width: 100%;
+  max-height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .player video {
-    width: 100%;
-    position: absolute;
+  width: 100%;
+  position: absolute;
 }
 
 .videos {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
 }
 
 .controls {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
 }
 
 .controls.fullscreen {
-    position: fixed;
-    width: 100%;
-    z-index: 4;
-    bottom: 0;
-    background-image: linear-gradient(0deg, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0) 150%);
+  position: fixed;
+  width: 100%;
+  z-index: 4;
+  bottom: 0;
+  background-image: linear-gradient(0deg, var(--surface-ground) 0%, transparent 150%);
 }
 
 .time-control {
-    display: flex;
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.seek-bar {
+  flex: 1;
 }
 
 .seek-time {
-    white-space: nowrap;
-    font-size: 12px;
-    padding-left: 10px;
-    opacity: 0.7;
+  white-space: nowrap;
+  font-size: 12px;
+  padding-left: 10px;
+  color: var(--text-color-secondary);
+  opacity: 0.8;
 }
 
 .playback-controls {
-    display: flex;
-    place-content: center;
-    align-items: center;
+  display: flex;
+  place-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-.center-controls > * {
-    margin: 0 2px;
+.spacer {
+  flex: 1;
+}
+
+.center-controls {
+  display: flex;
+  gap: 5px;
+  align-items: center;
 }
 
 .right-controls {
-    align-items: center;
-    display: flex;
+  display: flex;
+  align-items: center;
 }
 
-.player-volume-container {
-    overflow: hidden;
-    padding: 5px 10px;
+.volume-panel-content {
+  padding: 20px;
+  min-width: 200px;
 }
 
 .player-volume {
-    width: 120px;
+  width: 150px;
 }
 </style>

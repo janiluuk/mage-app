@@ -270,6 +270,12 @@ const router = createRouter({
           component: VideoEditDeforum,
         },
         {
+          path: "/editor/:type/:id", // type: 'file' or 'job', id: video ID
+          name: "VideoEditor",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/video/VideoEditor.vue"),
+        },
+        {
           path: "/admin/video-processing",
           name: "Video Processing",
           meta: { requiresAuth: true },

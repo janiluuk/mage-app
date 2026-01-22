@@ -1,6 +1,6 @@
 <template>
         <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
+            <button @click.stop="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
                 class="p-link topbar-button">
                 <i class="pi pi-plus mr-2"></i>
                 <span>Create!</span>
@@ -68,11 +68,15 @@ export default {
   },
     methods: {
         onTopBarActionButton(route) {
-          activeRoute.value = route;
+            activeRoute.value = route;
             this.$router.push(route);
         },
         toggleMenu(event) {
-            this.$refs.menu.toggle(event);
+            event.preventDefault();
+            event.stopPropagation();
+            if (this.$refs.menu) {
+                this.$refs.menu.toggle(event);
+            }
         },
         getOverlayMenu() {
             return ([

@@ -264,6 +264,34 @@ Upload videos through the Media Library, then use:
 - **Purpose:** Main API server handling authentication, database operations, video processing, and core business logic
 - **The `/backend` directory** in this repository contains optional helper code for development/testing audio streaming only
 
+### Backend CORS Configuration
+
+The video editor and other media features require proper CORS configuration on the backend API to handle cross-origin video playback and authentication. The frontend uses `crossOrigin="anonymous"` for video elements to enable CORS-compliant video loading.
+
+**Required Backend CORS Headers:**
+- `Access-Control-Allow-Origin`: Should be set to the frontend origin (e.g., `http://localhost:8080` for dev, your production domain for prod)
+- `Access-Control-Allow-Credentials`: Set to `true` if using cookie-based authentication
+- `Access-Control-Allow-Methods`: Include `GET, POST, PUT, DELETE, OPTIONS` for API operations
+- `Access-Control-Allow-Headers`: Include `Authorization, Content-Type` and any custom headers used
+
+**Authentication for Video URLs:**
+Since HTML5 `<video>` elements don't support custom headers directly, the backend should implement one of the following authentication methods for video URLs:
+1. **Signed URLs**: Generate temporary URLs with authentication tokens in query parameters
+2. **Cookie-based auth**: Use HTTP-only cookies for same-origin requests
+3. **Token in URL**: Include JWT token as a query parameter (less secure, use for development only)
+
+**Example Backend Configuration (Express.js):**
+```javascript
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:8080',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Authorization', 'Content-Type']
+}));
+```
+
+For more details, refer to the [mage-api repository](https://github.com/janiluuk/mage-api) backend documentation.
+
 ## Getting Started
 ### Prerequisites
 - Node.js **18+** and npm

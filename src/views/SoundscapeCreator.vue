@@ -100,15 +100,11 @@ async function generate() {
       audioSrc.value = streamUrl
     } catch (urlError) {
       errorMessage.value = 'Invalid API URL configuration'
-      if (import.meta.env.DEV) {
-        console.error('Invalid URL:', urlError)
-      }
+      console.error('Invalid URL:', urlError)
     }
   } catch (error) {
     errorMessage.value = error.message || 'Failed to generate soundscape'
-    if (import.meta.env.DEV) {
-      console.error('Generate error:', error)
-    }
+    console.error('Generate error:', error)
   }
 }
 

@@ -1,133 +1,83 @@
 <template>
+  <div class="playback-rate-slider">
+    <label class="slider-label">Speed</label>
     <div class="slider-container">
-        <div class="slider-holder" @wheel="wheelPbr">
-            <Slider class="slider"
-                      :prepend-icon="pbrIcon"
-                      dense
-                      hide-details
-                      min="0.1"
-                      max="2"
-                      step="0.001"
-                      v-model="rawPlaybackRate"></Slider>
-            <div class="slider-label">
-                <p>Playback rate: {{ activeFragment.playbackRate.toFixed(2) }}x</p>
-            </div>
-        </div>
-        <Tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-                <Button x-small icon class="reset-button"
-                       :style="{
-                                            opacity: activeFragment.playbackRate === 1 ? 0 : 0.5,
-                                            pointerEvents: activeFragment.playbackRate === 1 ? 'none' : 'all',
-                                        }"
-                       @click="rawPlaybackRate = 1" v-bind="attrs" v-on="on">
-                    <i className="pi pi-reload">
-                </Button>
-            </template>
-            <span>Set default playback rate</span>
-        </Tooltip>
+      <Slider
+        v-model="playbackRate"
+        :min="0.25"
+        :max="4"
+        :step="0.05"
+        class="slider"
+        @update:modelValue="updatePlaybackRate"
+      />
+      <span class="slider-value">{{ playbackRate.toFixed(2) }}x</span>
     </div>
+  </div>
 </template>
 
 <script>
-import {mapActions, mapState} from "vuex";
+import { computed } from 'vue';
+import { useStore } from 'vuex';
+import Slider from 'primevue/slider';
 
 export default {
-    name: "PlaybackRateSlider",
-    data: () => ({
-        rawPlaybackRate: 1,
-        commit: true,
-    }),
-    methods: {
-        updateRawPbr(commit = true) {
-            let pbr = this.activeFragment.playbackRate;
-            if (pbr > 1)
-                pbr = 1 + (pbr - 1) / 7;
-            if (pbr !== this.rawPlaybackRate) {
-                this.commit = commit;
-                this.rawPlaybackRate = pbr;
-            }
-        },
-        wheelPbr(e) {
-            this.rawPlaybackRate -= e.deltaY * 0.00005;
-        },
-        ...mapActions(['setPlaybackRate']),
-    },
-    watch: {
-        'activeFragment.playbackRate'() {
-            this.updateRawPbr(false);
-        },
-        activeFragment() {
-            this.updateRawPbr(false);
-        },
-        rawPlaybackRate() {
-            let playbackRate = this.rawPlaybackRate;
-            if (this.rawPlaybackRate > 1)
-                playbackRate = 1 + (this.rawPlaybackRate - 1) * 7;
-            if (this.commit)
-                this.setPlaybackRate({playbackRate});
-            else
-                this.commit = true;
-        },
-    },
-    computed: {
-        pbrIcon() {
-            if (this.rawPlaybackRate < 0.8) {
-                return 'mdi-speedometer-slow';
-            } else if (this.rawPlaybackRate < 1.2) {
-                return 'mdi-speedometer-medium';
-            } else {
-                return 'mdi-speedometer';
-            }
-        },
-        ...mapState({
-            activeFragment: state => state.activeFragment,
-        }),
-    },
-}
+  name: 'PlaybackRateSlider',
+  components: { Slider },
+  setup() {
+    const store = useStore();
+    
+    const playbackRate = computed({
+      get: () => {
+        const activeFragment = store.state.videoeditor.activeFragment;
+        return activeFragment?.playbackRate ?? 1;
+      },
+      set: (value) => {
+        store.dispatch('videoeditor/setFragmentPlaybackRate', { playbackRate: value });
+      }
+    });
+
+    const updatePlaybackRate = (value) => {
+      playbackRate.value = value;
+    };
+
+    return {
+      playbackRate,
+      updatePlaybackRate,
+    };
+  },
+};
 </script>
 
 <style scoped>
-.slider-container {
-    height: 100%;
-    display: flex;
-    place-items: center;
-}
-
-.slider-holder {
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    margin: 0 10px;
+.playback-rate-slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  min-width: 100px;
 }
 
 .slider-label {
-    display: flex;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: var(--text-color-secondary);
+  white-space: nowrap;
 }
 
-.reset-button {
-    margin-top: -2px;
-    opacity: 0;
-}
-
-.reset-button:hover, .reset-button:active {
-    opacity: 1;
-}
-
-.slider-label > p {
-    font-size: 12px;
-    opacity: 0.8;
-    width: 130px;
-    margin: 0;
-    text-align: center;
+.slider-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .slider {
-    width: 100%;
+  flex: 1;
+  min-width: 80px;
 }
 
-.slider >>> i {
-    font-size: 19px;
-    opacity: 0.8;
+.slider-value {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  min-width: 40px;
+  text-align: right;
 }
 </style>
