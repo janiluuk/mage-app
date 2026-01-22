@@ -8,7 +8,6 @@ export default class DeleteFragmentCommand extends BaseCommand {
     super('deleteFragment', `Delete fragment ${fragment.id}`);
     this.fragment = fragment;
     this.index = null;
-    this.videoWasRemoved = false;
   }
 
   execute(context) {
@@ -18,12 +17,6 @@ export default class DeleteFragmentCommand extends BaseCommand {
     if (this.index === -1) {
       return;
     }
-
-    // Check if this is the last fragment using this video
-    const otherFragmentsUsingVideo = state.timeline.filter(
-      f => f.video === this.fragment.video && f !== this.fragment
-    );
-    this.videoWasRemoved = otherFragmentsUsingVideo.length === 0;
 
     commit('REMOVE_FROM_TIMELINE', this.fragment);
     return this.fragment;
