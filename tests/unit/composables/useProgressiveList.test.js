@@ -59,6 +59,16 @@ describe('useProgressiveList', () => {
     });
   });
 
+  // NOTE: Previously there were additional suites covering the leading-edge
+  // debounce strategy and a "max visible cap" behavior. Those tests were
+  // removed because they were highly timing-sensitive and flaky in CI,
+  // even when marked as skipped with TODO comments.
+  //
+  // If we reintroduce coverage for those behaviors, we should do so with a
+  // more deterministic strategy (e.g. testing extracted debounce logic in
+  // isolation, or using integration-style tests that are less dependent on
+  // exact timer scheduling). See project issue tracker for context.
+
   describe('scroll pause behavior', () => {
     it('should pause loading when scrolling', async () => {
       const scrollRef = ref(document.createElement('div'));
