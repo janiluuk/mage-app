@@ -30,6 +30,54 @@ describe('Export Workflow Integration', () => {
       modules: {
         videoeditor: {
           ...videoeditor,
+          state: () => ({
+            timeline: [],
+            activeFragment: null,
+            videoFiles: [],
+            videosContainer: null,
+            videoMetadata: null,
+            videoType: null,
+            videoId: null,
+            storyInfo: null,
+            player: {
+              progress: 0,
+              playing: false,
+              volume: 1,
+              widthPercent: 0.75,
+              fullscreen: false,
+            },
+            configTimeline: {
+              minFragmentWidth: 90,
+              widthPerSecond: 3.5,
+            },
+            export: {
+              showDialog: false,
+              fps: '',
+              bitrate: '',
+              outputPath: '',
+              filters: [],
+              customResolution: false,
+              width: 1920,
+              height: 1080,
+              interpolate: false,
+            },
+            exportStatus: {
+              show: false,
+              progress: 0,
+              done: false,
+              error: '',
+              command: null,
+              output: [],
+            },
+            loading: {
+              videoImport: false,
+              projectImport: false,
+            },
+            commandHistory: {
+              undoStack: [],
+              redoStack: [],
+            },
+          }),
           mutations: {
             ...videoeditor.mutations,
             // Add missing mutations that are referenced in actions but not defined
@@ -43,12 +91,6 @@ describe('Export Workflow Integration', () => {
         },
       },
     });
-    
-    // Reset export state to defaults for each test
-    // This is needed because the videoeditor module's initialState is shared
-    store.commit('videoeditor/SET_EXPORT_FPS', '');
-    store.commit('videoeditor/SET_EXPORT_BITRATE', '');
-    store.commit('videoeditor/SET_EXPORT_CUSTOM_RESOLUTION', { width: null, height: null });
   });
 
   it('exports video with default options', async () => {
@@ -180,19 +222,21 @@ describe('Export Workflow Integration', () => {
 
     await store.dispatch('videoeditor/exportVideo');
 
-    expect(ExportService.exportVideo).toHaveBeenCalledWith(
-      expect.objectContaining({
-        exportOptions: expect.objectContaining({
-          fps: '60',
-          bitrate: '5',
-          customResolution: true,
-          width: 1280,
-          height: 720,
-        }),
-      }),
-      expect.any(Function),
-      expect.any(Function)
-    );
+    // Verify the exportVideo was called with correct parameters
+    expect(ExportService.exportVideo).toHaveBeenCalled();
+    const callArgs = ExportService.exportVideo.mock.calls[0];
+    const params = callArgs[0];
+    
+    // Check the export options contain our custom values
+    expect(params.exportOptions.fps).toBe('60');
+    expect(params.exportOptions.bitrate).toBe('5');
+    expect(params.exportOptions.customResolution).toBe(true);
+    expect(params.exportOptions.width).toBe(1280);
+    expect(params.exportOptions.height).toBe(720);
+    
+    // Verify timeline and output name are present
+    expect(params.timeline).toBeDefined();
+    expect(params.outputName).toBeDefined();
   });
 });
 
