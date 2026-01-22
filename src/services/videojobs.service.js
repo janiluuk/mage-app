@@ -185,7 +185,7 @@ export default {
     });
   },
 
-  async finalize(params) {
+  async _finalizeRequest(params) {
     const API_URL = env.VITE_API_URL || '';
     const response = await requestService.post(`${API_URL}/api/finalize`, params, {
       headers: {
@@ -194,6 +194,10 @@ export default {
       },
     });
     return response;
+  },
+
+  async finalize(params) {
+    return await this._finalizeRequest(params);
   },
 
   async cancelJob(id) {
@@ -212,14 +216,7 @@ export default {
     return await requestService.post("/generate", { ...params, type: "deforum" });
   },
   async finalizeDeforum(params) {
-    const API_URL = env.VITE_API_URL || '';
-    const response = await requestService.post(`${API_URL}/api/finalize`, params, {
-      headers: {
-        ...authHeader(),
-        'Content-Type': 'application/json',
-      },
-    });
-    return response;
+    return await this._finalizeRequest(params);
   },
 
   async queue() {
