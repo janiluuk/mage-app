@@ -621,15 +621,16 @@ class ExportService {
   extractJobData(response) {
     // Handle JSON:API format or direct response
     const jobData = response.data?.data?.attributes || response.data?.data || response.data;
+    const attrs = jobData.attributes || {};
     
     return {
-      status: jobData.status || jobData.attributes?.status,
-      progress: jobData.progress || jobData.attributes?.progress || 0,
-      error: jobData.error || jobData.attributes?.error,
-      output: jobData.output || jobData.attributes?.output || [],
-      fileUrl: jobData.fileUrl || jobData.file_url || jobData.attributes?.fileUrl || jobData.attributes?.file_url,
-      outputUrl: jobData.output_url || jobData.attributes?.output_url,
-      timemark: jobData.timemark || jobData.attributes?.timemark,
+      status: jobData.status || attrs.status,
+      progress: jobData.progress || attrs.progress || 0,
+      error: jobData.error || attrs.error,
+      output: jobData.output || attrs.output || [],
+      fileUrl: jobData.fileUrl || jobData.file_url || attrs.fileUrl || attrs.file_url,
+      outputUrl: jobData.output_url || attrs.output_url,
+      timemark: jobData.timemark || attrs.timemark,
     };
   }
 
