@@ -68,12 +68,14 @@
         label="View History" 
         icon="pi pi-chart-line" 
         class="p-button-sm p-button-outlined"
+        data-testid="view-history-button"
         @click="$emit('view-history', instance.id)"
       />
       <Button 
         label="View Jobs" 
         icon="pi pi-list" 
         class="p-button-sm p-button-outlined"
+        data-testid="view-jobs-button"
         @click="$emit('view-jobs', instance.id)"
       />
     </div>

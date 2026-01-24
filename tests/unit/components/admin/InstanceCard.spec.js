@@ -75,8 +75,7 @@ describe('InstanceCard', () => {
   });
 
   it('emits view-history event when View History button is clicked', async () => {
-    const buttons = wrapper.findAllComponents(Button);
-    const viewHistoryButton = buttons.find(b => b.text().includes('View History'));
+    const viewHistoryButton = wrapper.find('[data-testid="view-history-button"]');
     
     await viewHistoryButton.trigger('click');
     
@@ -85,8 +84,7 @@ describe('InstanceCard', () => {
   });
 
   it('emits view-jobs event when View Jobs button is clicked', async () => {
-    const buttons = wrapper.findAllComponents(Button);
-    const viewJobsButton = buttons.find(b => b.text().includes('View Jobs'));
+    const viewJobsButton = wrapper.find('[data-testid="view-jobs-button"]');
     
     await viewJobsButton.trigger('click');
     
