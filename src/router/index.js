@@ -256,6 +256,10 @@ const router = createRouter({
           path: "/dev/deforumation-qt",
           component: () => DeforumationQT,
         },
+        {
+          path: "/dev/admin-ui-demo",
+          component: () => import("@/views/dev/AdminUIDemo.vue"),
+        },
         // Other routes
         {
           path: "/edit/vid2vid/:id", // :id is a dynamic route parameter for the video ID
@@ -281,7 +285,18 @@ const router = createRouter({
           meta: { requiresAuth: true },
           component: () => import("@/views/admin/VideoProcessing.vue"),
         },
+        {
+          path: "/admin/instances",
+          name: "Instance Management",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/InstanceManagement.vue"),
+        },
       ],
+    },
+    {
+      path: "/demo/admin-ui",
+      name: "AdminUIDemo",
+      component: () => import("@/views/dev/AdminUIDemo.vue"),
     },
     {
       path: "/landing",
