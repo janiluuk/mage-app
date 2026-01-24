@@ -66,6 +66,16 @@ config.global.stubs = {
   'transition-group': false,
 };
 
+// Provide PrimeVue configuration for tests
+config.global.mocks = {
+  $primevue: {
+    config: {
+      ripple: false,
+      locale: {}
+    }
+  }
+};
+
 // Mock import.meta.env
 Object.defineProperty(import.meta, 'env', {
   writable: true,
