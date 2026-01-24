@@ -68,6 +68,7 @@ config.global.stubs = {
 
 // Provide PrimeVue configuration for tests
 config.global.mocks = {
+  ...(config.global.mocks || {}),
   $primevue: {
     config: {
       ripple: false,

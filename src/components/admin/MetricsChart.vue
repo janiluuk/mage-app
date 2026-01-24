@@ -52,11 +52,8 @@ import Dialog from 'primevue/dialog';
 import Button from 'primevue/button';
 import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
-import { Chart, registerables } from 'chart.js';
+import { Chart } from 'chart.js';
 import instanceAdminService from '@/services/instanceAdminService';
-
-// Register Chart.js components
-Chart.register(...registerables);
 
 export default {
   name: 'MetricsChart',

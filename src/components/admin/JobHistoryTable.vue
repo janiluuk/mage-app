@@ -64,6 +64,7 @@ import Tag from 'primevue/tag';
 import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
 import instanceAdminService from '@/services/instanceAdminService';
+import { formatProcessingTime, formatDate } from '@/utils/timeFormatters';
 
 export default {
   name: 'JobHistoryTable',
@@ -122,25 +123,6 @@ export default {
       if (status === 'failed') return 'danger';
       if (status === 'processing') return 'info';
       return 'warning';
-    };
-
-    const formatProcessingTime = (seconds) => {
-      if (!seconds) return 'N/A';
-      
-      const minutes = Math.floor(seconds / 60);
-      const remainingSeconds = Math.round(seconds % 60);
-      
-      if (minutes > 0) {
-        return `${minutes}m ${remainingSeconds}s`;
-      }
-      return `${remainingSeconds}s`;
-    };
-
-    const formatDate = (dateString) => {
-      if (!dateString) return 'N/A';
-      
-      const date = new Date(dateString);
-      return date.toLocaleString();
     };
 
     // Watch for visibility changes

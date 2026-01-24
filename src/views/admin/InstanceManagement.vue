@@ -237,10 +237,11 @@ export default {
     };
 
     const startAutoRefresh = () => {
-      // Auto-refresh every 30 seconds
+      // Auto-refresh interval (default: 30 seconds, configurable via env)
+      const refreshIntervalMs = import.meta.env.VITE_ADMIN_REFRESH_INTERVAL || 30000;
       refreshInterval.value = setInterval(() => {
         fetchData();
-      }, 30000);
+      }, refreshIntervalMs);
     };
 
     const stopAutoRefresh = () => {
