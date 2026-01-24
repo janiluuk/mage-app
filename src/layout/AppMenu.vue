@@ -41,6 +41,13 @@ const model = ref([
         ]
     },
     {
+        label: 'Administration',
+        items: [
+            { label: 'Instance Management', icon: 'pi pi-fw pi-server', to: '/admin/instances' },
+            { label: 'Video Processing', icon: 'pi pi-fw pi-video', to: '/admin/video-processing' }
+        ]
+    },
+    {
         label: 'Developer Tools',
         items: [
             { 

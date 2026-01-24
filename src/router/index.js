@@ -281,6 +281,12 @@ const router = createRouter({
           meta: { requiresAuth: true },
           component: () => import("@/views/admin/VideoProcessing.vue"),
         },
+        {
+          path: "/admin/instances",
+          name: "Instance Management",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/InstanceManagement.vue"),
+        },
       ],
     },
     {
