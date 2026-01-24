@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
+import Tooltip from 'primevue/tooltip';
 import BatchQueueItem from './BatchQueueItem.vue';
 import { FileStatus } from '@/services/batchProcessingService';
 
@@ -37,6 +38,9 @@ describe('BatchQueueItem', () => {
             template: '<div>{{ value }}%</div>',
             props: ['value', 'showValue']
           }
+        },
+        directives: {
+          tooltip: Tooltip,
         }
       }
     });
