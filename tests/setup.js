@@ -72,7 +72,17 @@ config.global.mocks = {
   $primevue: {
     config: {
       ripple: false,
-      locale: {}
+      locale: {
+        aria: {
+          close: 'Close'
+        }
+      },
+      zIndex: {
+        modal: 1100,
+        overlay: 1000,
+        menu: 1000,
+        tooltip: 1100
+      }
     }
   }
 };

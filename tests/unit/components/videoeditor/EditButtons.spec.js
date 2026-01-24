@@ -2,6 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import EditButtons from '@/components/videoeditor/EditButtons.vue';
+import Tooltip from 'primevue/tooltip';
 
 describe('EditButtons', () => {
   let store;
@@ -37,6 +38,9 @@ describe('EditButtons', () => {
         },
       },
     });
+
+    // Mock window.dispatchEvent for project dialog methods
+    global.window.dispatchEvent = vi.fn();
   });
 
   const createWrapper = (options = {}) => {
@@ -55,7 +59,7 @@ describe('EditButtons', () => {
           PlaybackRateSlider: true,
         },
         directives: {
-          tooltip: {},
+          tooltip: Tooltip,
         },
       },
       ...options,
@@ -117,7 +121,7 @@ describe('EditButtons', () => {
           PlaybackRateSlider: true,
         },
         directives: {
-          tooltip: {},
+          tooltip: Tooltip,
         },
       },
     });
@@ -182,7 +186,7 @@ describe('EditButtons', () => {
           PlaybackRateSlider: true,
         },
         directives: {
-          tooltip: {},
+          tooltip: Tooltip,
         },
       },
     });
@@ -241,7 +245,7 @@ describe('EditButtons', () => {
           PlaybackRateSlider: true,
         },
         directives: {
-          tooltip: {},
+          tooltip: Tooltip,
         },
       },
     });
