@@ -20,8 +20,8 @@ import Badge from "primevue/badge";
 import BadgeDirective from "primevue/badgedirective";
 
 // Register Chart.js components globally
-import { Chart, registerables } from 'chart.js';
-Chart.register(...registerables);
+import { Chart as ChartJS, registerables } from 'chart.js';
+ChartJS.register(...registerables);
 import BlockUI from "primevue/blockui";
 import Button from "primevue/button";
 import Breadcrumb from "primevue/breadcrumb";
