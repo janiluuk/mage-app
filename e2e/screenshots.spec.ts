@@ -1,17 +1,19 @@
 import { expect, test } from '@playwright/test';
 
 /**
- * Screenshot tests for Browser and VideoEditor pages
- * These tests capture visual snapshots of key application pages
+ * Screenshot tests for all application pages
+ * These tests capture visual snapshots of key application pages including
+ * user pages, admin pages, and main features
  */
 
 // Mock authentication state for accessing protected routes
 test.beforeEach(async ({ page }) => {
   // Set localStorage to simulate authenticated state
   await page.addInitScript(() => {
-    // Mock JWT token - this is for screenshot purposes only
-    const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNTE2MjM5MDIyfQ.4Adcj0MqXKe2cdMJ3L8fCkRzfFqJt8xJf7Q9X8qGlKg';
-    localStorage.setItem('jwt-token', mockToken);
+    // Mock JWT token with far-future expiration for screenshot purposes
+    // This token uses the correct localStorage key that AuthService expects
+    const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNTE2MjM5MDIyLCJyb2xlIjoiYWRtaW4ifQ.dummySignatureForScreenshotTestingOnly';
+    localStorage.setItem('auth.accessToken', mockToken);
   });
 });
 
@@ -139,5 +141,113 @@ test.describe('Additional UI Screenshots', () => {
     });
     
     console.log('✓ Story Creator screenshot saved to: screenshots/story-creator.png');
+  });
+
+  test('capture soundscape creator screenshot', async ({ page }) => {
+    await page.goto('/soundscape', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/soundscape-creator.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Soundscape Creator screenshot saved to: screenshots/soundscape-creator.png');
+  });
+
+  test('capture frontpage screenshot', async ({ page }) => {
+    await page.goto('/frontpage', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/frontpage.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Frontpage screenshot saved to: screenshots/frontpage.png');
+  });
+});
+
+test.describe('User Pages Screenshots', () => {
+  test('capture user profile screenshot', async ({ page }) => {
+    await page.goto('/profile', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/user-profile.png',
+      fullPage: true
+    });
+    
+    console.log('✓ User Profile screenshot saved to: screenshots/user-profile.png');
+  });
+
+  test('capture library screenshot', async ({ page }) => {
+    await page.goto('/library', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/library.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Library screenshot saved to: screenshots/library.png');
+  });
+
+  test('capture stories browser screenshot', async ({ page }) => {
+    await page.goto('/stories', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/stories-browser.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Stories Browser screenshot saved to: screenshots/stories-browser.png');
+  });
+
+  test('capture upload page screenshot', async ({ page }) => {
+    await page.goto('/upload', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/upload-page.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Upload Page screenshot saved to: screenshots/upload-page.png');
+  });
+});
+
+test.describe('Admin Pages Screenshots', () => {
+  test('capture video processing admin page screenshot', async ({ page }) => {
+    await page.goto('/admin/video-processing', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/admin-video-processing.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Admin Video Processing screenshot saved to: screenshots/admin-video-processing.png');
+  });
+
+  test('capture instance management admin page screenshot', async ({ page }) => {
+    await page.goto('/admin/instances', { waitUntil: 'networkidle' });
+    
+    await page.waitForLoadState('domcontentloaded');
+    
+    await page.screenshot({
+      path: 'screenshots/admin-instance-management.png',
+      fullPage: true
+    });
+    
+    console.log('✓ Admin Instance Management screenshot saved to: screenshots/admin-instance-management.png');
   });
 });

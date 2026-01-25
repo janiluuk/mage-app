@@ -49,12 +49,26 @@ npm run test:e2e:ui
 
 ### Screenshots
 Screenshot tests generate PNG images in the `/screenshots` directory:
-- `browser-page.png`
-- `browser-page-with-filters.png`
-- `video-editor-page.png`
-- `video-editor-loading.png`
-- `dashboard.png`
-- `story-creator.png`
+
+**Main Features:**
+- `browser-page.png` - Media browser/library
+- `browser-page-with-filters.png` - Browser with filters
+- `video-editor-page.png` - Video editor interface
+- `video-editor-loading.png` - Video editor loading state
+- `dashboard.png` - Application dashboard
+- `story-creator.png` - Story creator
+- `soundscape-creator.png` - Soundscape creator
+- `frontpage.png` - Application frontpage
+
+**User Pages:**
+- `user-profile.png` - User profile
+- `library.png` - Video library
+- `stories-browser.png` - Stories browser
+- `upload-page.png` - Upload page
+
+**Admin Pages:**
+- `admin-video-processing.png` - Video processing admin
+- `admin-instance-management.png` - Instance management admin
 
 Screenshots are excluded from git (see `.gitignore`).
 
