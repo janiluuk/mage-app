@@ -18,18 +18,17 @@ test.beforeEach(async ({ page }) => {
 test.describe('Browser Page Screenshots', () => {
   test('capture browser page screenshot', async ({ page }) => {
     // Navigate to browser page
-    await page.goto('/browser');
+    await page.goto('/browser', { waitUntil: 'networkidle' });
     
-    // Wait for the page to be in a stable state
-    // Wait for either loading indicator to disappear or content to appear
-    await page.waitForTimeout(2000); // Give time for initial render
-    
-    // Try to wait for loading to complete, but don't fail if it doesn't appear
+    // Wait for page to be in a stable state
     try {
       await page.waitForSelector('.loading-indicator', { state: 'hidden', timeout: 5000 });
     } catch {
       // Loading indicator might not appear, continue anyway
     }
+    
+    // Ensure page is fully loaded
+    await page.waitForLoadState('domcontentloaded');
     
     // Take full page screenshot
     await page.screenshot({
@@ -41,10 +40,10 @@ test.describe('Browser Page Screenshots', () => {
   });
   
   test('capture browser page with filters open', async ({ page }) => {
-    await page.goto('/browser');
+    await page.goto('/browser', { waitUntil: 'networkidle' });
     
-    // Wait for page load
-    await page.waitForTimeout(2000);
+    // Wait for page to be stable
+    await page.waitForLoadState('domcontentloaded');
     
     try {
       await page.waitForSelector('.loading-indicator', { state: 'hidden', timeout: 5000 });
@@ -57,7 +56,8 @@ test.describe('Browser Page Screenshots', () => {
       const filtersButton = page.locator('[aria-label*="filter" i], button:has-text("Filter")').first();
       if (await filtersButton.isVisible({ timeout: 2000 })) {
         await filtersButton.click();
-        await page.waitForTimeout(500); // Wait for filters panel to open
+        // Wait for filters panel animation to complete
+        await page.waitForLoadState('networkidle');
       }
     } catch {
       console.log('Filters button not found, taking screenshot of current state');
@@ -77,10 +77,10 @@ test.describe('Video Editor Screenshots', () => {
   test('capture video editor page screenshot', async ({ page }) => {
     // Navigate to video editor with test parameters
     // Using 'file' type and a test ID
-    await page.goto('/editor/file/test-video-id');
+    await page.goto('/editor/file/test-video-id', { waitUntil: 'networkidle' });
     
-    // Wait for the page to load
-    await page.waitForTimeout(2000);
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('domcontentloaded');
     
     // Wait for either the editor or an error/loading state to appear
     await Promise.race([
@@ -100,10 +100,10 @@ test.describe('Video Editor Screenshots', () => {
   });
   
   test('capture video editor loading state', async ({ page }) => {
-    await page.goto('/editor/job/test-job-id');
+    await page.goto('/editor/job/test-job-id', { waitUntil: 'domcontentloaded' });
     
     // Capture early state (likely loading or error)
-    await page.waitForTimeout(1000);
+    await page.waitForLoadState('domcontentloaded');
     
     await page.screenshot({
       path: 'screenshots/video-editor-loading.png',
@@ -116,9 +116,9 @@ test.describe('Video Editor Screenshots', () => {
 
 test.describe('Additional UI Screenshots', () => {
   test('capture dashboard screenshot', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('/', { waitUntil: 'networkidle' });
     
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
     
     await page.screenshot({
       path: 'screenshots/dashboard.png',
@@ -129,9 +129,9 @@ test.describe('Additional UI Screenshots', () => {
   });
   
   test('capture story creator screenshot', async ({ page }) => {
-    await page.goto('/story');
+    await page.goto('/story', { waitUntil: 'networkidle' });
     
-    await page.waitForTimeout(2000);
+    await page.waitForLoadState('domcontentloaded');
     
     await page.screenshot({
       path: 'screenshots/story-creator.png',
