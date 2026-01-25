@@ -29,6 +29,13 @@ test.describe('Browser Page Screenshots', () => {
       // Loading indicator might not appear, continue anyway
     }
     
+    // Wait for either content or empty state to appear
+    await Promise.race([
+      page.waitForSelector('.drop-zone', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.video-grid', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.content-region', { timeout: 3000 }).catch(() => null),
+    ]);
+    
     // Ensure page is fully loaded
     await page.waitForLoadState('domcontentloaded');
     
@@ -52,6 +59,13 @@ test.describe('Browser Page Screenshots', () => {
     } catch {
       // Continue if loading indicator doesn't appear
     }
+    
+    // Wait for either content or empty state
+    await Promise.race([
+      page.waitForSelector('.drop-zone', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.video-grid', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.content-region', { timeout: 3000 }).catch(() => null),
+    ]);
     
     // Try to open filters if the button exists
     try {
@@ -106,6 +120,8 @@ test.describe('Video Editor Screenshots', () => {
     
     // Capture early state (likely loading or error)
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/video-editor-loading.png',
@@ -121,6 +137,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/dashboard.png',
@@ -134,6 +152,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/story', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/story-creator.png',
@@ -147,6 +167,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/soundscape', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/soundscape-creator.png',
@@ -160,6 +182,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/frontpage', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/frontpage.png',
@@ -175,6 +199,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/profile', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/user-profile.png',
@@ -188,6 +214,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/library', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/library.png',
@@ -201,6 +229,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/stories', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/stories-browser.png',
@@ -214,6 +244,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/upload', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/upload-page.png',
@@ -229,6 +261,8 @@ test.describe('Admin Pages Screenshots', () => {
     await page.goto('/admin/video-processing', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/admin-video-processing.png',
@@ -242,6 +276,8 @@ test.describe('Admin Pages Screenshots', () => {
     await page.goto('/admin/instances', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
+    // Give page time to render content or empty states
+    await page.waitForTimeout(1000);
     
     await page.screenshot({
       path: 'screenshots/admin-instance-management.png',
