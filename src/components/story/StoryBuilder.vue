@@ -156,7 +156,6 @@
 import { computed, ref, watch } from 'vue'
 import Badge from 'primevue/badge'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
 import Dialog from 'primevue/dialog'
 import Divider from 'primevue/divider'
 import Dropdown from 'primevue/dropdown'
