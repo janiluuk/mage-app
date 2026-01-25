@@ -196,4 +196,56 @@ describe('AuthService', () => {
       expect(AuthService.hasToken()).toBe(true)
     })
   })
+
+  describe('OAuth provider authentication', () => {
+    it('should initiate OAuth flow for provider', async () => {
+      const mockUrl = 'https://discord.com/oauth2/authorize?client_id=123'
+      requestService.get.mockResolvedValue({
+        data: {
+          url: mockUrl
+        }
+      })
+
+      const url = await AuthService.signInByProvider('discord')
+      
+      expect(requestService.get).toHaveBeenCalledWith('/discord/auth')
+      expect(url).toBe(mockUrl)
+    })
+
+    it('should handle OAuth callback with code', async () => {
+      const mockToken = 'oauth-access-token'
+      const mockData = {
+        code: 'auth-code-123',
+        provider: 'google'
+      }
+      
+      requestService.get.mockResolvedValue({
+        data: {
+          data: {
+            accessToken: mockToken
+          }
+        }
+      })
+
+      await AuthService.signInByProviderCallback('google', mockData)
+      
+      expect(requestService.get).toHaveBeenCalledWith('/google/callback', mockData)
+      expect(localStorage.getItem('auth.accessToken')).toBe(mockToken)
+    })
+
+    it('should save token after successful OAuth callback', async () => {
+      const mockToken = 'facebook-token'
+      requestService.get.mockResolvedValue({
+        data: {
+          data: {
+            accessToken: mockToken
+          }
+        }
+      })
+
+      await AuthService.signInByProviderCallback('facebook', { code: 'abc123' })
+      
+      expect(AuthService.getToken()).toBe(mockToken)
+    })
+  })
 })

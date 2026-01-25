@@ -15,6 +15,7 @@ import DeforumationQT from "@/views/dev/DeforumationQT.vue";
 import MageAppMain from "@/views/MageAppMain.vue";
 import StoryCreator from "@/views/StoryCreator.vue";
 import Verification from "@/views/pages/auth/Verification.vue";
+import SocialiteAuth from "@/views/SocialiteAuth.vue";
 
 const router = createRouter({
   history: createWebHistory(),
@@ -353,6 +354,29 @@ const router = createRouter({
       path: "/auth/error",
       name: "error",
       component: () => import("@/views/pages/auth/Error.vue"),
+    },
+    
+    // OAuth callback routes
+    {
+      path: "/discord/callback",
+      name: "DiscordCallback",
+      component: SocialiteAuth,
+      props: { provider: 'discord' },
+      meta: { handleAuth: true }
+    },
+    {
+      path: "/google/callback",
+      name: "GoogleCallback",
+      component: SocialiteAuth,
+      props: { provider: 'google' },
+      meta: { handleAuth: true }
+    },
+    {
+      path: "/facebook/callback",
+      name: "FacebookCallback",
+      component: SocialiteAuth,
+      props: { provider: 'facebook' },
+      meta: { handleAuth: true }
     },
 
     ...routes,
