@@ -49,18 +49,10 @@ export default {
         topbarMenuClasses: { type: Object, default: {'layout-topbar-menu-mobile-active': false} }
 
     },
-    defaults: {
-        topbarMenuActive: { value: null },
-    },
     computed: {
     ...mapGetters('AuthService', {
       getLoggedUser: authGetters.GET_LOGGED_USER
-    }),
-    topBarMenuClasses() {
-        return {
-            'layout-topbar-menu-mobile-active': this.topbarMenuActive
-        };
-    }
+    })
   },
     methods: {
         onTopBarActionButton(route) {
