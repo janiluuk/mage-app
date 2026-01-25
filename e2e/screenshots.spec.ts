@@ -3,17 +3,129 @@ import { expect, test } from '@playwright/test';
 /**
  * Screenshot tests for all application pages
  * These tests capture visual snapshots of key application pages including
- * user pages, admin pages, and main features
+ * user pages, admin pages, and main features with mock data
  */
 
-// Mock authentication state for accessing protected routes
+// Mock data for screenshots
+const mockVideos = [
+  {
+    id: 1,
+    filename: 'mountain_sunset.mp4',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+    thumbnail: 'https://via.placeholder.com/320x180/4A90E2/ffffff?text=Mountain+Sunset',
+    duration: 15.5,
+    width: 1920,
+    height: 1080,
+    size: 5242880,
+    created_at: '2024-01-20T10:30:00Z',
+    tags: ['nature', 'landscape']
+  },
+  {
+    id: 2,
+    filename: 'ocean_waves.mp4',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+    thumbnail: 'https://via.placeholder.com/320x180/50C878/ffffff?text=Ocean+Waves',
+    duration: 22.3,
+    width: 1920,
+    height: 1080,
+    size: 8388608,
+    created_at: '2024-01-19T14:20:00Z',
+    tags: ['nature', 'water']
+  },
+  {
+    id: 3,
+    filename: 'city_timelapse.mp4',
+    url: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+    thumbnail: 'https://via.placeholder.com/320x180/FF6347/ffffff?text=City+Timelapse',
+    duration: 30.0,
+    width: 3840,
+    height: 2160,
+    size: 15728640,
+    created_at: '2024-01-18T09:15:00Z',
+    tags: ['urban', 'timelapse']
+  }
+];
+
+const mockJobs = [
+  {
+    id: 1,
+    status: 'completed',
+    type: 'vid2vid',
+    filename: 'processed_mountain.mp4',
+    progress: 100,
+    created_at: '2024-01-20T12:00:00Z'
+  },
+  {
+    id: 2,
+    status: 'processing',
+    type: 'deforum',
+    filename: 'animation_ocean.mp4',
+    progress: 65,
+    created_at: '2024-01-20T13:30:00Z'
+  }
+];
+
+const mockUser = {
+  id: 1,
+  name: 'Test User',
+  email: 'test@example.com',
+  credits: 150,
+  role: 'admin'
+};
+
+// Mock authentication state and API responses for all pages
 test.beforeEach(async ({ page }) => {
   // Set localStorage to simulate authenticated state
   await page.addInitScript(() => {
     // Mock JWT token with far-future expiration for screenshot purposes
-    // This token uses the correct localStorage key that AuthService expects
     const mockToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRlc3QgVXNlciIsImV4cCI6OTk5OTk5OTk5OSwiaWF0IjoxNTE2MjM5MDIyLCJyb2xlIjoiYWRtaW4ifQ.dummySignatureForScreenshotTestingOnly';
     localStorage.setItem('auth.accessToken', mockToken);
+  });
+
+  // Mock API responses to show actual content
+  await page.route('**/api/**', (route) => {
+    const url = route.request().url();
+    
+    // Mock files/videos endpoint
+    if (url.includes('/files') || url.includes('/videos')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockVideos, total: mockVideos.length })
+      });
+    }
+    // Mock jobs endpoint
+    else if (url.includes('/jobs') || url.includes('/video-jobs')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockJobs, total: mockJobs.length })
+      });
+    }
+    // Mock user/profile endpoint
+    else if (url.includes('/user') || url.includes('/profile')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: mockUser })
+      });
+    }
+    // Mock tags endpoint
+    else if (url.includes('/tags')) {
+      route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ data: [
+          { id: 1, name: 'nature', files_count: 2 },
+          { id: 2, name: 'urban', files_count: 1 },
+          { id: 3, name: 'timelapse', files_count: 1 }
+        ]})
+      });
+    }
+    // Default: continue with request
+    else {
+      route.continue();
+    }
   });
 });
 
@@ -29,15 +141,15 @@ test.describe('Browser Page Screenshots', () => {
       // Loading indicator might not appear, continue anyway
     }
     
-    // Wait for either content or empty state to appear
+    // Wait for content to appear (video grid or thumbnails)
     await Promise.race([
-      page.waitForSelector('.drop-zone', { timeout: 3000 }).catch(() => null),
-      page.waitForSelector('.video-grid', { timeout: 3000 }).catch(() => null),
-      page.waitForSelector('.content-region', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.video-grid img', { timeout: 5000 }).catch(() => null),
+      page.waitForSelector('.video-thumbnail', { timeout: 5000 }).catch(() => null),
+      page.waitForSelector('.content-region', { timeout: 5000 }).catch(() => null),
     ]);
     
-    // Ensure page is fully loaded
-    await page.waitForLoadState('domcontentloaded');
+    // Additional wait for images to load
+    await page.waitForTimeout(2000);
     
     // Take full page screenshot
     await page.screenshot({
@@ -60,12 +172,15 @@ test.describe('Browser Page Screenshots', () => {
       // Continue if loading indicator doesn't appear
     }
     
-    // Wait for either content or empty state
+    // Wait for content to appear
     await Promise.race([
-      page.waitForSelector('.drop-zone', { timeout: 3000 }).catch(() => null),
-      page.waitForSelector('.video-grid', { timeout: 3000 }).catch(() => null),
-      page.waitForSelector('.content-region', { timeout: 3000 }).catch(() => null),
+      page.waitForSelector('.video-grid img', { timeout: 5000 }).catch(() => null),
+      page.waitForSelector('.video-thumbnail', { timeout: 5000 }).catch(() => null),
+      page.waitForSelector('.content-region', { timeout: 5000 }).catch(() => null),
     ]);
+    
+    // Additional wait for content to render
+    await page.waitForTimeout(2000);
     
     // Try to open filters if the button exists
     try {
@@ -74,6 +189,7 @@ test.describe('Browser Page Screenshots', () => {
         await filtersButton.click();
         // Wait for filters panel animation to complete
         await page.waitForLoadState('networkidle');
+        await page.waitForTimeout(500);
       }
     } catch {
       console.log('Filters button not found, taking screenshot of current state');
@@ -137,8 +253,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render content with mock data
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/dashboard.png',
@@ -152,8 +268,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/story', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/story-creator.png',
@@ -167,8 +283,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/soundscape', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/soundscape-creator.png',
@@ -182,8 +298,8 @@ test.describe('Additional UI Screenshots', () => {
     await page.goto('/frontpage', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/frontpage.png',
@@ -199,8 +315,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/profile', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render user data
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/user-profile.png',
@@ -214,8 +330,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/library', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render library content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/library.png',
@@ -229,8 +345,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/stories', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render stories
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/stories-browser.png',
@@ -244,8 +360,8 @@ test.describe('User Pages Screenshots', () => {
     await page.goto('/upload', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render upload interface
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/upload-page.png',
@@ -261,8 +377,8 @@ test.describe('Admin Pages Screenshots', () => {
     await page.goto('/admin/video-processing', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render admin content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/admin-video-processing.png',
@@ -276,8 +392,8 @@ test.describe('Admin Pages Screenshots', () => {
     await page.goto('/admin/instances', { waitUntil: 'networkidle' });
     
     await page.waitForLoadState('domcontentloaded');
-    // Give page time to render content or empty states
-    await page.waitForTimeout(1000);
+    // Give page time to render admin content
+    await page.waitForTimeout(2000);
     
     await page.screenshot({
       path: 'screenshots/admin-instance-management.png',
