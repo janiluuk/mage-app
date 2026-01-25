@@ -4,17 +4,20 @@
 
 The Story Creator is a comprehensive tool for creating longer, narrative-driven animations inspired by deforum.studio. It enables creators to build multi-scene stories with live preview capabilities, making it easier to produce extended content with cohesive narratives.
 
+**Enhanced with PrimeVue**: The Story Creator now features a modern, professional UI using PrimeVue components including Panel, Fieldset, Badge, and Tag for better visual consistency and user experience. See [PrimeVue Enhancements Documentation](PRIMEVUE_ENHANCEMENTS.md) for details.
+
 ## Features
 
 ### 1. Multi-Scene Story Builder
 
 Organize your animations into scenes and chapters for better narrative structure:
 
-- **Scene Management**: Add, edit, duplicate, and delete scenes
+- **Scene Management**: Add, edit, duplicate, and delete scenes with intuitive Panel-based interface
 - **Duration Control**: Set individual scene durations with automatic frame calculation
 - **Keyframe Management**: Add multiple keyframes per scene with smooth transitions
 - **Camera Movements**: Choose from predefined camera movements (pan, zoom, orbit, etc.)
 - **Transition Types**: Control how scenes blend together (smooth, sharp, fade, morph)
+- **Visual Indicators**: Badge components show scene numbers, Tag components display keyframe counts
 
 ### 2. Story Templates
 
@@ -29,16 +32,19 @@ Each template provides:
 - Pre-configured scene structure
 - Recommended durations
 - Suggested keyframe distribution
+- One-click loading via Dialog component
 
 ### 3. Live Preview
 
-Real-time generation monitoring with:
+Real-time generation monitoring with color-coded status indicators:
 
 - **Visual Preview**: See frames as they're generated
-- **Progress Tracking**: Monitor generation progress with detailed statistics
-- **Frame History**: Review recently generated frames
-- **Quality Controls**: Adjust preview quality and refresh rate
-- **Debug Information**: Optional debug mode for troubleshooting
+- **Status Badge**: Color-coded status (green=generating, orange=paused, gray=idle)
+- **Progress Tracking**: Monitor generation progress with detailed statistics in organized Panels
+- **Frame History**: Review recently generated frames with thumbnail preview
+- **Quality Controls**: Adjust preview quality and refresh rate in collapsible Fieldset
+- **Debug Information**: Optional debug mode in toggleable Panel for troubleshooting
+- **Statistics Display**: Tag components label each statistic for clarity
 
 ### 4. Advanced Settings Integration
 
@@ -48,6 +54,7 @@ Full integration with Deforum configuration:
 - **Frame Configuration**: Fine-tune individual frame parameters
 - **Expression Mode**: Use mathematical expressions for dynamic parameters
 - **Batch Configuration**: Export settings in Deforum-compatible format
+- **Organized Fieldsets**: Settings grouped logically for easy navigation
 
 ### 5. Export & Sharing
 
@@ -327,11 +334,25 @@ Planned features:
 - [ ] Audio synchronization
 - [ ] Character consistency tools
 
+## UI/UX Enhancements
+
+The Story Creator features a modern, professional interface using PrimeVue components:
+
+- **Panel Components**: Organized sections with headers and collapsible content
+- **Fieldset Components**: Logical grouping of related settings with toggleable legends
+- **Badge Components**: Visual scene numbering and status indicators with color coding
+- **Tag Components**: Metadata display (keyframe counts, job types, statistics labels)
+- **InlineMessage Components**: Contextual help and descriptions
+- **Divider Components**: Clean visual separation between sections
+
+For detailed information about the UI enhancements, see [PrimeVue Enhancements Documentation](PRIMEVUE_ENHANCEMENTS.md).
+
 ## Support
 
 For issues or questions:
 - Check the main README.md
 - Review IMPLEMENTATION_PLAN.md
+- See [PrimeVue Enhancements Documentation](PRIMEVUE_ENHANCEMENTS.md)
 - Submit issues on GitHub
 - Join community discussions
 
@@ -340,6 +361,7 @@ For issues or questions:
 Inspired by:
 - deforum.studio - for the concept of long-form AI animation
 - Deforum - for the animation framework
+- PrimeVue - for the professional UI component library
 - The AI art community for continued innovation
 
 ## License

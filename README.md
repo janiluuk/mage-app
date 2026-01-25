@@ -88,14 +88,15 @@ An opinionated Vue 3/Vite frontend for the Mage AI Studio experience. The app bu
   - Metadata editing and tagging system
   - Thumbnail generation and preview support
 
-- **📖 Story Creator** (NEW)
-  - Multi-scene narrative builder for longer animations
-  - Pre-built story templates (Hero's Journey, Three-Act Structure, Music Video, Documentary)
-  - Live preview with real-time generation monitoring
-  - Advanced scene management with keyframes and transitions
-  - Batch processing for long sequences
-  - Export to Deforum-compatible formats
-  - See [Story Creator Documentation](docs/STORY_CREATOR.md) for details
+- **📖 Story Creator** (ENHANCED)
+  - **PrimeVue UI Components** - Professional interface with Panel, Fieldset, Badge, and Tag components
+  - **Multi-scene narrative builder** - Organize animations into scenes and chapters
+  - **Pre-built story templates** - Hero's Journey, Three-Act Structure, Music Video, Documentary
+  - **Live preview** - Real-time generation monitoring with color-coded status indicators
+  - **Advanced scene management** - Keyframes, camera movements, and smooth transitions
+  - **Batch processing** - Efficient processing of long sequences
+  - **Export capabilities** - Export to Deforum-compatible formats
+  - See [Story Creator Documentation](docs/STORY_CREATOR.md) and [PrimeVue Enhancements](docs/PRIMEVUE_ENHANCEMENTS.md)
 
 - **🤝 Collaboration & Sharing** (NEW)
   - **Share projects with granular permissions** - Generate secure share links with view, edit, or admin access
