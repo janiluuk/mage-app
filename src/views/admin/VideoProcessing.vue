@@ -1,54 +1,48 @@
 <template>
   <div class="grid">
     <div class="col-12">
-      <Panel header="Video Processing">
-        <template #icons>
+      <div class="card">
+        <div class="flex justify-content-between align-items-center mb-4">
+          <h5 class="m-0">Video Processing</h5>
           <Tag :value="form.job_type === 'beat-match' ? 'Beat Match' : 'Audio Track Split'" severity="info" />
-        </template>
-        
-        <InlineMessage severity="info" class="mb-3">
-          Create a music video with cuts synchronized to bass beats in audio
-        </InlineMessage>
+        </div>
+        <p>Create a music video with cuts synchronized to bass beats in audio.</p>
 
         <form @submit.prevent="submitForm" class="p-fluid">
-          <Fieldset legend="Job Configuration" class="mb-3">
-            <div class="formgrid grid">
-              <!-- Job Type Selection -->
-              <div class="field col-12 md:col-6">
-                <label for="job_type">Job Type *</label>
-                <Dropdown
-                  id="job_type"
-                  v-model="form.job_type"
-                  :options="jobTypes"
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Select job type"
-                  :class="{ 'p-invalid': errors.job_type }"
-                />
-                <small v-if="errors.job_type" class="p-error">{{ errors.job_type }}</small>
-              </div>
-
-              <!-- Input Type Selection -->
-              <div class="field col-12 md:col-6">
-                <label for="input_type">Input Type *</label>
-                <Dropdown
-                  id="input_type"
-                  v-model="form.input_type"
-                  :options="inputTypes"
-                  optionLabel="label"
-                  optionValue="value"
-                  placeholder="Select input type"
-                  :class="{ 'p-invalid': errors.input_type }"
-                  @change="onInputTypeChange"
-                />
-                <small v-if="errors.input_type" class="p-error">{{ errors.input_type }}</small>
-              </div>
+          <div class="formgrid grid">
+            <!-- Job Type Selection -->
+            <div class="field col-12 md:col-6">
+              <label for="job_type">Job Type *</label>
+              <Dropdown
+                id="job_type"
+                v-model="form.job_type"
+                :options="jobTypes"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select job type"
+                :class="{ 'p-invalid': errors.job_type }"
+              />
+              <small v-if="errors.job_type" class="p-error">{{ errors.job_type }}</small>
             </div>
-          </Fieldset>
 
-          <!-- File Upload Section -->
-          <Fieldset v-if="form.input_type === 'files'" legend="File Upload" class="mb-3">
-            <div class="formgrid grid">
+            <!-- Input Type Selection -->
+            <div class="field col-12 md:col-6">
+              <label for="input_type">Input Type *</label>
+              <Dropdown
+                id="input_type"
+                v-model="form.input_type"
+                :options="inputTypes"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Select input type"
+                :class="{ 'p-invalid': errors.input_type }"
+                @change="onInputTypeChange"
+              />
+              <small v-if="errors.input_type" class="p-error">{{ errors.input_type }}</small>
+            </div>
+
+            <!-- File Upload Section -->
+            <template v-if="form.input_type === 'files'">
               <!-- Audio File -->
               <div class="field col-12">
                 <label for="audio_file">Audio File (MP3, WAV, AAC, M4A) *</label>
@@ -61,9 +55,9 @@
                   @select="onAudioFileSelect"
                   :class="{ 'p-invalid': errors.audio_file }"
                 />
-                <InlineMessage v-if="selectedAudioFile" severity="info" class="mt-2">
+                <small v-if="selectedAudioFile" class="p-text-secondary">
                   Selected: {{ selectedAudioFile.name }}
-                </InlineMessage>
+                </small>
                 <small v-if="errors.audio_file" class="p-error">{{ errors.audio_file }}</small>
               </div>
 
@@ -80,20 +74,18 @@
                   @select="onVideoFilesSelect"
                   :class="{ 'p-invalid': errors.video_files }"
                 />
-                <div v-if="selectedVideoFiles.length > 0" class="mt-2">
-                  <Tag :value="`${selectedVideoFiles.length} file(s) selected`" severity="success" class="mb-2" />
-                  <div v-for="(file, index) in selectedVideoFiles" :key="index" class="mb-1">
-                    <InlineMessage severity="info">{{ file.name }}</InlineMessage>
-                  </div>
-                </div>
+                <small v-if="selectedVideoFiles.length > 0" class="p-text-secondary">
+                  Selected: {{ selectedVideoFiles.length }} file(s)
+                  <span v-for="(file, index) in selectedVideoFiles" :key="index" class="block">
+                    - {{ file.name }}
+                  </span>
+                </small>
                 <small v-if="errors.video_files" class="p-error">{{ errors.video_files }}</small>
               </div>
-            </div>
-          </Fieldset>
+            </template>
 
-          <!-- Project ID Section -->
-          <Fieldset v-if="form.input_type === 'project'" legend="Project Selection" class="mb-3">
-            <div class="field col-12">
+            <!-- Project ID Section -->
+            <div v-if="form.input_type === 'project'" class="field col-12">
               <label for="project_id">Project ID *</label>
               <InputNumber
                 id="project_id"
@@ -103,11 +95,9 @@
               />
               <small v-if="errors.project_id" class="p-error">{{ errors.project_id }}</small>
             </div>
-          </Fieldset>
 
-          <!-- Beat Match Job Parameters -->
-          <Fieldset v-if="form.job_type === 'beat-match'" legend="Beat Match Settings" class="mb-3">
-            <div class="formgrid grid">
+            <!-- Beat Match Job Parameters -->
+            <template v-if="form.job_type === 'beat-match'">
               <!-- Cut Intensity -->
               <div class="field col-12 md:col-6">
                 <label for="cut_intensity">Cut Intensity</label>
@@ -172,12 +162,10 @@
                 />
                 <small>End time in seconds for audio processing (optional)</small>
               </div>
-            </div>
-          </Fieldset>
+            </template>
 
-          <!-- Audio Track Split Job Parameters -->
-          <Fieldset v-if="form.job_type === 'audio-track-split'" legend="Audio Track Split Settings" class="mb-3">
-            <div class="formgrid grid">
+            <!-- Audio Track Split Job Parameters -->
+            <template v-if="form.job_type === 'audio-track-split'">
               <div class="field col-12 md:col-6">
                 <label for="model">UVR5 Model *</label>
                 <Dropdown
@@ -217,27 +205,26 @@
                 </div>
                 <small>Separate vocals from instrumental track</small>
               </div>
-            </div>
-          </Fieldset>
+            </template>
+          </div>
 
           <!-- Submit Button -->
-          <div class="field">
-            <div class="flex gap-2">
-              <Button
-                label="Cancel"
-                icon="pi pi-times"
-                class="p-button-secondary"
-                @click="resetForm"
-                :disabled="isSubmitting"
-              />
-              <Button
-                :label="form.job_type === 'beat-match' ? 'Create Music Video' : 'Create Audio Track Split'"
-                icon="pi pi-play"
-                type="submit"
-                :loading="isSubmitting"
-                :disabled="isSubmitting"
-              />
-            </div>
+          <div class="field col-12">
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              class="p-button-secondary"
+              @click="resetForm"
+              :disabled="isSubmitting"
+            />
+            <Button
+              :label="form.job_type === 'beat-match' ? 'Create Music Video' : 'Create Audio Track Split'"
+              icon="pi pi-play"
+              type="submit"
+              :loading="isSubmitting"
+              :disabled="isSubmitting"
+              class="ml-2"
+            />
           </div>
         </form>
 
@@ -261,7 +248,8 @@
         />
 
         <!-- Job Status -->
-        <Panel v-if="jobId" header="Job Status" class="mt-3">
+        <div v-if="jobId" class="card mt-3">
+          <h6 class="mb-3">Job Status</h6>
           <div class="grid">
             <div class="col-12 md:col-6">
               <div class="field grid">
@@ -298,8 +286,8 @@
               </div>
             </div>
           </div>
-        </Panel>
-      </Panel>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -311,12 +299,10 @@ import Badge from 'primevue/badge';
 import Button from 'primevue/button';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
-import Fieldset from 'primevue/fieldset';
 import FileUpload from 'primevue/fileupload';
-import InlineMessage from 'primevue/inlinemessage';
 import InputNumber from 'primevue/inputnumber';
+import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import Panel from 'primevue/panel';
 import ProgressBar from 'primevue/progressbar';
 import Tag from 'primevue/tag';
 
@@ -327,12 +313,10 @@ export default {
     Button,
     Checkbox,
     Dropdown,
-    Fieldset,
     FileUpload,
-    InlineMessage,
     InputNumber,
+    InputText,
     Message,
-    Panel,
     ProgressBar,
     Tag,
   },
