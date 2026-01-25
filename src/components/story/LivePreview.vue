@@ -1,138 +1,143 @@
 <template>
   <div class="live-preview">
-    <Card>
-      <template #title>
+    <Panel>
+      <template #header>
         <div class="header-container">
           <span>Live Preview</span>
-          <div class="status-badge" :class="statusClass">
-            <i :class="statusIcon"></i>
-            {{ statusText }}
-          </div>
+          <Badge :value="statusText" :severity="statusSeverity" />
         </div>
       </template>
-      <template #content>
-        <div class="preview-container">
-          <!-- Preview Canvas -->
-          <div class="preview-canvas" ref="canvasContainer">
-            <div v-if="!isGenerating && !previewImage" class="preview-placeholder">
-              <i class="pi pi-image" style="font-size: 3rem"></i>
-              <p>Preview will appear here during generation</p>
+      <div class="preview-container">
+        <!-- Preview Canvas -->
+        <div class="preview-canvas" ref="canvasContainer">
+          <div v-if="!isGenerating && !previewImage" class="preview-placeholder">
+            <i class="pi pi-image" style="font-size: 3rem"></i>
+            <InlineMessage severity="info">Preview will appear here during generation</InlineMessage>
+          </div>
+          
+          <img v-if="previewImage" :src="previewImage" alt="Live preview" class="preview-image" />
+          
+          <div v-if="isGenerating" class="preview-overlay">
+            <ProgressBar :value="progress" :show-value="true" />
+            <div class="generation-info">
+              <Tag :value="`Frame ${currentFrame} of ${totalFrames}`" severity="info" class="mb-2" />
+              <p class="current-prompt">{{ currentPrompt }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <Fieldset legend="Preview Controls" :toggleable="true" class="mt-3">
+          <div class="control-row">
+            <Button 
+              :label="isGenerating ? 'Pause' : 'Start'" 
+              :icon="isGenerating ? 'pi pi-pause' : 'pi pi-play'"
+              @click="toggleGeneration"
+              :class="isGenerating ? 'p-button-warning' : 'p-button-success'"
+            />
+            <Button 
+              label="Stop" 
+              icon="pi pi-stop"
+              @click="stopGeneration"
+              class="p-button-danger"
+              :disabled="!isGenerating && !isPaused"
+            />
+            <Button 
+              label="Skip Frame" 
+              icon="pi pi-step-forward"
+              @click="skipFrame"
+              :disabled="!isGenerating"
+            />
+          </div>
+
+          <Divider />
+
+          <div class="control-row">
+            <div class="control-item">
+              <label>Refresh Rate (fps)</label>
+              <Dropdown v-model="refreshRate" :options="refreshRates" option-label="label" option-value="value" />
             </div>
             
-            <img v-if="previewImage" :src="previewImage" alt="Live preview" class="preview-image" />
-            
-            <div v-if="isGenerating" class="preview-overlay">
-              <ProgressBar :value="progress" :show-value="true" />
-              <div class="generation-info">
-                <p class="current-frame">Frame {{ currentFrame }} of {{ totalFrames }}</p>
-                <p class="current-prompt">{{ currentPrompt }}</p>
-              </div>
+            <div class="control-item">
+              <label>Quality</label>
+              <Dropdown v-model="previewQuality" :options="qualityOptions" option-label="label" option-value="value" />
             </div>
           </div>
 
-          <!-- Controls -->
-          <div class="preview-controls">
-            <div class="control-row">
-              <Button 
-                :label="isGenerating ? 'Pause' : 'Start'" 
-                :icon="isGenerating ? 'pi pi-pause' : 'pi pi-play'"
-                @click="toggleGeneration"
-                :class="isGenerating ? 'p-button-warning' : 'p-button-success'"
-              />
-              <Button 
-                label="Stop" 
-                icon="pi pi-stop"
-                @click="stopGeneration"
-                class="p-button-danger"
-                :disabled="!isGenerating && !isPaused"
-              />
-              <Button 
-                label="Skip Frame" 
-                icon="pi pi-step-forward"
-                @click="skipFrame"
-                :disabled="!isGenerating"
-              />
-            </div>
+          <Divider />
 
-            <div class="control-row">
-              <div class="control-item">
-                <label>Refresh Rate (fps)</label>
-                <Dropdown v-model="refreshRate" :options="refreshRates" option-label="label" option-value="value" />
-              </div>
-              
-              <div class="control-item">
-                <label>Quality</label>
-                <Dropdown v-model="previewQuality" :options="qualityOptions" option-label="label" option-value="value" />
-              </div>
+          <div class="control-row">
+            <div class="checkbox-item">
+              <Checkbox v-model="autoSave" binary input-id="autosave" />
+              <label for="autosave">Auto-save frames</label>
             </div>
-
-            <div class="control-row">
-              <div class="checkbox-item">
-                <Checkbox v-model="autoSave" binary input-id="autosave" />
-                <label for="autosave">Auto-save frames</label>
-              </div>
-              
-              <div class="checkbox-item">
-                <Checkbox v-model="showDebug" binary input-id="debug" />
-                <label for="debug">Show debug info</label>
-              </div>
+            
+            <div class="checkbox-item">
+              <Checkbox v-model="showDebug" binary input-id="debug" />
+              <label for="debug">Show debug info</label>
             </div>
           </div>
+        </Fieldset>
 
-          <!-- Live Stats -->
-          <div v-if="isGenerating || isPaused" class="live-stats">
+        <!-- Live Stats -->
+        <Panel v-if="isGenerating || isPaused" header="Generation Statistics" class="mt-3">
+          <div class="live-stats">
             <div class="stat-item">
-              <span class="stat-label">Elapsed Time</span>
+              <Tag value="Elapsed Time" severity="info" class="stat-tag" />
               <span class="stat-value">{{ elapsedTime }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Est. Remaining</span>
+              <Tag value="Est. Remaining" severity="warning" class="stat-tag" />
               <span class="stat-value">{{ estimatedRemaining }}</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Avg. Frame Time</span>
+              <Tag value="Avg. Frame Time" severity="success" class="stat-tag" />
               <span class="stat-value">{{ averageFrameTime }}s</span>
             </div>
             <div class="stat-item">
-              <span class="stat-label">Frames Generated</span>
+              <Tag value="Frames Generated" severity="secondary" class="stat-tag" />
               <span class="stat-value">{{ framesGenerated }} / {{ totalFrames }}</span>
             </div>
           </div>
+        </Panel>
 
-          <!-- Debug Info -->
-          <div v-if="showDebug && debugInfo" class="debug-info">
-            <h4>Debug Information</h4>
-            <pre>{{ debugInfo }}</pre>
-          </div>
+        <!-- Debug Info -->
+        <Panel v-if="showDebug && debugInfo" header="Debug Information" :toggleable="true" class="mt-3">
+          <pre class="debug-pre">{{ debugInfo }}</pre>
+        </Panel>
 
-          <!-- Frame History -->
-          <div v-if="frameHistory.length > 0" class="frame-history">
-            <h4>Recent Frames</h4>
-            <div class="history-grid">
-              <div 
-                v-for="frame in frameHistory.slice(-8)" 
-                :key="frame.id" 
-                class="history-item"
-                @click="selectHistoryFrame(frame)"
-              >
-                <img :src="frame.thumbnail" :alt="`Frame ${frame.id}`" />
-                <span class="history-frame-id">{{ frame.id }}</span>
-              </div>
+        <!-- Frame History -->
+        <Panel v-if="frameHistory.length > 0" header="Recent Frames" :toggleable="true" class="mt-3">
+          <div class="history-grid">
+            <div 
+              v-for="frame in frameHistory.slice(-8)" 
+              :key="frame.id" 
+              class="history-item"
+              @click="selectHistoryFrame(frame)"
+              v-tooltip.top="`Frame ${frame.id}`"
+            >
+              <img :src="frame.thumbnail" :alt="`Frame ${frame.id}`" />
+              <Badge :value="frame.id" severity="info" class="history-frame-badge" />
             </div>
           </div>
-        </div>
-      </template>
-    </Card>
+        </Panel>
+      </div>
+    </Panel>
   </div>
 </template>
 
 <script setup>
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import Badge from 'primevue/badge'
 import Button from 'primevue/button'
-import Card from 'primevue/card'
 import Checkbox from 'primevue/checkbox'
+import Divider from 'primevue/divider'
 import Dropdown from 'primevue/dropdown'
+import Fieldset from 'primevue/fieldset'
+import InlineMessage from 'primevue/inlinemessage'
+import Panel from 'primevue/panel'
 import ProgressBar from 'primevue/progressbar'
+import Tag from 'primevue/tag'
 import GenerationService from '@/services/story/GenerationService'
 
 const props = defineProps({
@@ -194,10 +199,10 @@ const service = props.generationService
 let ws = null
 
 // Computed properties
-const statusClass = computed(() => {
-  if (isGenerating.value) return 'status-generating'
-  if (isPaused.value) return 'status-paused'
-  return 'status-idle'
+const statusSeverity = computed(() => {
+  if (isGenerating.value) return 'success'
+  if (isPaused.value) return 'warning'
+  return 'secondary'
 })
 
 const statusIcon = computed(() => {
@@ -461,35 +466,9 @@ onBeforeUnmount(() => {
   width: 100%;
 }
 
-.status-badge {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-.status-idle {
-  background: #e5e7eb;
-  color: #6b7280;
-}
-
-.status-generating {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-.status-paused {
-  background: #fef3c7;
-  color: #d97706;
-}
-
 .preview-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
 }
 
 .preview-canvas {
@@ -509,7 +488,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  color: #9ca3af;
+  color: var(--text-color-secondary);
 }
 
 .preview-image {
@@ -532,25 +511,11 @@ onBeforeUnmount(() => {
   margin-top: 0.5rem;
 }
 
-.current-frame {
-  font-size: 0.875rem;
-  font-weight: 600;
-  margin: 0;
-}
-
 .current-prompt {
-  font-size: 0.75rem;
-  margin: 0.25rem 0 0 0;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
   opacity: 0.9;
-}
-
-.preview-controls {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 8px;
+  color: white;
 }
 
 .control-row {
@@ -593,51 +558,33 @@ onBeforeUnmount(() => {
 .stat-item {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.5rem;
   padding: 0.75rem;
-  background: #f3f4f6;
+  background: var(--surface-50);
   border-radius: 6px;
+  align-items: center;
+  text-align: center;
 }
 
-.stat-label {
-  font-size: 0.75rem;
-  color: #6b7280;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+.stat-tag {
+  width: 100%;
 }
 
 .stat-value {
   font-size: 1.25rem;
   font-weight: bold;
-  color: #1f2937;
+  color: var(--text-color);
 }
 
-.debug-info {
-  padding: 1rem;
-  background: #1f2937;
-  border-radius: 8px;
-  color: #f9fafb;
-}
-
-.debug-info h4 {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.debug-info pre {
+.debug-pre {
   margin: 0;
   font-size: 0.75rem;
   font-family: 'Monaco', 'Courier New', monospace;
   white-space: pre-wrap;
   word-wrap: break-word;
-}
-
-.frame-history h4 {
-  margin: 0 0 1rem 0;
-  font-size: 1rem;
-  font-weight: 600;
+  background: var(--surface-ground);
+  padding: 1rem;
+  border-radius: 6px;
 }
 
 .history-grid {
@@ -653,10 +600,12 @@ onBeforeUnmount(() => {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
+  border: 2px solid var(--surface-border);
 }
 
 .history-item:hover {
   transform: scale(1.05);
+  border-color: var(--primary-color);
 }
 
 .history-item img {
@@ -665,15 +614,18 @@ onBeforeUnmount(() => {
   object-fit: cover;
 }
 
-.history-frame-id {
+.history-frame-badge {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 0.75rem;
-  text-align: center;
-  padding: 0.25rem;
+  bottom: 0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.mt-3 {
+  margin-top: 1rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
 }
 </style>
