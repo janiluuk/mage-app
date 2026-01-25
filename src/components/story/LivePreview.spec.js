@@ -54,9 +54,10 @@ describe('LivePreview', () => {
   })
 
   it('displays status badge', () => {
-    const statusBadge = wrapper.find('.status-badge')
-    expect(statusBadge.exists()).toBe(true)
-    expect(statusBadge.text()).toContain('Idle')
+    // Badge component is now used instead of .status-badge div
+    const badge = wrapper.findComponent({ name: 'Badge' })
+    expect(badge.exists()).toBe(true)
+    expect(badge.props('value')).toBe('Idle')
   })
 
   it('shows preview placeholder when not generating', () => {
@@ -162,8 +163,11 @@ describe('LivePreview', () => {
 
     await wrapper.vm.$nextTick()
 
-    const debugSection = wrapper.find('.debug-info')
-    expect(debugSection.exists()).toBe(true)
+    // Debug info is now in a Panel component
+    const debugPanel = wrapper.findAllComponents({ name: 'Panel' }).find(panel => 
+      panel.props('header') === 'Debug Information'
+    )
+    expect(debugPanel).toBeTruthy()
   })
 
   it('saves frame history when autoSave is enabled', async () => {

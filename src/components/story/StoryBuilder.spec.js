@@ -38,8 +38,15 @@ describe('StoryBuilder', () => {
   })
 
   it('displays story header correctly', () => {
-    expect(wrapper.find('.story-header h2').text()).toBe('Story Builder')
-    expect(wrapper.find('.story-header .description').text()).toContain('longer narratives')
+    // Story header is now in a Panel component with InlineMessage
+    const panel = wrapper.findComponent({ name: 'Panel' })
+    expect(panel.exists()).toBe(true)
+    expect(panel.props('header')).toBe('Story Builder')
+    
+    // Description is now an InlineMessage
+    const inlineMessage = wrapper.findComponent({ name: 'InlineMessage' })
+    expect(inlineMessage.exists()).toBe(true)
+    expect(wrapper.text()).toContain('longer narratives')
   })
 
   it('initializes with default story values', () => {
@@ -48,27 +55,38 @@ describe('StoryBuilder', () => {
   })
 
   it('has at least one default scene', async () => {
-    const scenes = wrapper.findAll('.scene-card')
-    expect(scenes.length).toBeGreaterThanOrEqual(1)
+    // Scenes are now Panel components
+    const scenePanels = wrapper.findAllComponents({ name: 'Panel' }).filter(panel => 
+      panel.classes().includes('scene-panel')
+    )
+    expect(scenePanels.length).toBeGreaterThanOrEqual(1)
   })
 
   it('can add a new scene', async () => {
     const addButton = wrapper.find('button[class*="p-button-success"]')
     expect(addButton.text()).toContain('Add Scene')
     
-    const initialSceneCount = wrapper.findAll('.scene-card').length
+    // Scenes are now Panel components with scene-panel class
+    const initialSceneCount = wrapper.findAllComponents({ name: 'Panel' }).filter(panel => 
+      panel.classes().includes('scene-panel')
+    ).length
     await addButton.trigger('click')
     
-    const newSceneCount = wrapper.findAll('.scene-card').length
+    const newSceneCount = wrapper.findAllComponents({ name: 'Panel' }).filter(panel => 
+      panel.classes().includes('scene-panel')
+    ).length
     expect(newSceneCount).toBe(initialSceneCount + 1)
   })
 
   it('displays story summary statistics', () => {
-    const summary = wrapper.find('.story-summary')
-    expect(summary.exists()).toBe(true)
-    expect(summary.text()).toContain('Total Scenes')
-    expect(summary.text()).toContain('Total Frames')
-    expect(summary.text()).toContain('Estimated Duration')
+    // Summary is now in a Panel component
+    const summaryPanel = wrapper.findAllComponents({ name: 'Panel' }).find(panel => 
+      panel.props('header') === 'Story Summary'
+    )
+    expect(summaryPanel).toBeTruthy()
+    expect(wrapper.text()).toContain('Total Scenes')
+    expect(wrapper.text()).toContain('Total Frames')
+    expect(wrapper.text()).toContain('Estimated Duration')
   })
 
   it('has export and generate buttons', () => {
@@ -107,12 +125,16 @@ describe('StoryBuilder', () => {
   })
 
   it('calculates total frames correctly', () => {
-    const summary = wrapper.find('.story-summary')
+    // Summary is now in a Panel component
+    const summaryPanel = wrapper.findAllComponents({ name: 'Panel' }).find(panel => 
+      panel.props('header') === 'Story Summary'
+    )
+    expect(summaryPanel).toBeTruthy()
     // Should display total frames in the summary
-    expect(summary.text()).toContain('Total Frames')
+    const summaryText = wrapper.text()
+    expect(summaryText).toContain('Total Frames')
     // The component should have some frames calculated
-    const totalFramesText = summary.text()
-    expect(totalFramesText).toMatch(/Total Frames:\s*\d+/)
+    expect(summaryText).toMatch(/Total Frames.*\d+/)
   })
 
   it('has story templates available', async () => {

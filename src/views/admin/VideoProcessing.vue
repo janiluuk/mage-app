@@ -2,7 +2,10 @@
   <div class="grid">
     <div class="col-12">
       <div class="card">
-        <h5>Video Processing</h5>
+        <div class="flex justify-content-between align-items-center mb-4">
+          <h5 class="m-0">Video Processing</h5>
+          <Tag :value="form.job_type === 'beat-match' ? 'Beat Match' : 'Audio Track Split'" severity="info" />
+        </div>
         <p>Create a music video with cuts synchronized to bass beats in audio.</p>
 
         <form @submit.prevent="submitForm" class="p-fluid">
@@ -245,28 +248,45 @@
         />
 
         <!-- Job Status -->
-        <Panel v-if="jobId" header="Job Status" class="mt-3">
-          <div class="field grid">
-            <label class="col-fixed" style="width: 120px">Job ID:</label>
-            <div class="col">{{ jobId }}</div>
-          </div>
-          <div class="field grid">
-            <label class="col-fixed" style="width: 120px">Status:</label>
-            <div class="col">{{ jobStatus }}</div>
-          </div>
-          <div v-if="jobProgress" class="field grid">
-            <label class="col-fixed" style="width: 120px">Progress:</label>
-            <div class="col">{{ jobProgress }}%</div>
-          </div>
-          <div v-if="jobUrl" class="field grid">
-            <label class="col-fixed" style="width: 120px">Video URL:</label>
-            <div class="col">
-              <a :href="jobUrl" target="_blank" class="p-button p-component p-button-text p-button-plain">
-                {{ jobUrl }}
-              </a>
+        <div v-if="jobId" class="card mt-3">
+          <h6 class="mb-3">Job Status</h6>
+          <div class="grid">
+            <div class="col-12 md:col-6">
+              <div class="field grid">
+                <label class="col-fixed font-bold" style="width: 120px">Job ID:</label>
+                <div class="col">
+                  <Tag :value="jobId" severity="info" />
+                </div>
+              </div>
+            </div>
+            <div class="col-12 md:col-6">
+              <div class="field grid">
+                <label class="col-fixed font-bold" style="width: 120px">Status:</label>
+                <div class="col">
+                  <Tag :value="jobStatus" :severity="getStatusSeverity(jobStatus)" />
+                </div>
+              </div>
+            </div>
+            <div v-if="jobProgress" class="col-12">
+              <div class="field grid">
+                <label class="col-fixed font-bold" style="width: 120px">Progress:</label>
+                <div class="col">
+                  <Badge :value="`${jobProgress}%`" severity="success" size="large" />
+                </div>
+              </div>
+            </div>
+            <div v-if="jobUrl" class="col-12">
+              <div class="field grid">
+                <label class="col-fixed font-bold" style="width: 120px">Video URL:</label>
+                <div class="col">
+                  <a :href="jobUrl" target="_blank" class="p-button p-component p-button-text p-button-plain">
+                    {{ jobUrl }}
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
-        </Panel>
+        </div>
       </div>
     </div>
   </div>
@@ -275,30 +295,30 @@
 <script>
 import { ref, onUnmounted } from 'vue';
 import customJobService from '@/services/customJobService';
+import Badge from 'primevue/badge';
 import Button from 'primevue/button';
-import Card from 'primevue/card';
 import Checkbox from 'primevue/checkbox';
 import Dropdown from 'primevue/dropdown';
 import FileUpload from 'primevue/fileupload';
 import InputNumber from 'primevue/inputnumber';
 import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
-import Panel from 'primevue/panel';
 import ProgressBar from 'primevue/progressbar';
+import Tag from 'primevue/tag';
 
 export default {
   name: 'VideoProcessing',
   components: {
+    Badge,
     Button,
-    Card,
     Checkbox,
     Dropdown,
     FileUpload,
     InputNumber,
     InputText,
     Message,
-    Panel,
     ProgressBar,
+    Tag,
   },
   setup() {
     const form = ref({
@@ -572,6 +592,20 @@ export default {
       }
     };
 
+    const getStatusSeverity = (status) => {
+      switch (status) {
+        case 'finished':
+          return 'success';
+        case 'processing':
+        case 'approved':
+          return 'info';
+        case 'error':
+          return 'danger';
+        default:
+          return 'warning';
+      }
+    };
+
     onUnmounted(() => {
       if (statusCheckInterval.value) {
         clearInterval(statusCheckInterval.value);
@@ -601,6 +635,7 @@ export default {
       onVideoFilesSelect,
       submitForm,
       resetForm,
+      getStatusSeverity,
     };
   },
 };
