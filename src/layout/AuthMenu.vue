@@ -29,10 +29,6 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 
-const menu = ref(null);
-const activeRoute = ref(false);
-const router = useRouter();
-
 export default {
 
     name: 'AuthorizedMenu',
@@ -53,29 +49,20 @@ export default {
         topbarMenuClasses: { type: Object, default: {'layout-topbar-menu-mobile-active': false} }
 
     },
-    defaults: {
-        topbarMenuActive: { value: null },
-    },
     computed: {
     ...mapGetters('AuthService', {
       getLoggedUser: authGetters.GET_LOGGED_USER
-    }),
-    topBarMenuClasses() {
-        return {
-            'layout-topbar-menu-mobile-active': this.topbarMenuActive.value
-        };
-    }
+    })
   },
     methods: {
         onTopBarActionButton(route) {
-            activeRoute.value = route;
             this.$router.push(route);
         },
         toggleMenu(event) {
             event.preventDefault();
             event.stopPropagation();
-            if (this.$refs.menu) {
-                this.$refs.menu.toggle(event);
+            if (this.menu) {
+                this.menu.toggle(event);
             }
         },
         getOverlayMenu() {
@@ -84,7 +71,6 @@ export default {
                     label: 'Profile',
                     icon: 'pi pi-user',
                     command: () => {
-                        activeRoute.value = '/profile';
                         this.$router.push('/profile');
                     }
                 },
