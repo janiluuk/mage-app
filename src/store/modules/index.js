@@ -3,6 +3,7 @@ export { default as authServiceModule } from './auth';
 export { default as categoriesModule } from './categories-module';
 export { default as chatModule } from './chat';
 export { default as financeOperationModule } from './finance-operation';
+export { default as filmProjectModule } from './film-project';
 export { default as itemsModule } from './items-module';
 export { default as messageModule } from './message';
 export { default as notificationModule } from './notification';
