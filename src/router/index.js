@@ -281,6 +281,24 @@ const router = createRouter({
           component: () => import("@/views/pages/video/VideoEditor.vue"),
         },
         {
+          path: "/batch",
+          name: "BatchProcessing",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/BatchProcessing.vue"),
+        },
+        {
+          path: "/presets",
+          name: "Presets",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/Presets.vue"),
+        },
+        {
+          path: "/cloud-storage",
+          name: "CloudStorage",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/CloudStorage.vue"),
+        },
+        {
           path: "/admin/video-processing",
           name: "Video Processing",
           meta: { requiresAuth: true },

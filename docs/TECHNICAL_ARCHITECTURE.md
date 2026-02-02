@@ -17,7 +17,6 @@ This document provides the technical architecture for the 8 new video editing fe
 │  └────────────────┘  └──────────────┘  └──────────────────┘   │
 │                                                                  │
 │  ┌────────────────┐  ┌──────────────┐  ┌──────────────────┐   │
-│  │ Audio Viz      │  │ RT Preview   │  │ Collaboration    │   │
 │  └────────────────┘  └──────────────┘  └──────────────────┘   │
 │                                                                  │
 │  ┌────────────────┐                                             │
@@ -808,7 +807,6 @@ class PreviewDebouncer {
 
 ---
 
-## Feature: Collaborative Project Sharing
 
 ### Share Link Architecture
 ```
@@ -837,16 +835,13 @@ class PreviewDebouncer {
 └────────────────────────────────────────────────────┘
 ```
 
-### Real-time Collaboration (WebSocket)
 ```javascript
 // Presence tracking
-const collaborators = new Map();
 
 io.on('connection', (socket) => {
   socket.on('join_project', ({ projectId, userId }) => {
     socket.join(`project:${projectId}`);
     
-    collaborators.set(socket.id, { projectId, userId, joinedAt: Date.now() });
     
     // Broadcast to others
     socket.to(`project:${projectId}`).emit('user_joined', {
@@ -854,10 +849,7 @@ io.on('connection', (socket) => {
       timestamp: Date.now()
     });
     
-    // Send current collaborators list
-    const current = Array.from(collaborators.values())
       .filter(c => c.projectId === projectId);
-    socket.emit('collaborators_list', current);
   });
   
   socket.on('settings_change', ({ projectId, settings, userId }) => {
@@ -870,13 +862,8 @@ io.on('connection', (socket) => {
   });
   
   socket.on('disconnect', () => {
-    const collab = collaborators.get(socket.id);
-    if (collab) {
-      socket.to(`project:${collab.projectId}`).emit('user_left', {
-        userId: collab.userId,
         timestamp: Date.now()
       });
-      collaborators.delete(socket.id);
     }
   });
 });

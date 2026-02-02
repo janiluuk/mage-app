@@ -98,6 +98,14 @@ const queryFilter = ref('');
 const statusFilterKey = ref('');
 const statusFilter = ref('');
 
+const hasFilters = computed(() => {
+    return Boolean(queryFilter.value || generatorFilter.value || statusFilter.value);
+});
+
+const isEmptyLibrary = computed(() => {
+    return !dataviewValue.value || dataviewValue.value.length === 0;
+});
+
 const sortOptions = ref([
     { label: 'From latest to oldest', value: '-updated_at' },
     { label: 'From oldest to latest', value: 'updated_at' }
@@ -390,6 +398,16 @@ const onStatusFilterChange = (event) => {
             </template>
 
 
+            <template #empty>
+                <div class="empty-library">
+                    <i class="pi pi-folder-open empty-icon"></i>
+                    <h4>{{ hasFilters ? 'No matches found' : 'Your library is empty' }}</h4>
+                    <p v-if="hasFilters">Try adjusting your filters or search terms.</p>
+                    <p v-else>Start by creating your first video.</p>
+                    <Button icon="pi pi-plus" label="Create a Video" class="p-button-sm" @click="router.push('/upload')" />
+                </div>
+            </template>
+
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">
                     <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
@@ -557,6 +575,25 @@ span>img[lazy=error] {
   :deep .p-menubar {
     background: transparent;
   }
+}
+
+.empty-library {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  color: var(--text-color-secondary);
+}
+
+.empty-library h4 {
+  margin: 0.5rem 0 0.25rem;
+}
+
+.empty-library p {
+  margin: 0 0 1rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  color: var(--text-color-secondary);
 }
 
 .menu-list {

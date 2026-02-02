@@ -63,7 +63,6 @@ Multiple export options:
 - **JSON Config**: Export complete story configuration
 - **Deforum Settings**: Export in Deforum-compatible format
 - **Story Package**: Download comprehensive package with all settings
-- **Share Links**: Generate shareable links for collaboration (coming soon)
 
 ### 6. Batch Generation Service
 
@@ -328,7 +327,6 @@ Planned features:
 - [ ] AI-assisted prompt generation
 - [ ] Automatic scene detection
 - [ ] Style transfer between scenes
-- [ ] Collaborative story editing
 - [ ] Cloud-based generation queue
 - [ ] Mobile app for on-the-go editing
 - [ ] Audio synchronization

@@ -107,6 +107,14 @@
         <p>Click the green button to refresh your library from the API.</p>
       </div>
 
+      <div
+        v-else-if="viewGroupedByTags && viewMode !== 'files' && !isLoading"
+        class="drop-zone"
+      >
+        <h2>Grouped view is only available for files</h2>
+        <p>Switch to Files view to group items by tags.</p>
+      </div>
+
       <!-- Grouped by Tags View -->
       <div
         v-if="viewGroupedByTags && viewMode === 'files'"
@@ -793,6 +801,9 @@ const handleClearRating = () => {
 
 const handleViewModeChange = async (mode) => {
   viewMode.value = mode;
+  if (mode !== 'files' && viewGroupedByTags.value) {
+    viewGroupedByTags.value = false;
+  }
   await refreshData();
 };
 

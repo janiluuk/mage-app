@@ -1,6 +1,15 @@
 import requestService from '../request-service/ApiRequestService';
+import env from '@/utils/env';
 
-const BASE_PATH = '/film-projects';
+const getApiRoot = () => {
+  if (env.VITE_API_URL) {
+    return `${env.VITE_API_URL.replace(/\/$/, '')}/api`;
+  }
+  if (env.VITE_API_BASE_URL) {
+    return env.VITE_API_BASE_URL.replace(/\/v1$/, '').replace(/\/$/, '');
+  }
+  return '';
+};
 
 /**
  * Service for managing film projects, sequences, and shots
@@ -9,7 +18,7 @@ class FilmProjectService {
   // Projects
   async getProjects(params = {}) {
     try {
-      const response = await requestService.get(BASE_PATH, params, {}, true);
+      const response = await requestService.get(`${getApiRoot()}/film-projects`, params, {}, true);
       return response.data?.data || response.data || [];
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -19,7 +28,7 @@ class FilmProjectService {
 
   async getProjectById(id) {
     try {
-      const response = await requestService.get(`${BASE_PATH}/${id}`, {}, {}, true);
+      const response = await requestService.get(`${getApiRoot()}/film-projects/${id}`, {}, {}, true);
       return response.data?.data || response.data || null;
     } catch (error) {
       console.error('Error fetching project:', error);
@@ -29,7 +38,7 @@ class FilmProjectService {
 
   async createProject(data) {
     try {
-      const response = await requestService.post(BASE_PATH, data, {}, true);
+      const response = await requestService.post(`${getApiRoot()}/film-projects`, data, {}, true);
       return response.data?.data || response.data || null;
     } catch (error) {
       console.error('Error creating project:', error);
@@ -39,7 +48,7 @@ class FilmProjectService {
 
   async updateProject(id, data) {
     try {
-      const response = await requestService.put(`${BASE_PATH}/${id}`, data, {}, true);
+      const response = await requestService.put(`${getApiRoot()}/film-projects/${id}`, data, {}, true);
       return response.data?.data || response.data || null;
     } catch (error) {
       console.error('Error updating project:', error);
@@ -49,7 +58,7 @@ class FilmProjectService {
 
   async deleteProject(id) {
     try {
-      await requestService.delete(`${BASE_PATH}/${id}`, {}, {}, true);
+      await requestService.delete(`${getApiRoot()}/film-projects/${id}`, {}, {}, true);
       return true;
     } catch (error) {
       console.error('Error deleting project:', error);
@@ -61,7 +70,7 @@ class FilmProjectService {
   async getSequences(projectId, params = {}) {
     try {
       const response = await requestService.get(
-        `${BASE_PATH}/${projectId}/sequences`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences`,
         params,
         {},
         true
@@ -76,7 +85,7 @@ class FilmProjectService {
   async getSequenceById(projectId, sequenceId) {
     try {
       const response = await requestService.get(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}`,
         {},
         {},
         true
@@ -91,7 +100,7 @@ class FilmProjectService {
   async createSequence(projectId, data) {
     try {
       const response = await requestService.post(
-        `${BASE_PATH}/${projectId}/sequences`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences`,
         data,
         {},
         true
@@ -106,7 +115,7 @@ class FilmProjectService {
   async updateSequence(projectId, sequenceId, data) {
     try {
       const response = await requestService.put(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}`,
         data,
         {},
         true
@@ -121,7 +130,7 @@ class FilmProjectService {
   async deleteSequence(projectId, sequenceId) {
     try {
       await requestService.delete(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}`,
         {},
         {},
         true
@@ -137,7 +146,7 @@ class FilmProjectService {
   async getShots(projectId, sequenceId, params = {}) {
     try {
       const response = await requestService.get(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots`,
         params,
         {},
         true
@@ -152,7 +161,7 @@ class FilmProjectService {
   async getShotById(projectId, sequenceId, shotId) {
     try {
       const response = await requestService.get(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
         {},
         {},
         true
@@ -167,7 +176,7 @@ class FilmProjectService {
   async createShot(projectId, sequenceId, data) {
     try {
       const response = await requestService.post(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots`,
         data,
         {},
         true
@@ -182,7 +191,7 @@ class FilmProjectService {
   async updateShot(projectId, sequenceId, shotId, data) {
     try {
       const response = await requestService.put(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
         data,
         {},
         true
@@ -197,7 +206,7 @@ class FilmProjectService {
   async deleteShot(projectId, sequenceId, shotId) {
     try {
       await requestService.delete(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots/${shotId}`,
         {},
         {},
         true
@@ -212,7 +221,7 @@ class FilmProjectService {
   // AI Generation
   async getAvailableModels() {
     try {
-      const response = await requestService.get(`${BASE_PATH}/ai/models`, {}, {}, true);
+      const response = await requestService.get(`${getApiRoot()}/film-projects/ai/models`, {}, {}, true);
       return response.data?.data || response.data || null;
     } catch (error) {
       console.error('Error fetching available models:', error);
@@ -223,7 +232,7 @@ class FilmProjectService {
   async generateScript(projectId, prompt, options = {}) {
     try {
       const response = await requestService.post(
-        `${BASE_PATH}/${projectId}/generate/script`,
+        `${getApiRoot()}/film-projects/${projectId}/generate/script`,
         { prompt, options },
         {},
         true
@@ -238,7 +247,7 @@ class FilmProjectService {
   async generateScene(projectId, sequenceId, shotId, prompt, options = {}) {
     try {
       const response = await requestService.post(
-        `${BASE_PATH}/${projectId}/sequences/${sequenceId}/shots/${shotId}/generate/scene`,
+        `${getApiRoot()}/film-projects/${projectId}/sequences/${sequenceId}/shots/${shotId}/generate/scene`,
         { prompt, options },
         {},
         true

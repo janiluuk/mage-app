@@ -5,6 +5,12 @@
         <div class="flex justify-content-between align-items-center mb-4">
           <h5 class="m-0">Instance Management</h5>
           <div class="flex align-items-center gap-2">
+            <Button 
+              label="Add Instance"
+              icon="pi pi-plus"
+              class="p-button-sm"
+              @click="openCreateDialog"
+            />
             <Tag 
               v-if="lastUpdated" 
               :value="`Updated: ${lastUpdated}`" 
@@ -74,7 +80,7 @@
                   <i class="pi pi-list text-2xl text-orange-500"></i>
                   <div>
                     <div class="text-sm text-600">Total Queue</div>
-                    <div class="text-xl font-semibold">{{ summary.total_queue || 0 }}</div>
+                    <div class="text-xl font-semibold">{{ summary.total_queue_size || 0 }}</div>
                   </div>
                 </div>
               </div>
@@ -110,6 +116,9 @@
                   :instance="instance"
                   @view-history="openMetricsDialog"
                   @view-jobs="openJobHistoryDialog"
+                  @toggle-enabled="toggleInstance"
+                  @edit-instance="openEditDialog"
+                  @delete-instance="deleteInstance"
                 />
               </div>
             </div>
@@ -134,12 +143,53 @@
       :instanceId="selectedInstanceId"
       :instanceName="selectedInstanceName"
     />
+
+    <Dialog
+      v-model:visible="showInstanceDialog"
+      :header="dialogTitle"
+      :modal="true"
+      :style="{ width: '480px' }"
+    >
+      <div class="flex flex-column gap-3">
+        <div class="field">
+          <label class="block text-sm mb-2">Name</label>
+          <InputText v-model="formState.name" class="w-full" />
+        </div>
+        <div class="field">
+          <label class="block text-sm mb-2">URL</label>
+          <InputText v-model="formState.url" class="w-full" />
+        </div>
+        <div class="field">
+          <label class="block text-sm mb-2">Type</label>
+          <Dropdown
+            v-model="formState.type"
+            :options="instanceTypeOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select type"
+            class="w-full"
+          />
+        </div>
+        <div class="field flex align-items-center gap-2">
+          <InputSwitch v-model="formState.enabled" />
+          <span class="text-sm">{{ formState.enabled ? 'Enabled' : 'Disabled' }}</span>
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" class="p-button-text" @click="closeDialog" />
+        <Button label="Save" icon="pi pi-check" @click="saveInstance" />
+      </template>
+    </Dialog>
   </div>
 </template>
 
 <script>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
+import Dropdown from 'primevue/dropdown';
+import InputSwitch from 'primevue/inputswitch';
+import InputText from 'primevue/inputtext';
 import Message from 'primevue/message';
 import ProgressSpinner from 'primevue/progressspinner';
 import Tag from 'primevue/tag';
@@ -153,6 +203,10 @@ export default {
   name: 'InstanceManagement',
   components: {
     Button,
+    Dialog,
+    Dropdown,
+    InputSwitch,
+    InputText,
     Message,
     ProgressSpinner,
     Tag,
@@ -171,6 +225,19 @@ export default {
     const showJobHistoryDialog = ref(false);
     const selectedInstanceId = ref(null);
     const selectedInstanceName = ref('');
+    const showInstanceDialog = ref(false);
+    const dialogTitle = ref('Add Instance');
+    const editingInstanceId = ref(null);
+    const formState = ref({
+      name: '',
+      url: '',
+      type: null,
+      enabled: true,
+    });
+    const instanceTypeOptions = [
+      { label: 'Stable Diffusion Forge', value: 'stable_diffusion_forge' },
+      { label: 'ComfyUI', value: 'comfyui' },
+    ];
 
     const instances = computed(() => {
       return statusData.value?.instances || [];
@@ -188,7 +255,7 @@ export default {
       return statusData.value?.summary || {
         total_instances: 0,
         online_instances: 0,
-        total_queue: 0
+        total_queue_size: 0
       };
     });
 
@@ -216,6 +283,86 @@ export default {
 
     const refreshData = () => {
       fetchData();
+    };
+
+    const openCreateDialog = () => {
+      dialogTitle.value = 'Add Instance';
+      editingInstanceId.value = null;
+      formState.value = {
+        name: '',
+        url: '',
+        type: null,
+        enabled: true,
+      };
+      showInstanceDialog.value = true;
+    };
+
+    const openEditDialog = (instanceId) => {
+      const instance = instances.value.find(i => i.id === instanceId);
+      if (!instance) return;
+      dialogTitle.value = 'Edit Instance';
+      editingInstanceId.value = instanceId;
+      formState.value = {
+        name: instance.name || '',
+        url: instance.url || '',
+        type: instance.type || null,
+        enabled: Boolean(instance.enabled),
+      };
+      showInstanceDialog.value = true;
+    };
+
+    const closeDialog = () => {
+      showInstanceDialog.value = false;
+    };
+
+    const saveInstance = async () => {
+      const payload = {
+        name: formState.value.name?.trim(),
+        url: formState.value.url?.trim(),
+        type: formState.value.type,
+        enabled: Boolean(formState.value.enabled),
+      };
+
+      if (!payload.name || !payload.url || !payload.type) {
+        error.value = 'Name, URL, and type are required.';
+        return;
+      }
+
+      try {
+        if (editingInstanceId.value) {
+          await instanceAdminService.updateInstance(editingInstanceId.value, payload);
+        } else {
+          await instanceAdminService.createInstance(payload);
+        }
+        showInstanceDialog.value = false;
+        await fetchData();
+      } catch (err) {
+        console.error('Failed to save instance:', err);
+        error.value = err.message || 'Failed to save instance';
+      }
+    };
+
+    const toggleInstance = async (instanceId) => {
+      try {
+        await instanceAdminService.toggleInstance(instanceId);
+        await fetchData();
+      } catch (err) {
+        console.error('Failed to toggle instance:', err);
+        error.value = err.message || 'Failed to toggle instance';
+      }
+    };
+
+    const deleteInstance = async (instanceId) => {
+      const instance = instances.value.find(i => i.id === instanceId);
+      const confirmed = window.confirm(`Delete instance "${instance?.name || instanceId}"?`);
+      if (!confirmed) return;
+      try {
+        await instanceAdminService.deleteInstance(instanceId);
+        await fetchData();
+      } catch (err) {
+        console.error('Failed to delete instance:', err);
+        error.value = err.message || 'Failed to delete instance';
+      }
     };
 
     const openMetricsDialog = (instanceId) => {
@@ -274,8 +421,18 @@ export default {
       summary,
       totalProcessing,
       refreshData,
+      openCreateDialog,
+      openEditDialog,
+      closeDialog,
+      saveInstance,
+      toggleInstance,
+      deleteInstance,
       showMetricsDialog,
       showJobHistoryDialog,
+      showInstanceDialog,
+      dialogTitle,
+      formState,
+      instanceTypeOptions,
       selectedInstanceId,
       selectedInstanceName,
       openMetricsDialog,

@@ -1,7 +1,7 @@
 # Browser Hang Debugging
 
 ## Issue
-Browser hangs when trying to navigate to pages, especially after the film-production → film-project migration.
+Browser hangs when trying to navigate to pages after the film-project naming cleanup.
 
 ## Potential Causes
 
@@ -73,13 +73,13 @@ Browser hangs when trying to navigate to pages, especially after the film-produc
 
 ## Common Issues Found
 
-1. **Nested Directory Structure:** Files were in `film-project/film-production/` instead of `film-project/`
+1. **Nested Directory Structure:** Files were in a nested service directory instead of `film-project/`
    - **Fix:** Moved files to correct location ✅
 
-2. **Import Paths:** Old paths still referenced `film-production`
+2. **Import Paths:** Old paths still referenced legacy naming
    - **Fix:** Updated all imports ✅
 
-3. **Store Module Name:** Module still registered as `FilmProduction`
+3. **Store Module Name:** Module still registered with legacy naming
    - **Fix:** Updated to `FilmProject` ✅
 
 ## Next Steps

@@ -8,6 +8,11 @@
           :severity="healthStatusSeverity"
           :icon="healthStatusIcon"
         />
+        <Tag
+          :value="instance.enabled ? 'Enabled' : 'Disabled'"
+          :severity="instance.enabled ? 'success' : 'warning'"
+          icon="pi pi-power-off"
+        />
       </div>
       <div class="text-sm text-color-secondary">
         {{ instance.type }}
@@ -56,14 +61,36 @@
       <div class="col-12 md:col-6">
         <label class="block text-sm mb-2 text-600">Queue Status</label>
         <div class="text-sm">
-          Queue: {{ instance.queue_count || 0 }} | 
+          Queue: {{ instance.queue_size || 0 }} | 
           Processing: {{ instance.processing_count || 0 }}
         </div>
       </div>
     </div>
 
     <!-- Actions -->
-    <div class="flex gap-2 mt-3">
+    <div class="flex flex-wrap gap-2 mt-3">
+      <Button 
+        :label="instance.enabled ? 'Disable' : 'Enable'"
+        :icon="instance.enabled ? 'pi pi-ban' : 'pi pi-check'"
+        :severity="instance.enabled ? 'warning' : 'success'"
+        class="p-button-sm"
+        data-testid="toggle-instance-button"
+        @click="$emit('toggle-enabled', instance.id)"
+      />
+      <Button 
+        label="Edit"
+        icon="pi pi-pencil"
+        class="p-button-sm p-button-outlined"
+        data-testid="edit-instance-button"
+        @click="$emit('edit-instance', instance.id)"
+      />
+      <Button 
+        label="Delete"
+        icon="pi pi-trash"
+        class="p-button-sm p-button-outlined p-button-danger"
+        data-testid="delete-instance-button"
+        @click="$emit('delete-instance', instance.id)"
+      />
       <Button 
         label="View History" 
         icon="pi pi-chart-line" 
@@ -101,22 +128,22 @@ export default {
       required: true
     }
   },
-  emits: ['view-history', 'view-jobs'],
+  emits: ['view-history', 'view-jobs', 'toggle-enabled', 'edit-instance', 'delete-instance'],
   setup(props) {
     const gpuUtilization = computed(() => {
-      return Math.round(props.instance.metrics?.gpu_utilization || 0);
+      return Math.round(props.instance.gpu_utilization || 0);
     });
 
     const cpuUtilization = computed(() => {
-      return Math.round(props.instance.metrics?.cpu_utilization || 0);
+      return Math.round(props.instance.cpu_utilization || 0);
     });
 
     const memoryUtilization = computed(() => {
-      return Math.round(props.instance.metrics?.memory_utilization || 0);
+      return Math.round(props.instance.memory_utilization || 0);
     });
 
     const currentModel = computed(() => {
-      return props.instance.metrics?.current_model || 'N/A';
+      return props.instance.current_model || 'N/A';
     });
 
     const healthStatusLabel = computed(() => {

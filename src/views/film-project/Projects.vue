@@ -209,7 +209,7 @@ const projectToDelete = ref(null);
 const statusOptions = [
   { label: 'Draft', value: 'draft' },
   { label: 'In Progress', value: 'in_progress' },
-  { label: 'Post Project', value: 'post_project' },
+  { label: 'Post Production', value: 'post_production' },
   { label: 'Completed', value: 'completed' },
   { label: 'On Hold', value: 'on_hold' },
 ];
@@ -230,7 +230,7 @@ const getStatusSeverity = (status) => {
   const severityMap = {
     draft: 'secondary',
     in_progress: 'info',
-    post_project: 'warning',
+    post_production: 'warning',
     completed: 'success',
     on_hold: 'danger',
   };

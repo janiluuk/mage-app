@@ -55,7 +55,7 @@
 
           <DataTable 
             :value="shots" 
-            :loading="isLoadingShots"
+            :loading="isLoading"
             :paginator="true"
             :rows="10"
             responsiveLayout="scroll"

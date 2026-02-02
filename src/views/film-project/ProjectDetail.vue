@@ -59,7 +59,7 @@
 
           <DataTable 
             :value="sequences" 
-            :loading="isLoadingSequences"
+            :loading="isLoading"
             :paginator="true"
             :rows="10"
             responsiveLayout="scroll"
@@ -306,7 +306,7 @@ const getStatusSeverity = (status) => {
   const severityMap = {
     draft: 'secondary',
     in_progress: 'info',
-    post_project: 'warning',
+      post_production: 'warning',
     completed: 'success',
     on_hold: 'danger',
   };

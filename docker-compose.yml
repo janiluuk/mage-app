@@ -46,11 +46,15 @@ services:
     env_file:
       - .env.docker
     environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost/mage-api
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${MYSQL_DATABASE:-mage}
       DB_USERNAME: ${MYSQL_USER:-mage}
       DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      QUEUE_CONNECTION: sync
     depends_on:
       - mysql
     expose:
