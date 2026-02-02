@@ -393,12 +393,16 @@ const onStatusFilterChange = (event) => {
             </template>
 
             <template #empty>
-                <div class="empty-library">
-                    <i class="pi pi-folder-open empty-icon"></i>
-                    <h4>{{ hasFilters ? 'No matches found' : 'Your library is empty' }}</h4>
-                    <p v-if="hasFilters">Try adjusting your filters or search terms.</p>
-                    <p v-else>Start by creating your first video.</p>
-                    <Button icon="pi pi-plus" label="Create a Video" class="p-button-sm" @click="router.push('/upload')" />
+                <div class="empty-state-container">
+                    <div class="empty-state">
+                        <i class="pi pi-inbox empty-state-icon"></i>
+                        <h3 class="empty-state-title">No Content Yet</h3>
+                        <p class="empty-state-message">Your library is empty. Start creating by uploading or generating your first video!</p>
+                        <a href="/upload/">
+                            <Button icon="pi pi-plus" label="Create Your First Video"
+                                class="p-button p-button-lg p-button-rounded p-button-success"></Button>
+                        </a>
+                    </div>
                 </div>
             </template>
 
@@ -652,6 +656,42 @@ span>img[lazy=error] {
       align-items: flex-start;
     }
   }
+}
+
+.empty-state-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+  padding: 2rem;
+}
+
+.empty-state {
+  text-align: center;
+  max-width: 500px;
+  padding: 2rem;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 1.5rem;
+  opacity: 0.6;
+}
+
+.empty-state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+}
+
+.empty-state-message {
+  font-size: 1rem;
+  color: var(--text-color-secondary);
+  margin-bottom: 2rem;
+  line-height: 1.6;
 }
 
 </style>
