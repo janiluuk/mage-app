@@ -53,8 +53,8 @@ describe('EditButtons', () => {
   it('dispatches trim actions', async () => {
     const wrapper = createWrapper();
 
-    await wrapper.find('button[data-icon="pi-angle-left"]').trigger('click');
-    await wrapper.find('button[data-icon="pi-angle-right"]').trigger('click');
+    await wrapper.find('button[data-icon="pi pi-angle-left"]').trigger('click');
+    await wrapper.find('button[data-icon="pi pi-angle-right"]').trigger('click');
 
     expect(dispatch).toHaveBeenCalledWith('videoeditor/setStartPoint');
     expect(dispatch).toHaveBeenCalledWith('videoeditor/setEndPoint');
@@ -62,7 +62,7 @@ describe('EditButtons', () => {
 
   it('dispatches split action', async () => {
     const wrapper = createWrapper();
-    await wrapper.find('button[data-icon="pi-code"]').trigger('click');
+    await wrapper.find('button[data-icon="pi pi-code"]').trigger('click');
     expect(dispatch).toHaveBeenCalledWith('videoeditor/split');
   });
 });

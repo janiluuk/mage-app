@@ -93,7 +93,7 @@ import env from '@/utils/env'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Divider from 'primevue/divider'
-import InputTextarea from 'primevue/inputtextarea'
+import InputTextarea from 'primevue/textarea'
 import Message from 'primevue/message'
 
 const prompt = ref('')

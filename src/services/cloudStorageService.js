@@ -132,11 +132,11 @@ const cloudStorageService = {
     return loadConfig();
   },
   connect(config) {
-    const finalConfig = { ...DEFAULT_CONFIG, ...config };
-    const validation = validateConfig(finalConfig);
+    const validation = validateConfig(config);
     if (!validation.valid) {
       throw new Error(validation.error);
     }
+    const finalConfig = { ...DEFAULT_CONFIG, ...config };
     saveConfig(finalConfig);
     return finalConfig;
   },

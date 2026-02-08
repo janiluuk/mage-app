@@ -1,18 +1,19 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
-import CloudStorage from './CloudStorage.vue';
 
-const mockService = {
+const mockService = vi.hoisted(() => ({
   getConfig: vi.fn(),
   connect: vi.fn(),
   disconnect: vi.fn(),
   listFiles: vi.fn(),
   addLocalFile: vi.fn()
-};
+}));
 
 vi.mock('@/services/cloudStorageService', () => ({
   default: mockService
 }));
+
+import CloudStorage from './CloudStorage.vue';
 
 describe('CloudStorage', () => {
   beforeEach(() => {

@@ -25,6 +25,11 @@ Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich 
 
 ## Related Docs
 
+### User Guides
+- [Admin Panel User Guide](docs/ADMIN_PANEL_USER_GUIDE.md) - Complete guide for instance management features
+- [Screenshot Guide](docs/SCREENSHOT_GUIDE.md) - How to capture screenshots of admin features
+
+### Technical Documentation
 - docs/STORY_CREATOR.md
 - docs/PRIMEVUE_ENHANCEMENTS.md
 - ADMIN_PANEL_IMPLEMENTATION.md
