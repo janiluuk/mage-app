@@ -98,14 +98,6 @@ const queryFilter = ref('');
 const statusFilterKey = ref('');
 const statusFilter = ref('');
 
-const hasFilters = computed(() => {
-    return Boolean(queryFilter.value || generatorFilter.value || statusFilter.value);
-});
-
-const isEmptyLibrary = computed(() => {
-    return !dataviewValue.value || dataviewValue.value.length === 0;
-});
-
 const sortOptions = ref([
     { label: 'From latest to oldest', value: '-updated_at' },
     { label: 'From oldest to latest', value: 'updated_at' }
@@ -398,20 +390,6 @@ const onStatusFilterChange = (event) => {
             </template>
 
 
-            <template #empty>
-                <div class="empty-state-container">
-                    <div class="empty-state">
-                        <i class="pi pi-inbox empty-state-icon"></i>
-                        <h3 class="empty-state-title">No Content Yet</h3>
-                        <p class="empty-state-message">Your library is empty. Start creating by uploading or generating your first video!</p>
-                        <a href="/upload/">
-                            <Button icon="pi pi-plus" label="Create Your First Video"
-                                class="p-button p-button-lg p-button-rounded p-button-success"></Button>
-                        </a>
-                    </div>
-                </div>
-            </template>
-
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">
                     <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
@@ -581,25 +559,6 @@ span>img[lazy=error] {
   }
 }
 
-.empty-library {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  color: var(--text-color-secondary);
-}
-
-.empty-library h4 {
-  margin: 0.5rem 0 0.25rem;
-}
-
-.empty-library p {
-  margin: 0 0 1rem;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  color: var(--text-color-secondary);
-}
-
 .menu-list {
   display: flex;
   flex-flow: row;
@@ -666,42 +625,6 @@ span>img[lazy=error] {
       align-items: flex-start;
     }
   }
-}
-
-.empty-state-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 400px;
-  width: 100%;
-  padding: 2rem;
-}
-
-.empty-state {
-  text-align: center;
-  max-width: 500px;
-  padding: 2rem;
-}
-
-.empty-state-icon {
-  font-size: 4rem;
-  color: var(--text-color-secondary);
-  margin-bottom: 1.5rem;
-  opacity: 0.6;
-}
-
-.empty-state-title {
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: var(--text-color);
-  margin-bottom: 1rem;
-}
-
-.empty-state-message {
-  font-size: 1rem;
-  color: var(--text-color-secondary);
-  margin-bottom: 2rem;
-  line-height: 1.6;
 }
 
 </style>

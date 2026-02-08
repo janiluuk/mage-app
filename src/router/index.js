@@ -281,52 +281,10 @@ const router = createRouter({
           component: () => import("@/views/pages/video/VideoEditor.vue"),
         },
         {
-          path: "/batch",
-          name: "BatchProcessing",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/pages/BatchProcessing.vue"),
-        },
-        {
-          path: "/presets",
-          name: "Presets",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/pages/Presets.vue"),
-        },
-        {
-          path: "/cloud-storage",
-          name: "CloudStorage",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/pages/CloudStorage.vue"),
-        },
-        {
           path: "/admin/video-processing",
           name: "Video Processing",
           meta: { requiresAuth: true },
           component: () => import("@/views/admin/VideoProcessing.vue"),
-        },
-        {
-          path: "/projects",
-          name: "projects",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/film-project/Projects.vue"),
-        },
-        {
-          path: "/projects/:id",
-          name: "project-detail",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/film-project/ProjectDetail.vue"),
-        },
-        {
-          path: "/projects/:projectId/sequences/:sequenceId",
-          name: "sequence-detail",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/film-project/SequenceDetail.vue"),
-        },
-        {
-          path: "/projects/:projectId/sequences/:sequenceId/shots/:shotId",
-          name: "shot-detail",
-          meta: { requiresAuth: true },
-          component: () => import("@/views/film-project/ShotDetail.vue"),
         },
         {
           path: "/admin/instances",

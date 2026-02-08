@@ -19,6 +19,21 @@ services:
         aliases:
           - app.localhost
 
+  test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: mage-app-test
+    hostname: test
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep infinity"]
+    profiles:
+      - test
+
   api:
     build:
       context: .
