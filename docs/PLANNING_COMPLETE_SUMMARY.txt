@@ -11,12 +11,13 @@ Last Updated:    February 8, 2026
 
 FEATURES STATUS
 ═══════════════════════════════════════════════════════════════════════════════
-1. Video Trimming/Clipping in Editor       [P0] ✅ IMPLEMENTED
-2. Export/Import Presets                   [P0] ✅ IMPLEMENTED
-3. Batch Processing Multiple Files         [P1] ✅ IMPLEMENTED
-4. Preset Library Management               [P1] ✅ IMPLEMENTED
-5. Advanced Audio Visualization            [P2] 🔧 PARTIAL (component exists, page view pending)
-6. Real-time Preview During Editing        [P2] 🔧 PARTIAL (service exists, UI pending)
+1. Video Trimming/Clipping in Editor       [P0] ✅ COMPLETE
+2. Export/Import Presets                   [P0] ✅ COMPLETE
+3. Batch Processing Multiple Files         [P1] ✅ COMPLETE
+4. Preset Library Management               [P1] ✅ COMPLETE
+5. Advanced Audio Visualization            [P2] ✅ COMPLETE
+6. Real-time Preview / Movie Editor        [P2] ✅ COMPLETE
+7. Ollama Instance Integration             [P2] ✅ COMPLETE
 8. Cloud Storage Integration               [P3] ⬜ NOT STARTED
 
 IMPLEMENTATION DETAILS
@@ -29,6 +30,9 @@ Feature 1: Video Trimming — ✅ Complete
   Integration:
     • Integrated into Editor.vue as a side panel
     • Uses videoeditor Vuex store for seek/setStartPoint/setEndPoint
+  Tests:
+    • tests/unit/components/videoeditor/VideoTrimPanel.spec.js (12 tests)
+    • tests/unit/services/videoTrimService.spec.js (25+ tests)
   API:
     • POST /api/v1/video-jobs/trim — Server-side trimming
 
@@ -68,23 +72,86 @@ Feature 4: Preset Library Management — ✅ Complete
     • Full REST API at /api/v1/presets/*
     • Categories endpoint at /api/v1/presets/categories
 
-Feature 5: Audio Visualization — 🔧 Partial
+Feature 5: Audio-Reactive Video Generator — ✅ Complete
+  Page: /audio-visualizer
+  Description:
+    Upload an audio file, analyse its frequency bands, map each band to
+    Deforum animation parameters, and generate audio-reactive AI video.
   Components:
-    • src/components/AudioVisualizer.vue — Core visualizer component
+    • src/views/pages/AudioVisualization.vue — Full page view
+    • src/components/AudioVisualizer.vue — Three.js live visualizer
     • src/components/audio/AudioVisualizationControls.vue — Controls panel
-  Remaining:
-    • Page view at src/views/pages/AudioVisualization.vue needs to be created
-    • Route exists at /audio-visualizer but page component is missing
-
-Feature 6: Real-time Preview — 🔧 Partial
   Services:
-    • src/services/realtimePreviewService.js — Preview debounce + WebSocket
-  Remaining:
-    • UI integration into Editor.vue pending
+    • src/services/audioDeforumService.js — Offline audio decoding, FFT
+      analysis, band extraction, Parseq keyframe generation, Deforum config
+    • src/services/audioAnalysisService.js — Real-time waveform/spectrum
+  Frequency Bands:
+    Sub-bass (20-60 Hz), Bass (60-250 Hz), Low-mid (250-500 Hz),
+    Mid (500-2 kHz), Upper-mid (2-4 kHz), Presence (4-6 kHz),
+    Brilliance (6-20 kHz)
+  Drivable Deforum Parameters:
+    translation_x/y/z, rotation_3d_x/y/z, strength_schedule,
+    noise_schedule, contrast_schedule, zoom, angle
+  Workflow:
+    1. Upload audio → offline decode → FFT per frame
+    2. Assign bands to Deforum targets with min/max ranges
+    3. Preview keyframe schedules (Parseq format: "0:(val), 12:(val), ...")
+    4. Export full Deforum config JSON or send to generation pipeline
+
+Feature 6: Real-time Preview / Movie Editor — ✅ Complete
+  Page: /projects/:id/editor
+  Description:
+    Full-featured movie editor accessible from the Film Projects page.
+    Organise scenes, set transitions between clips, add animated text
+    overlays on a visual timeline, and preview in real time.
+  Views:
+    • src/views/film-project/Projects.vue — Project listing & CRUD
+    • src/views/film-project/ProjectDetail.vue — Sequences table, AI script
+    • src/views/film-project/SequenceDetail.vue — Shots table, AI scenes
+    • src/views/film-project/ShotDetail.vue — Individual shot with video
+    • src/views/film-project/MovieEditor.vue — Main editor page
+  Components:
+    • src/components/movie-editor/PreviewPlayer.vue — Canvas-based player
+      with transport controls (play/pause/step), quality selector, overlay
+      rendering, and transition blending (crossfade, fade-to-black, wipe)
+    • src/components/movie-editor/TransitionPicker.vue — Overlay-panel
+      picker with 6 transition types and adjustable duration
+    • src/components/movie-editor/TextOverlayEditor.vue — Dialog for
+      creating/editing text overlays with position, font, colour, bold,
+      italic, and entrance/exit animations (fade, slide, zoom)
+  Movie Editor Features:
+    • Drag-and-drop clip reordering in the scene list
+    • Visual timeline with zoomable ruler, clip track, and overlay track
+    • Red playhead synced to canvas preview
+    • Click-to-seek on timeline
+    • Transitions between every clip (cut, crossfade, fade-to-black,
+      wipe-left, wipe-right, dissolve) with configurable duration
+    • Text overlays positionable on the timeline with animation options
+    • Project export to JSON
+    • "Movie Editor" button on ProjectDetail launches the editor
+  Store:
+    • src/store/modules/film-project/ — Vuex module for projects,
+      sequences, shots, with CRUD + AI generation actions
+  Services:
+    • src/services/realtimePreviewService.js — WebSocket preview service
+
+Feature 7: Ollama Instance Integration — ✅ Complete
+  Description:
+    Ollama AI instances can be registered alongside Stable Diffusion Forge
+    and ComfyUI in the admin panel for text/LLM generation.
+  Backend:
+    • app/Services/AI/OllamaService.php — Model listing, text generation,
+      health checks, model pulling
+    • GeneratorInstanceController — accepts 'ollama' type with stricter
+      URL regex validation
+    • Migration for MySQL/MariaDB/PostgreSQL/SQLite enum update
+  Frontend:
+    • InstanceManagement.vue — Ollama in instance type dropdown
+    • InstanceCard.vue — Ollama icon and label
 
 BUG FIXES APPLIED
 ═══════════════════════════════════════════════════════════════════════════════
-1. StoryGenerationController::share() — Now returns 404 when batch not found
+1. StoryGenerationController::share() — Returns 404 when batch not found
    (previously returned success with orphaned share token)
 
 2. VideoTrimPanel — Fixed currentTime computed property
@@ -101,13 +168,31 @@ BUG FIXES APPLIED
 5. ComfyWebSocketClient::matchesClientId() — Added array structure validation
    (now checks array_is_list + isset + is_array before accessing prompt[3])
 
+6. src/lib/auth.js — Logout always clears local state
+   (setAccessToken(null) and USER_LOGOUT commit run regardless of server
+    response to prevent stale auth state on network errors)
+
+7. database/seeders/UserSeeder.php — Null checks for role lookups
+   (prevents errors when expected roles don't exist in the database)
+
+8. GeneratorInstanceController URL validation — Stricter regex
+   (replaced permissive [\w.\-]+ with RFC-compliant domain label pattern
+    that rejects leading dots/hyphens and consecutive dots)
+
+9. Migration: PostgreSQL support for ollama enum
+   (DROP + ADD CHECK constraint for pgsql driver alongside MySQL/MariaDB)
+
+10. TransitionPicker — Fixed undefined event in toggle()
+    (watch on showPanel called toggle(event) where event was undefined;
+     replaced with togglePanel(event) method receiving the DOM click event)
+
 ARCHITECTURE
 ═══════════════════════════════════════════════════════════════════════════════
 Frontend:
   • Vue 3 with Composition API
   • PrimeVue component library
   • Vite build system
-  • Vitest for testing
+  • Vitest for testing (76 suites, 1025+ tests)
   • Vuex for state management
 
 Backend:
@@ -115,6 +200,7 @@ Backend:
   • PHPUnit for testing
   • ComfyUI integration for AI generation
   • FFmpeg for video processing
+  • OllamaService for LLM integration
 
 DOCUMENTATION
 ═══════════════════════════════════════════════════════════════════════════════
