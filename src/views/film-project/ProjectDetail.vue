@@ -25,6 +25,12 @@
             </div>
             <div class="flex gap-2">
               <Button 
+                label="Movie Editor" 
+                icon="pi pi-play" 
+                class="p-button-success"
+                @click="openMovieEditor"
+              />
+              <Button 
                 label="Generate Script" 
                 icon="pi pi-magic" 
                 class="p-button-outlined"
@@ -426,6 +432,10 @@ const generateScript = async () => {
   } finally {
     generatingScript.value = false;
   }
+};
+
+const openMovieEditor = () => {
+  router.push({ name: 'movie-editor', params: { id: projectId.value } });
 };
 
 const editProject = () => {

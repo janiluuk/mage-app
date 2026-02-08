@@ -1,5 +1,5 @@
 <template>
-  <div class="transition-picker" @click="showPanel = true">
+  <div class="transition-picker" @click="togglePanel">
     <div class="transition-icon" :class="'trans-' + modelValue.type">
       <i :class="transitionIcon" />
     </div>
@@ -53,7 +53,6 @@ export default {
   emits: ['update:modelValue'],
   setup(props, { emit }) {
     const op = ref(null);
-    const showPanel = ref(false);
 
     const transitionTypes = [
       { value: 'cut', label: 'Cut', icon: 'pi pi-minus' },
@@ -69,6 +68,12 @@ export default {
       return found ? found.icon : 'pi pi-minus';
     });
 
+    function togglePanel(event) {
+      if (op.value) {
+        op.value.toggle(event);
+      }
+    }
+
     function selectType(type) {
       emit('update:modelValue', { ...props.modelValue, type });
     }
@@ -79,19 +84,12 @@ export default {
 
     return {
       op,
-      showPanel,
       transitionTypes,
       transitionIcon,
+      togglePanel,
       selectType,
       updateDuration,
     };
-  },
-  watch: {
-    showPanel(val) {
-      if (val && this.$refs.op) {
-        this.$refs.op.toggle(event);
-      }
-    },
   },
 };
 </script>

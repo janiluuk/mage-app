@@ -43,7 +43,7 @@ describe('InstanceCard', () => {
   });
 
   it('renders instance type', () => {
-    expect(wrapper.text()).toContain('comfyui');
+    expect(wrapper.text()).toContain('ComfyUI');
   });
 
   it('displays health status as Online', () => {
