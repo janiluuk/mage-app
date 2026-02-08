@@ -281,6 +281,18 @@ const router = createRouter({
           component: () => import("@/views/pages/video/VideoEditor.vue"),
         },
         {
+          path: "/presets",
+          name: "Presets",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/Presets.vue"),
+        },
+        {
+          path: "/audio-visualizer",
+          name: "AudioVisualizer",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/AudioVisualization.vue"),
+        },
+        {
           path: "/admin/video-processing",
           name: "Video Processing",
           meta: { requiresAuth: true },

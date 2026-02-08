@@ -30,7 +30,9 @@ const model = ref([
         label: 'Tools',
         items: [
             { label: 'Mage Helper', icon: 'pi pi-fw pi-bolt', to: '/mage' },
-            { label: 'Timeline', icon: 'pi pi-fw pi-clock', to: '/timeline' }
+            { label: 'Timeline', icon: 'pi pi-fw pi-clock', to: '/timeline' },
+            { label: 'Preset Library', icon: 'pi pi-fw pi-sliders-h', to: '/presets' },
+            { label: 'Audio Visualizer', icon: 'pi pi-fw pi-chart-bar', to: '/audio-visualizer' }
         ]
     },
     {

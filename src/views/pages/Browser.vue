@@ -1210,6 +1210,35 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
     case "file-properties":
       openMetadataPanel();
       break;
+    case "batch:download": {
+      // Download all selected items that are finished
+      const downloadable = targets.filter((v) => v?.job && (v.status === "finished" || v.job?.status === "finished"));
+      downloadable.forEach((video) => {
+        store.dispatch("videojobs/download", video.job);
+      });
+      break;
+    }
+    case "batch:reprocess": {
+      // Re-queue selected items for processing
+      const reprocessable = targets.filter((v) => v?.job?.id);
+      if (!reprocessable.length) break;
+      confirm.require({
+        message: `Re-process ${reprocessable.length} video(s)? This will create new processing jobs.`,
+        header: "Batch Re-process",
+        icon: "pi pi-refresh",
+        accept: () => {
+          reprocessable.forEach((video) => {
+            store.dispatch("videojobs/reprocess", video.job.id);
+          });
+        },
+      });
+      break;
+    }
+    case "batch:apply-preset": {
+      // Open preset selector for batch apply
+      showBatchPresetDialog.value = true;
+      break;
+    }
     default:
       break;
   }
@@ -1230,6 +1259,7 @@ const showSoundtrackDialog = ref(false);
 const selectedVideoForSoundtrack = ref(null);
 const showExtensionDialog = ref(false);
 const selectedVideoForExtension = ref(null);
+const showBatchPresetDialog = ref(false);
 
 const openSoundtrackDialog = (videoJob) => {
   selectedVideoForSoundtrack.value = videoJob;

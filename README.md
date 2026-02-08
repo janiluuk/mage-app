@@ -2,35 +2,85 @@
 
 Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich media browser, Story Creator, and Film Projects management, backed by the Mage API.
 
-## Practical Overview
+## Features
 
-- Media Library & Browser: tagging, filtering, sortable grids, metadata, and previews.
-- Story Creator: multi-scene builder with live status, saved configs, and exports.
-- Film Projects: manage projects, sequences, and shots with AI script/scene generation.
-- Audio Tools: Soundscape Creator with queue/status feedback.
-- Admin & Ops: instance management, processing queues, and diagnostics.
+### 🎬 Video Studio
+- **Media Library & Browser**: tagging, filtering, sortable grids, metadata, previews, and batch operations (download, reprocess, apply preset).
+- **Upload**: drag-and-drop upload for vid2vid and deforum workflows with multi-file batch progress tracking.
+- **Video Editor**: timeline-based editor with trim panel, start/end point editing, fragment splitting, and export.
+- **Video Trimming**: integrated trim panel in the editor — set start/end by time or current playback position, preview trim, and apply.
 
-## Setup (Summary)
+### 🤖 AI Tools
+- **Story Creator**: multi-scene narrative builder with live status, saved configs, and exports.
+- **Soundscape Creator**: audio-driven animation with queue/status feedback.
 
-- Requires Node.js 18+, a running Mage API backend, and optional Docker for containers.
-- Configure VITE_API_URL and VITE_API_BASE_URL in .env.
-- Start the dev server with the standard Vite workflow.
+### 🛠️ Tools
+- **Preset Library**: manage generation presets with categories, favorites, usage tracking, and JSON import/export.
+- **Audio Visualizer**: waveform and frequency visualization for audio files.
+- **Timeline**: studio timeline view for sequencing.
+
+### 🔧 Admin & Ops
+- **Instance Management**: monitor and manage ComfyUI / Stable Diffusion Forge instances with real-time status.
+- **Video Processing**: admin queue monitoring and job management.
+
+## Setup
+
+Requires Node.js 18+, a running Mage API backend, and optional Docker for containers.
+
+```bash
+# Install dependencies
+npm install --legacy-peer-deps
+
+# Configure environment
+cp .env.example .env
+# Set VITE_API_URL and VITE_API_BASE_URL
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
 
 ## Tech Stack
 
-- Vue 3 + Vite, Vue Router, Vuex
-- PrimeVue + PrimeFlex + PrimeIcons
-- Media playback helpers (Vue Plyr, vue-audio-visual)
-- Optional Node helper in backend/ for FFmpeg/ComfyUI audio streaming
+- **Framework**: Vue 3 + Vite, Vue Router, Vuex
+- **UI**: PrimeVue + PrimeFlex + PrimeIcons
+- **Media**: Vue Plyr, vue-audio-visual
+- **Testing**: Vitest + Vue Test Utils
+- **Backend helper**: Optional Node server in `backend/` for FFmpeg/ComfyUI audio streaming
+
+## Testing
+
+```bash
+# Run all frontend tests
+npm run test:frontend
+
+# Watch mode
+npm run test:frontend:watch
+
+# With coverage
+npm run test:frontend:coverage
+```
+
+### Test Structure
+
+- **Unit tests**: `tests/unit/` — components, services, utilities
+- **Integration tests**: `tests/integration/` — editor workflows, timeline operations
 
 ## Related Docs
 
-### User Guides
-- [Admin Panel User Guide](docs/ADMIN_PANEL_USER_GUIDE.md) - Complete guide for instance management features
-- [Screenshot Guide](docs/SCREENSHOT_GUIDE.md) - How to capture screenshots of admin features
+### Feature Documentation
+- [docs/README.md](docs/README.md) — Documentation hub and feature status
+- [docs/BROWSER_FEATURE.md](docs/BROWSER_FEATURE.md) — Video Browser
+- [docs/STORY_CREATOR.md](docs/STORY_CREATOR.md) — Story Creator
+- [docs/AUDIO_ANIMATION_FEATURE.md](docs/AUDIO_ANIMATION_FEATURE.md) — Audio animation
 
-### Technical Documentation
-- docs/STORY_CREATOR.md
-- docs/PRIMEVUE_ENHANCEMENTS.md
-- ADMIN_PANEL_IMPLEMENTATION.md
-- FILM_PROJECT_API_NAMESPACE.md
+### Admin & Ops
+- [docs/ADMIN_PANEL_USER_GUIDE.md](docs/ADMIN_PANEL_USER_GUIDE.md) — Instance management guide
+- [docs/ADMIN_PANEL_FEATURES.md](docs/ADMIN_PANEL_FEATURES.md) — Admin panel features
+
+### Technical
+- [docs/TECHNICAL_ARCHITECTURE.md](docs/TECHNICAL_ARCHITECTURE.md) — System architecture
+- [docs/PRIMEVUE_ENHANCEMENTS.md](docs/PRIMEVUE_ENHANCEMENTS.md) — PrimeVue component usage
+- [docs/RELEASE_WORKFLOW.md](docs/RELEASE_WORKFLOW.md) — Automated release workflow
