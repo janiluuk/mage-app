@@ -1,6 +1,6 @@
 # Mage AI Studio Frontend
 
-Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich media browser, Story Creator, and Film Projects management, backed by the Mage API.
+Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich media browser, Story Creator, Film Projects management, and audio-reactive video generation, backed by the Mage API.
 
 ## Features
 
@@ -10,17 +10,21 @@ Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich 
 - **Video Editor**: timeline-based editor with trim panel, start/end point editing, fragment splitting, and export.
 - **Video Trimming**: integrated trim panel in the editor — set start/end by time or current playback position, preview trim, and apply.
 
+### 🎬 Film Projects & Movie Editor
+- **Film Projects**: hierarchical project management (Projects → Sequences → Shots) with AI-assisted script and scene generation at every level.
+- **Movie Editor**: assemble project shots into a finished sequence with drag-and-drop scene ordering, configurable clip transitions (cut, crossfade, fade-to-black, wipe, dissolve), animated text overlays, a zoomable timeline, and JSON export.
+
 ### 🤖 AI Tools
 - **Story Creator**: multi-scene narrative builder with live status, saved configs, and exports.
 - **Soundscape Creator**: audio-driven animation with queue/status feedback.
+- **Audio-Reactive Video Generator**: upload audio, analyse frequency bands, map them to Deforum animation parameters (translation, rotation, strength, noise, etc.), preview Parseq-style keyframe schedules, and export or generate video.
 
 ### 🛠️ Tools
 - **Preset Library**: manage generation presets with categories, favorites, usage tracking, and JSON import/export.
-- **Audio Visualizer**: waveform and frequency visualization for audio files.
 - **Timeline**: studio timeline view for sequencing.
 
 ### 🔧 Admin & Ops
-- **Instance Management**: monitor and manage ComfyUI / Stable Diffusion Forge instances with real-time status.
+- **Instance Management**: monitor and manage ComfyUI, Stable Diffusion Forge, and Ollama instances with real-time status.
 - **Video Processing**: admin queue monitoring and job management.
 
 ## Setup
@@ -46,7 +50,7 @@ npm run build
 
 - **Framework**: Vue 3 + Vite, Vue Router, Vuex
 - **UI**: PrimeVue + PrimeFlex + PrimeIcons
-- **Media**: Vue Plyr, vue-audio-visual
+- **Media**: Vue Plyr, vue-audio-visual, Three.js (audio visualiser)
 - **Testing**: Vitest + Vue Test Utils
 - **Backend helper**: Optional Node server in `backend/` for FFmpeg/ComfyUI audio streaming
 
