@@ -237,6 +237,7 @@ export default {
     const instanceTypeOptions = [
       { label: 'Stable Diffusion Forge', value: 'stable_diffusion_forge' },
       { label: 'ComfyUI', value: 'comfyui' },
+      { label: 'Ollama', value: 'ollama' },
     ];
 
     const instances = computed(() => {

@@ -14,8 +14,9 @@
           icon="pi pi-power-off"
         />
       </div>
-      <div class="text-sm text-color-secondary">
-        {{ instance.type }}
+      <div class="flex align-items-center gap-1">
+        <i :class="typeIcon" class="text-sm"></i>
+        <span class="text-sm text-color-secondary">{{ typeLabel }}</span>
       </div>
     </div>
 
@@ -167,6 +168,24 @@ export default {
       return 'pi pi-question-circle';
     });
 
+    const typeLabel = computed(() => {
+      const typeMap = {
+        stable_diffusion_forge: 'SD Forge',
+        comfyui: 'ComfyUI',
+        ollama: 'Ollama',
+      };
+      return typeMap[props.instance.type] || props.instance.type;
+    });
+
+    const typeIcon = computed(() => {
+      const iconMap = {
+        stable_diffusion_forge: 'pi pi-image',
+        comfyui: 'pi pi-sitemap',
+        ollama: 'pi pi-comments',
+      };
+      return iconMap[props.instance.type] || 'pi pi-server';
+    });
+
     const getProgressBarClass = (value) => {
       if (value >= 90) return 'progress-bar-danger';
       if (value >= 70) return 'progress-bar-warning';
@@ -181,6 +200,8 @@ export default {
       healthStatusLabel,
       healthStatusSeverity,
       healthStatusIcon,
+      typeLabel,
+      typeIcon,
       getProgressBarClass
     };
   }
