@@ -18,6 +18,12 @@ const model = ref([
         ]
     },
     {
+        label: 'Film Projects',
+        items: [
+            { label: 'Projects', icon: 'pi pi-fw pi-folder', to: '/projects' },
+        ]
+    },
+    {
         label: 'AI Tools',
         items: [
             { label: 'Story Creator', icon: 'pi pi-fw pi-book', to: '/story' },
