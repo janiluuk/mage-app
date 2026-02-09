@@ -1,88 +1,33 @@
 <script setup>
 import { useLayout } from '@/layout/composables/layout';
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import store from '../store';
 import AuthMenu from './AuthMenu.vue';
 import VisitorMenu from './VisitorMenu.vue';
 
-const menu = ref(null);
-
 const { layoutConfig, onMenuToggle } = useLayout();
 
-const outsideClickListener = ref(null);
-const topbarMenuActive = ref(false);
-const activeRoute = ref(false);
 const loggedInUser = computed(() => store.getters['AuthService/GET_LOGGED_USER']);
+const authMenuRef = ref(null);
+const visitorMenuRef = ref(null);
 
 const router = useRouter();
 onMounted(() => {
     store.dispatch('AuthService/FETCH_LOGGED_USER');
-
-    bindOutsideClickListener();
-    activeRoute.value = router.currentRoute.value.path;
-});
-
-onBeforeUnmount(() => {
-    unbindOutsideClickListener();
 });
 
 const logoUrl = computed(() => {
     return `/public/img/mage-logo.png`;
 });
 
-const onTopBarActionButton = (route) => {
-    activeRoute.value = route;
-    router.push(route);
-};
-const onTopBarMenuButton = () => {
-    topbarMenuActive.value = !topbarMenuActive.value;
-};
-const onSettingsClick = () => {
-    topbarMenuActive.value = false;
-    router.push('/documentation');
-};
-const topbarMenuClasses = computed(() => {
-    return {
-        'layout-topbar-menu-mobile-active': topbarMenuActive.value
-    };
-});
-const checkActiveRoute = (item) => {
-    return activeRoute.value === item;
-};
-
-const bindOutsideClickListener = () => {
-    if (!outsideClickListener.value) {
-        outsideClickListener.value = (event) => {
-            if (isOutsideClicked(event)) {
-                topbarMenuActive.value = false;
-            }
-        };
-        document.addEventListener('click', outsideClickListener.value);
+const onTopBarMenuButton = (event) => {
+    if (authMenuRef.value) {
+        authMenuRef.value.toggleMobileMenu(event);
+    } else if (visitorMenuRef.value) {
+        visitorMenuRef.value.toggleMobileMenu(event);
     }
 };
-const unbindOutsideClickListener = () => {
-    if (outsideClickListener.value) {
-        document.removeEventListener('click', outsideClickListener);
-        outsideClickListener.value = null;
-    }
-};
-const isOutsideClicked = (event) => {
-    if (!topbarMenuActive.value) return;
-
-    const sidebarEl = document.querySelector('.layout-topbar-menu');
-    const topbarEl = document.querySelector('.layout-topbar-menu-button');
-    const menuEl = document.querySelector('.p-menu-overlay'); // PrimeVue menu overlay
-
-    return !(
-        sidebarEl?.isSameNode(event.target) || 
-        sidebarEl?.contains(event.target) || 
-        topbarEl?.isSameNode(event.target) || 
-        topbarEl?.contains(event.target) ||
-        menuEl?.contains(event.target) // Don't close if clicking on menu
-    );
-};
-
 </script>
 
 <template>
@@ -94,18 +39,17 @@ const isOutsideClicked = (event) => {
             <img :src="logoUrl" alt="logo" />
             <span>Mage:stable</span>
         </router-link>
-        <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton()">
+        <button class="p-link layout-topbar-menu-button layout-topbar-button" @click="onTopBarMenuButton($event)">
             <i class="pi pi-ellipsis-v"></i>
         </button>
 
         <div class="layout-topbar-logo"></div>
         <AuthMenu
             v-if="loggedInUser"
+            ref="authMenuRef"
             :user="loggedInUser"
-            :topbarMenuActive="topbarMenuActive"
-            :topbarMenuClasses="topbarMenuClasses"
           ></AuthMenu>
-        <VisitorMenu v-else></VisitorMenu>
+        <VisitorMenu v-else ref="visitorMenuRef"></VisitorMenu>
 
     </div>
 </template>

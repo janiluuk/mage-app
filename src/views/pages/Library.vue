@@ -389,6 +389,18 @@ const onStatusFilterChange = (event) => {
 
             </template>
 
+            <template #empty>
+                <div class="empty-state flex flex-column align-items-center justify-content-center py-8">
+                    <i class="pi pi-video text-6xl text-primary mb-4" style="font-size: 5rem; opacity: 0.4;"></i>
+                    <h3 class="text-xl font-semibold mb-2" style="color: var(--text-color);">Your library is empty</h3>
+                    <p class="text-color-secondary mb-4 text-center" style="max-width: 400px;">
+                        You haven't created any videos yet. Start by uploading a video or creating one with AI.
+                    </p>
+                    <Button icon="pi pi-plus" label="Create your first video!" 
+                        class="p-button-lg p-button-rounded"
+                        @click="$router.push('/upload/')" />
+                </div>
+            </template>
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">

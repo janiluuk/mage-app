@@ -345,10 +345,3 @@ onMounted(() => {
   border-radius: 4px;
 }
 </style>
-
-
-</style>
-
-
-</style>
-

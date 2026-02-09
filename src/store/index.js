@@ -140,7 +140,3 @@ export default createStore({
   mutations: uiMutations,
   getters: uiGetters,
 });
-
-});
-
-});

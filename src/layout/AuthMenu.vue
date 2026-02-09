@@ -1,22 +1,26 @@
 <template>
-        <div class="layout-topbar-menu" :class="topbarMenuClasses">
-            <button @click.stop="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
-                class="p-link topbar-button">
-                <i class="pi pi-plus mr-2"></i>
-                <span>Create!</span>
-            </button>
-            <button @click="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
-                class="p-link topbar-button">
-                <i class="pi pi-images mr-2"></i>
-                <span>My library</span>
-            </button>
-            <Menu ref="menu" :model="getOverlayMenu()" :popup="true" />
-            <button icon="pi pi-angle-down" :label="user.email" @click="toggleMenu"
-                :class="{ 'active-route': checkActiveRoute('/profile') }" class="p-link topbar-button">
-                <i class="pi pi-user mr-2"></i>
-                <span>Account</span>
-            </button>
-        </div>
+    <!-- Desktop menu (auto-hidden on mobile ≤991px via _topbar.scss) -->
+    <div class="layout-topbar-menu">
+        <button @click.stop="onTopBarActionButton('/upload/');" :class="{ 'active-route': checkActiveRoute('/upload/') }"
+            class="p-link topbar-button">
+            <i class="pi pi-plus mr-2"></i>
+            <span>Create!</span>
+        </button>
+        <button @click="onTopBarActionButton('/library');" :class="{ 'active-route': checkActiveRoute('/library') }"
+            class="p-link topbar-button">
+            <i class="pi pi-images mr-2"></i>
+            <span>My library</span>
+        </button>
+        <Menu ref="accountMenu" :model="getAccountMenuItems()" :popup="true" />
+        <button @click="toggleAccountMenu" :class="{ 'active-route': checkActiveRoute('/profile') }"
+            class="p-link topbar-button">
+            <i class="pi pi-user mr-2"></i>
+            <span>Account</span>
+        </button>
+    </div>
+
+    <!-- Mobile dropdown menu (triggered by 3-dot button in AppTopbar) -->
+    <Menu ref="mobileMenu" :model="getMobileMenuItems()" :popup="true" class="mobile-topbar-menu" />
     <Toast/>
 </template>
 
@@ -26,47 +30,48 @@ import * as authGetters from '@/store/modules/auth/types/getters';
 import * as notificationActions from '@/store/modules/notification/types/actions';
 import Menu from 'primevue/menu';
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { mapActions, mapGetters } from 'vuex';
 
 export default {
-
     name: 'AuthorizedMenu',
     components: {
         Menu
     },
     setup() {
-        const menu = ref(null);
-        const topbarMenuActive = ref(false);
-        return { menu, topbarMenuActive };
+        const accountMenu = ref(null);
+        const mobileMenu = ref(null);
+        return { accountMenu, mobileMenu };
     },
     props: {
         user: {
             login: String,
             email: String,
             profile_picture: String
-        },
-        topbarMenuClasses: { type: Object, default: {'layout-topbar-menu-mobile-active': false} }
-
+        }
     },
     computed: {
-    ...mapGetters('AuthService', {
-      getLoggedUser: authGetters.GET_LOGGED_USER
-    })
-  },
+        ...mapGetters('AuthService', {
+            getLoggedUser: authGetters.GET_LOGGED_USER
+        })
+    },
     methods: {
         onTopBarActionButton(route) {
             this.$router.push(route);
         },
-        toggleMenu(event) {
+        toggleAccountMenu(event) {
             event.preventDefault();
             event.stopPropagation();
-            if (this.menu) {
-                this.menu.toggle(event);
+            if (this.accountMenu) {
+                this.accountMenu.toggle(event);
             }
         },
-        getOverlayMenu() {
-            return ([
+        toggleMobileMenu(event) {
+            if (this.mobileMenu) {
+                this.mobileMenu.toggle(event);
+            }
+        },
+        getAccountMenuItems() {
+            return [
                 {
                     label: 'Profile',
                     icon: 'pi pi-user',
@@ -82,28 +87,61 @@ export default {
                     icon: 'pi pi-sign-out',
                     command: () => {
                         this.exit();
-                        this.signOut();
-                        // Use $toast (globally injected) for reliable access in callbacks
                         if (this.$toast) {
                             this.$toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.', life: 3000 });
                         }
                     }
                 }
-            ]);
+            ];
+        },
+        getMobileMenuItems() {
+            return [
+                {
+                    label: 'Create!',
+                    icon: 'pi pi-plus',
+                    command: () => {
+                        this.$router.push('/upload/');
+                    }
+                },
+                {
+                    label: 'My Library',
+                    icon: 'pi pi-images',
+                    command: () => {
+                        this.$router.push('/library');
+                    }
+                },
+                {
+                    separator: true
+                },
+                {
+                    label: 'Profile',
+                    icon: 'pi pi-user',
+                    command: () => {
+                        this.$router.push('/profile');
+                    }
+                },
+                {
+                    label: 'Logout',
+                    icon: 'pi pi-sign-out',
+                    command: () => {
+                        this.exit();
+                        if (this.$toast) {
+                            this.$toast.add({ severity: 'info', summary: 'CYA!', detail: 'You have been logged out.', life: 3000 });
+                        }
+                    }
+                }
+            ];
         },
         checkActiveRoute(item) {
-            // Check if current route matches (with or without trailing slash)
             const currentPath = this.$router.currentRoute.value.path;
             return currentPath === item || currentPath === item + '/' || currentPath + '/' === item;
         },
         ...mapActions('AuthService', {
             signOut: authActions.SIGN_OUT
         }),
-
         ...mapActions('notification', {
             setErrorNotification: notificationActions.SET_ERROR_NOTIFICATION
         }),
-
         async exit() {
             try {
                 await this.signOut();
