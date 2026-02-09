@@ -39,7 +39,7 @@
               <Button 
                 label="Edit" 
                 icon="pi pi-pencil" 
-                @click="editShot"
+                @click="showEditShotDialog"
               />
             </div>
           </div>
@@ -111,6 +111,37 @@
       </div>
     </div>
 
+    <!-- Edit Shot Dialog -->
+    <Dialog 
+      v-model:visible="showShotEditDialog" 
+      header="Edit Shot" 
+      :modal="true"
+      :style="{ width: '600px' }"
+    >
+      <div class="flex flex-column gap-3">
+        <div class="field">
+          <label for="shot-edit-name" class="font-semibold block mb-2">Shot Name *</label>
+          <InputText id="shot-edit-name" v-model="shotEditForm.name" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="shot-edit-desc" class="font-semibold block mb-2">Description</label>
+          <Textarea id="shot-edit-desc" v-model="shotEditForm.description" rows="4" autoResize class="w-full" />
+        </div>
+        <div class="field">
+          <label for="shot-edit-dur" class="font-semibold block mb-2">Duration (seconds)</label>
+          <InputNumber id="shot-edit-dur" v-model="shotEditForm.duration" :min="0.1" :max="300" :step="0.1" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="shot-edit-order" class="font-semibold block mb-2">Order</label>
+          <InputNumber id="shot-edit-order" v-model="shotEditForm.order" :min="1" class="w-full" />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="showShotEditDialog = false" />
+        <Button label="Save" icon="pi pi-check" @click="saveShotEdit" :loading="savingShotEdit" />
+      </template>
+    </Dialog>
+
     <!-- Scene Generation Dialog -->
     <Dialog 
       v-model:visible="showSceneDialog" 
@@ -136,7 +167,10 @@
             id="scene-style" 
             v-model="sceneOptions.style" 
             :options="sceneStyles"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select style"
+            class="w-full"
           />
         </div>
 
@@ -146,7 +180,10 @@
             id="scene-resolution" 
             v-model="sceneOptions.resolution" 
             :options="resolutions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select resolution"
+            class="w-full"
           />
         </div>
       </div>
@@ -212,14 +249,40 @@ const formatDate = (date) => {
   return new Date(date).toLocaleDateString();
 };
 
-const editShot = () => {
-  router.push({ 
-    name: 'sequence-detail', 
-    params: { 
-      projectId: projectId.value, 
-      sequenceId: sequenceId.value 
-    } 
-  });
+// ── Shot editing ─────────────────────────────────────────────────────
+const showShotEditDialog = ref(false);
+const savingShotEdit = ref(false);
+const shotEditForm = ref({ name: '', description: '', duration: 5, order: 1 });
+
+const showEditShotDialog = () => {
+  if (shot.value) {
+    shotEditForm.value = {
+      name: shot.value.name || '',
+      description: shot.value.description || '',
+      duration: shot.value.duration || 5,
+      order: shot.value.order || 1,
+    };
+  }
+  showShotEditDialog.value = true;
+};
+
+const saveShotEdit = async () => {
+  if (!shotEditForm.value.name) return;
+  savingShotEdit.value = true;
+  try {
+    await store.dispatch('FilmProject/' + actions.UPDATE_SHOT, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      shotId: shotId.value,
+      data: shotEditForm.value,
+    });
+    showShotEditDialog.value = false;
+    await loadShot();
+  } catch (error) {
+    console.error('Error updating shot:', error);
+  } finally {
+    savingShotEdit.value = false;
+  }
 };
 
 const generateScene = async () => {

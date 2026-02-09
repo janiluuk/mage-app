@@ -29,6 +29,7 @@ import {
   userWalletModule,
   walletTypeModule,
 } from './modules';
+import FilmProject from './modules/film-project';
 
 const baseState = () => ({
   hideConfigButton: false,
@@ -125,6 +126,7 @@ const featureModules = {
   Order: orderModule,
   ItemsV2: itemsModule,
   ProfileV2: profileModule,
+  FilmProject,
 };
 
 export default createStore({

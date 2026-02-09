@@ -27,7 +27,7 @@
               <Button 
                 label="Edit" 
                 icon="pi pi-pencil" 
-                @click="editSequence"
+                @click="showEditSequenceDialog"
               />
             </div>
           </div>
@@ -210,7 +210,10 @@
             id="scene-style" 
             v-model="sceneOptions.style" 
             :options="sceneStyles"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select style"
+            class="w-full"
           />
         </div>
 
@@ -220,7 +223,10 @@
             id="scene-resolution" 
             v-model="sceneOptions.resolution" 
             :options="resolutions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select resolution"
+            class="w-full"
           />
         </div>
       </div>
@@ -238,6 +244,33 @@
           @click="generateScene"
           :loading="generatingScene"
         />
+      </template>
+    </Dialog>
+
+    <!-- Edit Sequence Dialog -->
+    <Dialog 
+      v-model:visible="showSeqEditDialog" 
+      header="Edit Sequence" 
+      :modal="true"
+      :style="{ width: '600px' }"
+    >
+      <div class="flex flex-column gap-3">
+        <div class="field">
+          <label for="seq-edit-name" class="font-semibold block mb-2">Sequence Name *</label>
+          <InputText id="seq-edit-name" v-model="seqEditForm.name" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="seq-edit-desc" class="font-semibold block mb-2">Description</label>
+          <Textarea id="seq-edit-desc" v-model="seqEditForm.description" rows="4" autoResize class="w-full" />
+        </div>
+        <div class="field">
+          <label for="seq-edit-order" class="font-semibold block mb-2">Order</label>
+          <InputNumber id="seq-edit-order" v-model="seqEditForm.order" :min="1" class="w-full" />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="showSeqEditDialog = false" />
+        <Button label="Save" icon="pi pi-check" @click="saveSequenceEdit" :loading="savingSequenceEdit" />
       </template>
     </Dialog>
 
@@ -458,9 +491,38 @@ const generateScene = async () => {
   }
 };
 
-const editSequence = () => {
-  // Navigate to edit or show edit dialog
-  router.push({ name: 'project-detail', params: { id: projectId.value } });
+// ── Sequence editing ────────────────────────────────────────────────
+const showSeqEditDialog = ref(false);
+const savingSequenceEdit = ref(false);
+const seqEditForm = ref({ name: '', description: '', order: 1 });
+
+const showEditSequenceDialog = () => {
+  if (sequence.value) {
+    seqEditForm.value = {
+      name: sequence.value.name || '',
+      description: sequence.value.description || '',
+      order: sequence.value.order || 1,
+    };
+  }
+  showSeqEditDialog.value = true;
+};
+
+const saveSequenceEdit = async () => {
+  if (!seqEditForm.value.name) return;
+  savingSequenceEdit.value = true;
+  try {
+    await store.dispatch('FilmProject/' + actions.UPDATE_SEQUENCE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      data: seqEditForm.value,
+    });
+    showSeqEditDialog.value = false;
+    await loadSequence();
+  } catch (error) {
+    console.error('Error updating sequence:', error);
+  } finally {
+    savingSequenceEdit.value = false;
+  }
 };
 
 const loadSequence = async () => {

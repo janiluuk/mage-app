@@ -134,7 +134,10 @@
             id="status" 
             v-model="formData.status" 
             :options="statusOptions"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select status"
+            class="w-full"
           />
         </div>
       </div>

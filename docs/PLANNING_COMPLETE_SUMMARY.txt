@@ -132,7 +132,11 @@ Feature 6: Real-time Preview / Movie Editor — ✅ Complete
   Store:
     • src/store/modules/film-project/ — Vuex module for projects,
       sequences, shots, with CRUD + AI generation actions
+    • Registered as 'FilmProject' in store/index.js
   Services:
+    • src/services/film-project/FilmProjectService.js — REST API client
+      for all /film-projects/* endpoints (projects, sequences, shots,
+      AI script/scene generation)
     • src/services/realtimePreviewService.js — WebSocket preview service
 
 Feature 7: Ollama Instance Integration — ✅ Complete
@@ -185,6 +189,25 @@ BUG FIXES APPLIED
 10. TransitionPicker — Fixed undefined event in toggle()
     (watch on showPanel called toggle(event) where event was undefined;
      replaced with togglePanel(event) method receiving the DOM click event)
+
+11. FilmProject Vuex module not registered in store
+    (module existed at store/modules/film-project but was never imported
+     or added to featureModules in store/index.js)
+
+12. FilmProjectService API client missing
+    (actions.js imported a non-existent service; created at
+     src/services/film-project/FilmProjectService.js)
+
+13. SET_SHOTS mutation overwrites instead of merging
+    (MovieEditor loads shots across multiple sequences; each GET_SHOTS
+     replaced previous shots. Changed to merge: { ...state.shots, ...shots })
+
+14. Edit buttons on ProjectDetail/SequenceDetail/ShotDetail navigated away
+    (replaced with in-place edit dialogs using Vuex UPDATE_* actions)
+
+15. Dropdown components missing optionLabel/optionValue
+    (Projects, ProjectDetail, SequenceDetail, ShotDetail all used object
+     options without specifying how to extract labels and values)
 
 ARCHITECTURE
 ═══════════════════════════════════════════════════════════════════════════════

@@ -39,7 +39,7 @@
               <Button 
                 label="Edit" 
                 icon="pi pi-pencil" 
-                @click="editProject"
+                @click="showEditDialog"
               />
             </div>
           </div>
@@ -197,7 +197,10 @@
             id="script-style" 
             v-model="scriptOptions.style" 
             :options="scriptStyles"
+            optionLabel="label"
+            optionValue="value"
             placeholder="Select style"
+            class="w-full"
           />
         </div>
 
@@ -225,6 +228,40 @@
           @click="generateScript"
           :loading="generatingScript"
         />
+      </template>
+    </Dialog>
+
+    <!-- Edit Project Dialog -->
+    <Dialog 
+      v-model:visible="showProjectEditDialog" 
+      header="Edit Project" 
+      :modal="true"
+      :style="{ width: '600px' }"
+    >
+      <div class="flex flex-column gap-3">
+        <div class="field">
+          <label for="proj-name" class="font-semibold block mb-2">Project Name *</label>
+          <InputText id="proj-name" v-model="projectForm.name" class="w-full" />
+        </div>
+        <div class="field">
+          <label for="proj-desc" class="font-semibold block mb-2">Description</label>
+          <Textarea id="proj-desc" v-model="projectForm.description" rows="4" autoResize class="w-full" />
+        </div>
+        <div class="field">
+          <label for="proj-status" class="font-semibold block mb-2">Status</label>
+          <Dropdown 
+            id="proj-status" 
+            v-model="projectForm.status" 
+            :options="statusOptions"
+            optionLabel="label"
+            optionValue="value"
+            class="w-full"
+          />
+        </div>
+      </div>
+      <template #footer>
+        <Button label="Cancel" icon="pi pi-times" class="p-button-text" @click="showProjectEditDialog = false" />
+        <Button label="Save" icon="pi pi-check" @click="saveProjectEdit" :loading="savingProject" />
       </template>
     </Dialog>
 
@@ -438,8 +475,45 @@ const openMovieEditor = () => {
   router.push({ name: 'movie-editor', params: { id: projectId.value } });
 };
 
-const editProject = () => {
-  router.push({ name: 'projects' });
+// ── Project editing ─────────────────────────────────────────────────
+const showProjectEditDialog = ref(false);
+const savingProject = ref(false);
+const projectForm = ref({ name: '', description: '', status: 'draft' });
+
+const statusOptions = [
+  { label: 'Draft', value: 'draft' },
+  { label: 'In Progress', value: 'in_progress' },
+  { label: 'Post Production', value: 'post_production' },
+  { label: 'Completed', value: 'completed' },
+  { label: 'On Hold', value: 'on_hold' },
+];
+
+const showEditDialog = () => {
+  if (project.value) {
+    projectForm.value = {
+      name: project.value.name || '',
+      description: project.value.description || '',
+      status: project.value.status || 'draft',
+    };
+  }
+  showProjectEditDialog.value = true;
+};
+
+const saveProjectEdit = async () => {
+  if (!projectForm.value.name) return;
+  savingProject.value = true;
+  try {
+    await store.dispatch('FilmProject/' + actions.UPDATE_PRODUCTION, {
+      id: projectId.value,
+      data: projectForm.value,
+    });
+    showProjectEditDialog.value = false;
+    await loadProject();
+  } catch (error) {
+    console.error('Error updating project:', error);
+  } finally {
+    savingProject.value = false;
+  }
 };
 
 const loadProject = async () => {

@@ -58,7 +58,9 @@ export default {
     }
   },
   [mutations.SET_SHOTS](state, shots) {
-    state.shots = shots;
+    // Merge new shots into existing map so loading shots across multiple
+    // sequences doesn't overwrite previously loaded data.
+    state.shots = { ...state.shots, ...shots };
   },
   [mutations.SET_SHOT](state, shot) {
     state.shot = shot;
