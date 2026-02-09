@@ -281,6 +281,49 @@ const router = createRouter({
           component: () => import("@/views/pages/video/VideoEditor.vue"),
         },
         {
+          path: "/presets",
+          name: "Presets",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/Presets.vue"),
+        },
+        {
+          path: "/audio-visualizer",
+          name: "AudioVisualizer",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/pages/AudioVisualization.vue"),
+        },
+        // Film Projects
+        {
+          path: "/projects",
+          name: "projects",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/film-project/Projects.vue"),
+        },
+        {
+          path: "/projects/:id",
+          name: "project-detail",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/film-project/ProjectDetail.vue"),
+        },
+        {
+          path: "/projects/:projectId/sequences/:sequenceId",
+          name: "sequence-detail",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/film-project/SequenceDetail.vue"),
+        },
+        {
+          path: "/projects/:projectId/sequences/:sequenceId/shots/:shotId",
+          name: "shot-detail",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/film-project/ShotDetail.vue"),
+        },
+        {
+          path: "/projects/:id/editor",
+          name: "movie-editor",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/film-project/MovieEditor.vue"),
+        },
+        {
           path: "/admin/video-processing",
           name: "Video Processing",
           meta: { requiresAuth: true },

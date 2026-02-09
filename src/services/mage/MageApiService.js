@@ -35,13 +35,13 @@ async function fetchJson(url, timeoutMs = 10000) {
 
 const MageApiService = {
   getStatus() {
-    // Use full API URL from environment
-    const API_URL = env.VITE_API_URL || '';
+    // Mage Helper API is served from the app gateway (/api/*).
+    const API_URL = (env.VITE_HELPER_API_URL || env.VITE_APP_URL || '').replace(/\/$/, '');
     return fetchJson(`${API_URL}/api/status`);
   },
   getQueue() {
     // Use audio-queue endpoint to avoid conflict with video queue
-    const API_URL = env.VITE_API_URL || '';
+    const API_URL = (env.VITE_HELPER_API_URL || env.VITE_APP_URL || '').replace(/\/$/, '');
     return fetchJson(`${API_URL}/api/audio-queue`);
   },
 };

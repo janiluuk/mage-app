@@ -6,7 +6,7 @@ import MageApiService from '@/services/mage/MageApiService';
 // Mock env module FIRST before any other imports
 vi.mock('@/utils/env', () => ({
   default: {
-    VITE_API_URL: 'http://localhost:3000',
+    VITE_HELPER_API_URL: 'http://localhost:3000',
   },
 }));
 

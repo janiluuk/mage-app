@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Simple script to run tests in Docker
+# Usage: ./docker-test [test-file]
+# Example: ./docker-test tests/unit/services/instanceAdminService.spec.js
+
+set -e
+
+# Use docker compose (newer) or docker-compose (older)
+if command -v docker &> /dev/null; then
+    if docker compose version &> /dev/null 2>&1; then
+        DOCKER_COMPOSE="docker compose"
+    elif command -v docker-compose &> /dev/null; then
+        DOCKER_COMPOSE="docker-compose"
+    else
+        echo "Error: docker compose not found"
+        exit 1
+    fi
+else
+    echo "Error: docker not found"
+    exit 1
+fi
+
+echo "Starting test container..."
+$DOCKER_COMPOSE --profile test up -d test
+
+echo "Waiting for container to be ready..."
+sleep 2
+
+CONTAINER_NAME="mage-app-test"
+
+# Run tests
+echo "Running tests..."
+if [ $# -eq 0 ]; then
+    docker exec "$CONTAINER_NAME" npm run test:frontend
+else
+    docker exec "$CONTAINER_NAME" npm run test:frontend -- "$1"
+fi
+
+EXIT_CODE=$?
+
+# Optionally stop the test container (comment out if you want to keep it running)
+# $DOCKER_COMPOSE --profile test stop test
+
+exit $EXIT_CODE
+
+

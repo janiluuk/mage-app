@@ -7,9 +7,6 @@ import {
   getProjectShares,
   updateSharePermission,
   revokeShare,
-  addCollaborator,
-  removeCollaborator,
-  getCollaborators,
   generateShareUrl,
   isShareExpired,
   isShareActive,
@@ -133,68 +130,6 @@ describe('sharingService', () => {
       await revokeShare('abc123');
 
       expect(requestService.delete).toHaveBeenCalledWith('/v1/shares/abc123');
-    });
-  });
-
-  describe('collaborator management', () => {
-    describe('addCollaborator', () => {
-      it('adds collaborator to share', async () => {
-        const mockCollaborator = {
-          user_id: 123,
-          email: 'user@example.com',
-          permission_level: 'view'
-        };
-        requestService.post.mockResolvedValue({ data: mockCollaborator });
-
-        const result = await addCollaborator('abc123', 'user@example.com');
-
-        expect(requestService.post).toHaveBeenCalledWith('/v1/shares/abc123/collaborators', {
-          email: 'user@example.com',
-          permission_level: 'view'
-        });
-        expect(result).toEqual(mockCollaborator);
-      });
-
-      it('adds collaborator with custom permission', async () => {
-        const mockCollaborator = {
-          user_id: 123,
-          email: 'user@example.com',
-          permission_level: 'edit'
-        };
-        requestService.post.mockResolvedValue({ data: mockCollaborator });
-
-        await addCollaborator('abc123', 'user@example.com', PermissionLevel.EDIT);
-
-        expect(requestService.post).toHaveBeenCalledWith('/v1/shares/abc123/collaborators', {
-          email: 'user@example.com',
-          permission_level: 'edit'
-        });
-      });
-    });
-
-    describe('removeCollaborator', () => {
-      it('removes collaborator from share', async () => {
-        requestService.delete.mockResolvedValue({});
-
-        await removeCollaborator('abc123', 456);
-
-        expect(requestService.delete).toHaveBeenCalledWith('/v1/shares/abc123/collaborators/456');
-      });
-    });
-
-    describe('getCollaborators', () => {
-      it('fetches all collaborators for a share', async () => {
-        const mockCollaborators = [
-          { user_id: 123, email: 'user1@example.com' },
-          { user_id: 456, email: 'user2@example.com' }
-        ];
-        requestService.get.mockResolvedValue({ data: mockCollaborators });
-
-        const result = await getCollaborators('abc123');
-
-        expect(requestService.get).toHaveBeenCalledWith('/v1/shares/abc123/collaborators');
-        expect(result).toEqual(mockCollaborators);
-      });
     });
   });
 

@@ -92,6 +92,15 @@ const menuItems = computed(() => {
     },
   ]);
 
+  // Batch actions — only shown when multiple items are selected
+  if (props.selectionCount > 1) {
+    pushSection([
+      { id: "batch-download", label: `Download ${props.selectionCount} items`, action: "batch:download" },
+      { id: "batch-reprocess", label: `Re-process ${props.selectionCount} items`, action: "batch:reprocess" },
+      { id: "batch-apply-preset", label: "Apply Preset to Selection", action: "batch:apply-preset" },
+    ]);
+  }
+
   pushSection([
     {
       id: "copy-path",

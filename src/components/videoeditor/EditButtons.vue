@@ -219,6 +219,8 @@ export default {
       undo,
       redo,
       showExportDialog,
+      showSaveProjectDialog,
+      showLoadProjectDialog,
     };
   },
 };

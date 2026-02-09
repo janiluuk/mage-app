@@ -18,6 +18,12 @@ const model = ref([
         ]
     },
     {
+        label: 'Film Projects',
+        items: [
+            { label: 'Projects', icon: 'pi pi-fw pi-folder', to: '/projects' },
+        ]
+    },
+    {
         label: 'AI Tools',
         items: [
             { label: 'Story Creator', icon: 'pi pi-fw pi-book', to: '/story' },
@@ -30,7 +36,9 @@ const model = ref([
         label: 'Tools',
         items: [
             { label: 'Mage Helper', icon: 'pi pi-fw pi-bolt', to: '/mage' },
-            { label: 'Timeline', icon: 'pi pi-fw pi-clock', to: '/timeline' }
+            { label: 'Timeline', icon: 'pi pi-fw pi-clock', to: '/timeline' },
+            { label: 'Preset Library', icon: 'pi pi-fw pi-sliders-h', to: '/presets' },
+            { label: 'Audio Visualizer', icon: 'pi pi-fw pi-chart-bar', to: '/audio-visualizer' }
         ]
     },
     {

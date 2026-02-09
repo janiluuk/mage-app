@@ -106,55 +106,6 @@ export async function revokeShare(shareId) {
   }
 }
 
-/**
- * Add collaborator to share
- * @param {string} shareId - Share ID
- * @param {string} email - Collaborator email
- * @param {string} permission - Permission level
- * @returns {Promise<object>} Collaborator data
- */
-export async function addCollaborator(shareId, email, permission = PermissionLevel.VIEW) {
-  try {
-    const response = await requestService.post(`/v1/shares/${shareId}/collaborators`, {
-      email,
-      permission_level: permission
-    });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding collaborator:', error);
-    throw error;
-  }
-}
-
-/**
- * Remove collaborator from share
- * @param {string} shareId - Share ID
- * @param {number} userId - User ID
- * @returns {Promise<void>}
- */
-export async function removeCollaborator(shareId, userId) {
-  try {
-    await requestService.delete(`/v1/shares/${shareId}/collaborators/${userId}`);
-  } catch (error) {
-    console.error('Error removing collaborator:', error);
-    throw error;
-  }
-}
-
-/**
- * Get collaborators for a share
- * @param {string} shareId - Share ID
- * @returns {Promise<array>} List of collaborators
- */
-export async function getCollaborators(shareId) {
-  try {
-    const response = await requestService.get(`/v1/shares/${shareId}/collaborators`);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching collaborators:', error);
-    throw error;
-  }
-}
 
 /**
  * Generate share URL
@@ -277,9 +228,6 @@ export default {
   getProjectShares,
   updateSharePermission,
   revokeShare,
-  addCollaborator,
-  removeCollaborator,
-  getCollaborators,
   generateShareUrl,
   isShareExpired,
   isShareActive,

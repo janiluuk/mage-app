@@ -36,14 +36,14 @@
           />
         </template>
       </Column>
-      <Column field="processing_time" header="Processing Time" :sortable="true">
+      <Column field="processing_time_seconds" header="Processing Time" :sortable="true">
         <template #body="slotProps">
-          {{ formatProcessingTime(slotProps.data.processing_time) }}
+          {{ formatProcessingTime(slotProps.data.processing_time_seconds) }}
         </template>
       </Column>
-      <Column field="created_at" header="Created" :sortable="true">
+      <Column field="assigned_at" header="Assigned" :sortable="true">
         <template #body="slotProps">
-          {{ formatDate(slotProps.data.created_at) }}
+          {{ slotProps.data.assigned_at ? formatDate(slotProps.data.assigned_at) : 'N/A' }}
         </template>
       </Column>
       <Column field="completed_at" header="Completed" :sortable="true">

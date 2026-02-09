@@ -122,7 +122,7 @@ export default {
       const ctx = chartCanvas.value.getContext('2d');
       
       const labels = metricsData.value.map(item => {
-        const date = new Date(item.timestamp);
+        const date = new Date(item.recorded_at);
         return date.toLocaleTimeString();
       });
 

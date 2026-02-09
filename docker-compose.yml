@@ -19,6 +19,21 @@ services:
         aliases:
           - app.localhost
 
+  test:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: mage-app-test
+    hostname: test
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["sleep infinity"]
+    profiles:
+      - test
+
   api:
     build:
       context: .
@@ -46,11 +61,15 @@ services:
     env_file:
       - .env.docker
     environment:
+      APP_ENV: local
+      APP_DEBUG: 'true'
+      APP_URL: http://localhost/mage-api
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${MYSQL_DATABASE:-mage}
       DB_USERNAME: ${MYSQL_USER:-mage}
       DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      QUEUE_CONNECTION: sync
     depends_on:
       - mysql
     expose:
@@ -103,9 +122,34 @@ services:
         aliases:
           - ffmpeg.localhost
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: mage-ollama
+    hostname: ollama
+    environment:
+      OLLAMA_HOST: 0.0.0.0
+      OLLAMA_NUM_PARALLEL: 1
+      OLLAMA_MAX_LOADED_MODELS: 1
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    networks:
+      mage:
+        aliases:
+          - ollama.localhost
+
 networks:
   mage:
     driver: bridge
 
 volumes:
   mysql_data:
+  ollama_data:

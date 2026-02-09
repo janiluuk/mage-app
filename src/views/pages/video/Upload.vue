@@ -6,7 +6,7 @@
 
     <div class="banner-item-row">
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
-        <input class="file-input" type="file" accept="image/*" @change="uploadHandler($event, 'deforum')">
+        <input class="file-input" type="file" accept="image/*" multiple @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
           <img src="/public/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
@@ -17,21 +17,20 @@
               <i class="pi pi-upload"></i>
             </div>
             <div class="banner-overlay-body">
-              <div class="banner-overlay-title">Upload an image</div>
-              <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif, size less than 2MB</div>
-
+              <div class="banner-overlay-title">Upload images</div>
+              <div class="banner-overlay-desc">Formats .jpg, .jpeg, .png, .gif — up to 2MB each. Select multiple files.</div>
             </div>
           </div>
         </div>
 
         <ProgressBar :value="getProgress" v-if="getProgress > 0"></ProgressBar>
         <div class="banner-content-container">
-          <div class="banner-header">Animation </div>
+          <div class="banner-header">Animation</div>
           <div class="banner-description">Turn images into gorgeous animated clips</div>
         </div>
       </div>
       <div class="banner-item" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
-        <input class="file-input" type="file" accept="video/*" @change="uploadHandler($event, 'vid2vid')">
+        <input class="file-input" type="file" accept="video/*" multiple @change="uploadHandler($event, 'vid2vid')">
         <div class="banner-media-container">
           <img src="/public/img/mona.jpg" class="banner-media-main"/>
           <div class="banner-media-secondary">
@@ -42,8 +41,8 @@
               <i class="pi pi-upload"></i>
             </div>
             <div class="banner-overlay-body">
-              <div class="banner-overlay-title">Upload a video</div>
-              <div class="banner-overlay-desc">Format .mp4, size less than 50MB</div>
+              <div class="banner-overlay-title">Upload videos</div>
+              <div class="banner-overlay-desc">Format .mp4 — up to 50MB each. Select multiple files.</div>
             </div>
           </div>
         </div>
@@ -82,10 +81,49 @@
       </div>
     </div>
 
+    <!-- Batch Upload Progress -->
+    <div v-if="batchQueue.length > 0" class="batch-progress-section">
+      <div class="batch-progress-header">
+        <h4 class="m-0">
+          Uploading {{ batchQueue.length }} file{{ batchQueue.length > 1 ? 's' : '' }}
+        </h4>
+        <ProgressBar :value="batchOverallProgress" class="mt-2 mb-3" />
+      </div>
+      <div class="batch-queue-list">
+        <div
+          v-for="item in batchQueue"
+          :key="item.id"
+          class="batch-queue-entry"
+          :class="'status-' + item.status"
+        >
+          <div class="flex align-items-center gap-2 flex-grow-1">
+            <i :class="getBatchItemIcon(item.status)" class="text-lg"></i>
+            <span class="text-sm font-semibold">{{ item.file.name }}</span>
+            <span class="text-xs text-color-secondary ml-auto">{{ formatFileSize(item.file.size) }}</span>
+          </div>
+          <div class="flex align-items-center gap-2" style="min-width: 140px">
+            <Tag
+              v-if="item.status !== 'uploading'"
+              :value="item.status"
+              :severity="getBatchItemSeverity(item.status)"
+              class="text-xs"
+            />
+            <ProgressBar
+              v-if="item.status === 'uploading'"
+              :value="item.progress"
+              :showValue="false"
+              style="height: 6px; flex: 1"
+            />
+          </div>
+          <div v-if="item.error" class="text-xs text-red-500 mt-1 w-full">{{ item.error }}</div>
+        </div>
+      </div>
+    </div>
+
     <!-- Audio Job Creation Dialog -->
-    <Dialog 
-      v-model:visible="showAudioJobDialog" 
-      :modal="true" 
+    <Dialog
+      v-model:visible="showAudioJobDialog"
+      :modal="true"
       header="Create Audio Animation Job"
       :style="{ width: '50vw' }"
       :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
@@ -119,6 +157,7 @@ export default {
       status: '',
       errorMessage: false,
       showAudioJobDialog: false,
+      batchQueue: [],
       fileSizeLimit: {'video/mp4': 50, 'image/jpeg': 2, 'image/png': 2, 'image/gif': 2 },
       supportedFormats: {
         deforum: ['image/jpeg', 'image/png', 'image/gif'],
@@ -128,22 +167,27 @@ export default {
   },
   watch: {
     videoId(newValue) {
-      if (newValue) {
-           this.$router.push(`/edit/${this.generatorType}/${newValue}`);
+      if (newValue && this.batchQueue.length <= 1) {
+        // Only auto-navigate for single file uploads
+        this.$router.push(`/edit/${this.generatorType}/${newValue}`);
       }
     },
   },
   computed: {
     ...mapGetters('videojobs', {
       getProgress: 'progress'
-    })
+    }),
+    batchOverallProgress() {
+      if (!this.batchQueue.length) return 0;
+      const done = this.batchQueue.filter(i => i.status === 'done' || i.status === 'error').length;
+      return Math.round((done / this.batchQueue.length) * 100);
+    },
   },
   methods: {
     ...mapActions({
         upload: 'videojobs/upload',
         setErrorNotification: 'notification/'+notificationActions.SET_ERROR_NOTIFICATION,
         setSuccessNotification: 'notification/'+notificationActions.SET_SUCCESS_NOTIFICATION
-
     }),
     cancel() {
       this.isLoading = false;
@@ -151,49 +195,130 @@ export default {
       this.videoFile = false;
       this.status = '';
       this.errorMessage = false;
-
+    },
+    formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    },
+    getBatchItemIcon(status) {
+      const map = {
+        pending: 'pi pi-clock text-color-secondary',
+        uploading: 'pi pi-spin pi-spinner text-primary',
+        done: 'pi pi-check-circle text-green-500',
+        error: 'pi pi-times-circle text-red-500',
+      };
+      return map[status] || 'pi pi-circle';
+    },
+    getBatchItemSeverity(status) {
+      const map = { pending: 'info', done: 'success', error: 'danger' };
+      return map[status] || 'info';
     },
     uploadHandler(event, type) {
-      // Validate file exists
-      if (!event.target.files || event.target.files.length === 0) {
+      const files = event.target?.files || event.dataTransfer?.files;
+      if (!files || files.length === 0) {
         this.setErrorNotification('No file selected');
         return;
       }
 
-      let currentFile = event.target.files[0];
-      let fileType = currentFile.type;
-      let fileSize = currentFile.size;
       this.generatorType = type;
 
-      // Validate file type
+      // Single file — keep original behavior
+      if (files.length === 1) {
+        const file = files[0];
+        const validation = this.validateFile(file, type);
+        if (!validation.valid) {
+          this.setErrorNotification(validation.error);
+          return;
+        }
+        this.setSuccessNotification('Uploading file...');
+        this.uploadFile(file, type);
+        if (event.target) event.target.value = '';
+        return;
+      }
+
+      // Multiple files — batch upload
+      const validated = [];
+      for (const file of files) {
+        const validation = this.validateFile(file, type);
+        if (validation.valid) {
+          validated.push(file);
+        } else {
+          this.setErrorNotification(`${file.name}: ${validation.error}`);
+        }
+      }
+
+      if (validated.length === 0) return;
+
+      this.setSuccessNotification(`Uploading ${validated.length} files...`);
+      this.startBatchUpload(validated, type);
+      if (event.target) event.target.value = '';
+    },
+    validateFile(file, type) {
+      const fileType = file.type;
+      const fileSize = file.size;
+
       if (!this.supportedFormats[type].includes(fileType)) {
         const formatList = this.supportedFormats[type].map(f => f.split('/')[1]).join(', ');
-        this.errorMessage = `Unsupported file format. Please upload: ${formatList}`;
-        this.setErrorNotification(this.errorMessage);
-        return;
+        return { valid: false, error: `Unsupported format. Expected: ${formatList}` };
       }
 
-      // Validate file size
       const maxSizeMB = this.fileSizeLimit[fileType] || (type === 'deforum' ? 2 : 50);
       if (fileSize > 1024 * 1024 * maxSizeMB) {
-        this.errorMessage = `File is too large. Maximum size: ${maxSizeMB}MB`;
-        this.setErrorNotification(this.errorMessage);
-        return;
+        return { valid: false, error: `File too large. Max: ${maxSizeMB}MB` };
       }
 
-      // Start upload
-      this.setSuccessNotification('Uploading file...');
-      
-      const reader = new FileReader();
-      reader.addEventListener('progress', function(progress) {
-          console.log('Upload progress:', progress);
-      });
+      return { valid: true };
+    },
+    async startBatchUpload(files, type) {
+      // Build queue
+      this.batchQueue = files.map((file, idx) => ({
+        id: `batch_${Date.now()}_${idx}`,
+        file,
+        status: 'pending',
+        progress: 0,
+        error: null,
+        videoId: null,
+      }));
 
-      reader.addEventListener('error', () => {
-        this.setErrorNotification('Error reading file');
-      });
+      // Process sequentially to avoid overwhelming the server
+      for (const item of this.batchQueue) {
+        item.status = 'uploading';
+        item.progress = 10;
+        try {
+          const response = await this.upload({ attachment: item.file, type });
+          item.status = 'done';
+          item.progress = 100;
+          item.videoId = response.id;
+        } catch (error) {
+          item.status = 'error';
+          item.error = error.response?.data?.message || error.message || 'Upload failed';
+        }
+      }
 
-      this.uploadFile(currentFile, type);
+      // Batch complete — show summary
+      const succeeded = this.batchQueue.filter(i => i.status === 'done').length;
+      const failed = this.batchQueue.filter(i => i.status === 'error').length;
+      if (failed === 0) {
+        this.setSuccessNotification(`All ${succeeded} files uploaded successfully`);
+      } else {
+        this.setErrorNotification(`${succeeded} uploaded, ${failed} failed`);
+      }
+
+      // If all succeeded and there's just one, navigate to editor
+      if (succeeded === 1 && failed === 0) {
+        const done = this.batchQueue.find(i => i.status === 'done');
+        if (done?.videoId) {
+          this.$router.push(`/edit/${type}/${done.videoId}`);
+        }
+      } else if (succeeded > 0) {
+        // Multiple successes — go to library to see them
+        setTimeout(() => {
+          this.$router.push('/library');
+        }, 2000);
+      }
     },
     async uploadFile(file, type) {
       try {
@@ -386,6 +511,54 @@ export default {
     grid-template: auto auto / 1fr 1fr;
     max-width: 960px;
     row-gap: 5rem;
+  }
+}
+
+.batch-progress-section {
+  max-width: 576px;
+  margin: 0 auto 3rem;
+  padding: 1.5rem;
+  background: var(--surface-card);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--surface-border);
+}
+
+.batch-progress-header h4 {
+  font-size: 1.1rem;
+}
+
+.batch-queue-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.batch-queue-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius);
+  background: var(--surface-ground);
+  transition: background 0.2s;
+}
+
+.batch-queue-entry.status-uploading {
+  background: var(--blue-50, rgba(59, 130, 246, 0.05));
+}
+
+.batch-queue-entry.status-done {
+  background: var(--green-50, rgba(16, 185, 129, 0.05));
+}
+
+.batch-queue-entry.status-error {
+  background: var(--red-50, rgba(239, 68, 68, 0.05));
+}
+
+@media (min-width: 768px) {
+  .batch-progress-section {
+    max-width: 960px;
   }
 }
 

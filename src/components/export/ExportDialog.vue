@@ -274,7 +274,7 @@ export default {
 
 .field-radiobutton {
   display: flex;
-  align-items-center;
+  align-items: center;
 }
 
 .field-radiobutton label {

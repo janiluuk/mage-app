@@ -1,56 +1,87 @@
 <template>
   <div class="soundscape-creator">
-    <h1>Create a Soundscape</h1>
-    <textarea v-model="prompt" placeholder="Describe your soundscape or mood..." />
-
-    <div class="mood-tags">
-      <button
-        v-for="mood in moods"
-        :key="mood"
-        :class="{ active: selectedMood === mood }"
-        @click="selectedMood = mood"
-      >
-        {{ mood }}
-      </button>
+    <div class="page-header">
+      <h1>Create a Soundscape</h1>
     </div>
 
-    <div class="actions">
-      <button @click="recording = !recording">
-        {{ recording ? 'Stop Recording' : 'Speak' }}
-      </button>
-      <button @click="generate">Generate</button>
-    </div>
+    <Card class="soundscape-card">
+      <template #content>
+        <div class="form-grid">
+          <InputTextarea
+            v-model="prompt"
+            autoResize
+            placeholder="Describe your soundscape or mood..."
+            rows="4"
+          />
 
-    <AudioVisualizer v-if="audioSrc" :audio="audioPlayer" />
-    <audio
-      v-if="audioSrc"
-      :src="audioSrc"
-      controls
-      loop
-      ref="audioPlayer"
-    />
+          <div class="mood-tags">
+            <Button
+              v-for="mood in moods"
+              :key="mood"
+              :label="mood"
+              size="small"
+              :outlined="selectedMood !== mood"
+              :severity="selectedMood === mood ? 'info' : 'secondary'"
+              @click="selectedMood = mood"
+            />
+          </div>
 
-    <div class="queue-status" v-if="status">
-      <h2>Processing status</h2>
-      <p v-if="status.processing">Currently processing: {{ status.processing.metadata.text || 'Pending text' }}</p>
-      <p v-else>Nothing processing right now.</p>
-      <p>Items in queue: {{ status.queued }}</p>
+          <div class="actions">
+            <Button
+              :label="recording ? 'Stop Recording' : 'Speak'"
+              :icon="recording ? 'pi pi-stop' : 'pi pi-microphone'"
+              :severity="recording ? 'danger' : 'secondary'"
+              outlined
+              @click="recording = !recording"
+            />
+            <Button
+              label="Generate"
+              icon="pi pi-play"
+              @click="generate"
+            />
+          </div>
+        </div>
 
-      <h3>Recent history</h3>
-      <ul>
-        <li v-for="item in status.recent" :key="item.id">
-          <strong>{{ item.status }}</strong> — {{ item.metadata.text || 'No text provided' }}
-        </li>
-      </ul>
+        <div v-if="audioSrc" class="preview">
+          <AudioVisualizer :audio="audioPlayer" />
+          <audio
+            :src="audioSrc"
+            controls
+            loop
+            ref="audioPlayer"
+          />
+        </div>
+      </template>
+    </Card>
 
-      <div class="queue-list">
-        <h3>Queued items</h3>
+    <Card v-if="status" class="queue-status">
+      <template #title>Processing status</template>
+      <template #content>
+        <p v-if="status.processing">Currently processing: {{ status.processing.metadata.text || 'Pending text' }}</p>
+        <p v-else>Nothing processing right now.</p>
+        <p>Items in queue: {{ status.queued }}</p>
+
+        <Divider />
+
+        <h3>Recent history</h3>
         <ul>
-          <li v-for="item in queueItems" :key="item.id">{{ item.metadata.text || 'Queued request' }}</li>
+          <li v-for="item in status.recent" :key="item.id">
+            <strong>{{ item.status }}</strong> — {{ item.metadata.text || 'No text provided' }}
+          </li>
         </ul>
-      </div>
-    </div>
-    <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+
+        <div class="queue-list">
+          <h3>Queued items</h3>
+          <ul>
+            <li v-for="item in queueItems" :key="item.id">{{ item.metadata.text || 'Queued request' }}</li>
+          </ul>
+        </div>
+      </template>
+    </Card>
+
+    <Message v-if="errorMessage" severity="error" :closable="false" class="error">
+      {{ errorMessage }}
+    </Message>
   </div>
 </template>
 
@@ -59,6 +90,11 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import AudioVisualizer from '@/components/AudioVisualizer.vue'
 import MageApiService from '@/services/mage/MageApiService'
 import env from '@/utils/env'
+import Button from 'primevue/button'
+import Card from 'primevue/card'
+import Divider from 'primevue/divider'
+import InputTextarea from 'primevue/textarea'
+import Message from 'primevue/message'
 
 const prompt = ref('')
 const selectedMood = ref('')
@@ -81,7 +117,7 @@ async function generate() {
       return
     }
     
-    const API_URL = env.VITE_API_URL || ''
+    const API_URL = (env.VITE_HELPER_API_URL || env.VITE_APP_URL || '').replace(/\/$/, '')
     if (!API_URL) {
       errorMessage.value = 'API URL is not configured'
       return
@@ -134,43 +170,53 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .soundscape-creator {
-  max-width: 600px;
+  max-width: 720px;
   margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+.page-header {
   text-align: center;
+  margin-bottom: 1.5rem;
 }
-textarea {
-  width: 100%;
-  min-height: 80px;
-  margin-bottom: 1rem;
+
+.soundscape-card,
+.queue-status {
+  margin-bottom: 1.5rem;
 }
+
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 .mood-tags {
-  margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
 }
-.mood-tags button {
-  margin: 0 0.5rem;
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
 }
-.mood-tags button.active {
-  background: #42b983;
-  color: #fff;
+
+.preview {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
-.actions button {
-  margin: 0 0.5rem;
-}
+
 audio {
   width: 100%;
-  margin-top: 1rem;
-}
-.queue-status {
-  margin-top: 2rem;
-  text-align: left;
 }
 
 .queue-status ul {
   padding-left: 1.2rem;
-}
-
-.error {
-  color: #e44;
-  margin-top: 1rem;
 }
 </style>

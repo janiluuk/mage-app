@@ -17,6 +17,7 @@
                 <Timeline class="timeline" />
             </div>
         </div>
+        <VideoTrimPanel class="trim-panel" @trim-applied="onTrimApplied" @trim-preview="onTrimPreview" />
         <VideoInfoFooter class="footer-panel" />
         <ExportDialog />
         <ExportStatus />
@@ -43,6 +44,7 @@ import ExportDialog from "@/components/videoeditor/ExportDialog.vue";
 import ExportStatus from "@/components/videoeditor/ExportStatus.vue";
 import SaveProjectDialog from "@/components/videoeditor/SaveProjectDialog.vue";
 import LoadProjectDialog from "@/components/videoeditor/LoadProjectDialog.vue";
+import VideoTrimPanel from "@/components/videoeditor/VideoTrimPanel.vue";
 
 export default {
     name: "Editor",
@@ -56,6 +58,7 @@ export default {
         ExportStatus,
         SaveProjectDialog,
         LoadProjectDialog,
+        VideoTrimPanel,
     },
     setup() {
         const store = useStore();
@@ -116,6 +119,14 @@ export default {
             console.log('Project loaded');
         };
 
+        const onTrimApplied = (trimData) => {
+            console.log('Trim applied:', trimData);
+        };
+
+        const onTrimPreview = (trimData) => {
+            console.log('Trim preview:', trimData);
+        };
+
         onMounted(() => {
             document.addEventListener('mousemove', move, false);
             document.addEventListener('mouseup', endMove, false);
@@ -140,6 +151,8 @@ export default {
             showLoadProjectDialog,
             onProjectSaved,
             onProjectLoaded,
+            onTrimApplied,
+            onTrimPreview,
         };
     }
 }
@@ -170,6 +183,11 @@ export default {
     display: flex;
     min-height: 0;
     overflow: hidden;
+}
+
+.trim-panel {
+    width: 100%;
+    flex-shrink: 0;
 }
 
 .footer-panel {
