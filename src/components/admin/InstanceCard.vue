@@ -217,3 +217,45 @@ export default {
   background-color: #EF5350;
 }
 </style>
+
+      healthStatusLabel,
+      healthStatusSeverity,
+      healthStatusIcon,
+      typeLabel,
+      typeIcon,
+      getProgressBarClass
+    };
+  }
+};
+</script>
+
+<style scoped>
+.progress-bar-warning :deep(.p-progressbar-value) {
+  background-color: #FFA726;
+}
+
+.progress-bar-danger :deep(.p-progressbar-value) {
+  background-color: #EF5350;
+}
+</style>
+
+      healthStatusLabel,
+      healthStatusSeverity,
+      healthStatusIcon,
+      typeLabel,
+      typeIcon,
+      getProgressBarClass
+    };
+  }
+};
+</script>
+
+<style scoped>
+.progress-bar-warning :deep(.p-progressbar-value) {
+  background-color: #FFA726;
+}
+
+.progress-bar-danger :deep(.p-progressbar-value) {
+  background-color: #EF5350;
+}
+</style>

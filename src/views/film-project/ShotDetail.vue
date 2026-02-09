@@ -350,3 +350,129 @@ onMounted(async () => {
 }
 </style>
 
+
+  generatingScene.value = true;
+  try {
+    const result = await store.dispatch('FilmProject/' + actions.GENERATE_SCENE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      shotId: shotId.value,
+      prompt: scenePrompt.value,
+      options: sceneOptions.value,
+    });
+    
+    // Update shot with generated scene data
+    if (result?.sceneData) {
+      await store.dispatch('FilmProject/' + actions.UPDATE_SHOT, {
+        projectId: projectId.value,
+        sequenceId: sequenceId.value,
+        shotId: shotId.value,
+        data: { sceneData: result.sceneData },
+      });
+    }
+    
+    showSceneDialog.value = false;
+    scenePrompt.value = '';
+    await loadShot();
+  } catch (error) {
+    console.error('Error generating scene:', error);
+  } finally {
+    generatingScene.value = false;
+  }
+};
+
+const loadShot = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SHOT, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      shotId: shotId.value,
+    });
+  } catch (error) {
+    console.error('Error loading shot:', error);
+  }
+};
+
+onMounted(async () => {
+  await loadShot();
+  if (shot.value?.description) {
+    scenePrompt.value = shot.value.description;
+  }
+});
+</script>
+
+<style scoped>
+.shot-detail-page {
+  padding: 1rem;
+}
+
+.video-preview {
+  background: var(--surface-ground);
+  border-radius: 8px;
+  overflow: hidden;
+}
+</style>
+
+
+  generatingScene.value = true;
+  try {
+    const result = await store.dispatch('FilmProject/' + actions.GENERATE_SCENE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      shotId: shotId.value,
+      prompt: scenePrompt.value,
+      options: sceneOptions.value,
+    });
+    
+    // Update shot with generated scene data
+    if (result?.sceneData) {
+      await store.dispatch('FilmProject/' + actions.UPDATE_SHOT, {
+        projectId: projectId.value,
+        sequenceId: sequenceId.value,
+        shotId: shotId.value,
+        data: { sceneData: result.sceneData },
+      });
+    }
+    
+    showSceneDialog.value = false;
+    scenePrompt.value = '';
+    await loadShot();
+  } catch (error) {
+    console.error('Error generating scene:', error);
+  } finally {
+    generatingScene.value = false;
+  }
+};
+
+const loadShot = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SHOT, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      shotId: shotId.value,
+    });
+  } catch (error) {
+    console.error('Error loading shot:', error);
+  }
+};
+
+onMounted(async () => {
+  await loadShot();
+  if (shot.value?.description) {
+    scenePrompt.value = shot.value.description;
+  }
+});
+</script>
+
+<style scoped>
+.shot-detail-page {
+  padding: 1rem;
+}
+
+.video-preview {
+  background: var(--surface-ground);
+  border-radius: 8px;
+  overflow: hidden;
+}
+</style>
+

@@ -559,3 +559,127 @@ onMounted(async () => {
 }
 </style>
 
+
+    seqEditForm.value = {
+      name: sequence.value.name || '',
+      description: sequence.value.description || '',
+      order: sequence.value.order || 1,
+    };
+  }
+  showSeqEditDialog.value = true;
+};
+
+const saveSequenceEdit = async () => {
+  if (!seqEditForm.value.name) return;
+  savingSequenceEdit.value = true;
+  try {
+    await store.dispatch('FilmProject/' + actions.UPDATE_SEQUENCE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      data: seqEditForm.value,
+    });
+    showSeqEditDialog.value = false;
+    await loadSequence();
+  } catch (error) {
+    console.error('Error updating sequence:', error);
+  } finally {
+    savingSequenceEdit.value = false;
+  }
+};
+
+const loadSequence = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SEQUENCE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+    });
+  } catch (error) {
+    console.error('Error loading sequence:', error);
+  }
+};
+
+const loadShots = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SHOTS, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+    });
+  } catch (error) {
+    console.error('Error loading shots:', error);
+  }
+};
+
+onMounted(async () => {
+  await loadSequence();
+  await loadShots();
+});
+</script>
+
+<style scoped>
+.sequence-detail-page {
+  padding: 1rem;
+}
+</style>
+
+
+    seqEditForm.value = {
+      name: sequence.value.name || '',
+      description: sequence.value.description || '',
+      order: sequence.value.order || 1,
+    };
+  }
+  showSeqEditDialog.value = true;
+};
+
+const saveSequenceEdit = async () => {
+  if (!seqEditForm.value.name) return;
+  savingSequenceEdit.value = true;
+  try {
+    await store.dispatch('FilmProject/' + actions.UPDATE_SEQUENCE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+      data: seqEditForm.value,
+    });
+    showSeqEditDialog.value = false;
+    await loadSequence();
+  } catch (error) {
+    console.error('Error updating sequence:', error);
+  } finally {
+    savingSequenceEdit.value = false;
+  }
+};
+
+const loadSequence = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SEQUENCE, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+    });
+  } catch (error) {
+    console.error('Error loading sequence:', error);
+  }
+};
+
+const loadShots = async () => {
+  try {
+    await store.dispatch('FilmProject/' + actions.GET_SHOTS, {
+      projectId: projectId.value,
+      sequenceId: sequenceId.value,
+    });
+  } catch (error) {
+    console.error('Error loading shots:', error);
+  }
+};
+
+onMounted(async () => {
+  await loadSequence();
+  await loadShots();
+});
+</script>
+
+<style scoped>
+.sequence-detail-page {
+  padding: 1rem;
+}
+</style>
+
