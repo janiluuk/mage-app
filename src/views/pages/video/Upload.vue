@@ -121,9 +121,9 @@
     </div>
 
     <!-- Audio Job Creation Dialog -->
-    <Dialog 
-      v-model:visible="showAudioJobDialog" 
-      :modal="true" 
+    <Dialog
+      v-model:visible="showAudioJobDialog"
+      :modal="true"
       header="Create Audio Animation Job"
       :style="{ width: '50vw' }"
       :breakpoints="{ '960px': '75vw', '640px': '90vw' }"
