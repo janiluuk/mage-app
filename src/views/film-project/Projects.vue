@@ -1,7 +1,7 @@
 <template>
   <div class="projects-page">
     <div class="card">
-      <div class="flex justify-content-between align-items-center mb-4">
+      <div v-if="hasProjects" class="flex justify-content-between align-items-center mb-4">
         <div>
           <h2 class="text-3xl font-bold m-0">Film Projects</h2>
           <p class="text-500 mt-2">Manage your film projects, sequences, and shots</p>
@@ -14,7 +14,22 @@
         />
       </div>
 
+      <!-- Empty state -->
+      <div v-if="!isLoading && (!projects || projects.length === 0)" class="empty-state">
+        <i class="pi pi-video empty-state-icon" />
+        <h3 class="empty-state-title">No projects</h3>
+        <p class="empty-state-subtitle">Create your first film project to get started</p>
+        <Button 
+          label="New Project" 
+          icon="pi pi-plus" 
+          @click="showCreateDialog"
+          class="p-button-primary mt-3"
+        />
+      </div>
+
+      <!-- Data table (only when projects exist) -->
       <DataTable 
+        v-else
         :value="projects" 
         :loading="isLoading"
         :paginator="true"
@@ -200,6 +215,7 @@ const router = useRouter();
 
 const projects = computed(() => store.getters['FilmProject/projects']);
 const isLoading = computed(() => store.getters['FilmProject/isLoading']);
+const hasProjects = computed(() => !isLoading.value && projects.value && projects.value.length > 0);
 
 const showDialog = ref(false);
 const showDeleteDialog = ref(false);
@@ -343,5 +359,34 @@ onMounted(() => {
   height: 40px;
   object-fit: cover;
   border-radius: 4px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 2rem;
+  text-align: center;
+}
+
+.empty-state-icon {
+  font-size: 5rem;
+  color: var(--text-color-secondary);
+  opacity: 0.4;
+  margin-bottom: 1.5rem;
+}
+
+.empty-state-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.5rem 0;
+  color: var(--text-color);
+}
+
+.empty-state-subtitle {
+  font-size: 1.1rem;
+  color: var(--text-color-secondary);
+  margin: 0;
 }
 </style>

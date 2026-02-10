@@ -128,23 +128,23 @@ export default {
       return this.v.$invalid;
     },
     async login() {
+      if (this.validationLoginForm()) {
+        // Form is invalid — don't proceed
+        return;
+      }
+
       this.loading = true;
-      if (!this.validationLoginForm()) {
-        try {
+      try {
+        const isSignInSuccessful = await this.signIn(this.loginData);
 
-          const isSignInSuccessful = await this.signIn(this.loginData);
-          this.setErrorNotification("welcome notification");
-
-          if (isSignInSuccessful !== false) {
-            await this.fetchLoggedUser();
-            this.$router.replace(this.$route.query.redirect || '/library/');
-          }
-          this.loading = false;
-          
-        } catch (error) {
-          this.setErrorNotification(error.message);
+        if (isSignInSuccessful !== false) {
+          await this.fetchLoggedUser();
+          this.$router.replace(this.$route.query.redirect || '/library');
         }
-        return false;
+      } catch (error) {
+        this.setErrorNotification(error.message || 'Login failed');
+      } finally {
+        this.loading = false;
       }
     },
     async socialite(provider) {

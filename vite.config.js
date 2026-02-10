@@ -43,24 +43,13 @@ export default ({ mode }) => {
     },
     server: {
       proxy: {
-        // with options: http://localhost:5173/api/bar-> http://jsonplaceholder.typicode.com/bar
-  /*      '/processed': {
-          target: 'https://api.dudeisland.eu',
+        // Proxy API requests to local Laravel backend for development
+        // Start the backend with: cd ../mage-api && php artisan serve --port=8001
+        '/api': {
+          target: process.env.VITE_API_URL || 'http://localhost:8001',
           changeOrigin: true,
+          secure: false,
         },
-        '/preview': {
-          target: 'https://api.dudeisland.eu',
-          changeOrigin: true,
-        },
-        '/videos': {
-          target: 'https://api.dudeisland.eu',
-          changeOrigin: true,
-        },
-        '/storage': {
-          target: 'https://api.dudeisland.eu',
-          changeOrigin: true,
-        },
-	*/
       },
       cors: { origin: "*" },
 

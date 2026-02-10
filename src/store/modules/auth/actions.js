@@ -36,7 +36,8 @@ export default {
   },
   [actions.SIGN_IN]: async ({ commit, dispatch }, loginData) => {
     try {
-      var data = await AuthService.signIn(loginData);
+      const data = await AuthService.signIn(loginData);
+      return data;
     } catch (error) {
       dispatch(
         'notification/' + notificationActions.SET_ERROR_NOTIFICATION,

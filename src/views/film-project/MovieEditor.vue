@@ -27,6 +27,12 @@
             </div>
             <div class="flex gap-2">
               <Button
+                label="Generate Soundscape"
+                icon="pi pi-volume-up"
+                class="p-button-outlined"
+                @click="showSoundscapeDialog = true"
+              />
+              <Button
                 label="Add Text Overlay"
                 icon="pi pi-comment"
                 class="p-button-outlined"
@@ -228,6 +234,17 @@
       @save="onOverlaySave"
       @delete="removeOverlay"
     />
+
+    <!-- Soundscape Generator Dialog -->
+    <Dialog
+      v-model:visible="showSoundscapeDialog"
+      header="Generate Soundscape"
+      :modal="true"
+      :style="{ width: '680px' }"
+      :breakpoints="{ '768px': '95vw' }"
+    >
+      <SoundscapeGenerator @generated="onSoundscapeGenerated" />
+    </Dialog>
   </div>
 </template>
 
@@ -239,6 +256,7 @@ import { useToast } from 'primevue/usetoast';
 
 import Card from 'primevue/card';
 import Button from 'primevue/button';
+import Dialog from 'primevue/dialog';
 import Tag from 'primevue/tag';
 import Slider from 'primevue/slider';
 import ProgressSpinner from 'primevue/progressspinner';
@@ -246,6 +264,7 @@ import ProgressSpinner from 'primevue/progressspinner';
 import PreviewPlayer from '@/components/movie-editor/PreviewPlayer.vue';
 import TransitionPicker from '@/components/movie-editor/TransitionPicker.vue';
 import TextOverlayEditor from '@/components/movie-editor/TextOverlayEditor.vue';
+import SoundscapeGenerator from '@/components/soundscape/SoundscapeGenerator.vue';
 
 import * as actions from '@/store/modules/film-project/types/actions';
 
@@ -254,12 +273,14 @@ export default {
   components: {
     Card,
     Button,
+    Dialog,
     Tag,
     Slider,
     ProgressSpinner,
     PreviewPlayer,
     TransitionPicker,
     TextOverlayEditor,
+    SoundscapeGenerator,
   },
   setup() {
     const store = useStore();
@@ -290,6 +311,7 @@ export default {
 
     const showOverlayDialog = ref(false);
     const editingOverlay = ref(null);
+    const showSoundscapeDialog = ref(false);
 
     // ── Clip colours ─────────────────────────────────────────────────
     const palette = [
@@ -450,6 +472,16 @@ export default {
       toast.add({ severity: 'success', summary: 'Exported', detail: 'Project exported', life: 3000 });
     }
 
+    // ── Soundscape ──────────────────────────────────────────────────
+    function onSoundscapeGenerated(event) {
+      toast.add({
+        severity: 'success',
+        summary: 'Soundscape',
+        detail: 'Soundscape generation triggered',
+        life: 3000
+      });
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────
     function formatDuration(secs) {
       if (secs == null || isNaN(secs)) return '0:00';
@@ -514,6 +546,7 @@ export default {
       overlays,
       showOverlayDialog,
       editingOverlay,
+      showSoundscapeDialog,
       activeClipIndex,
       totalDuration,
       pixelsPerSecond,
@@ -535,6 +568,7 @@ export default {
       onTimeUpdate,
       onSeek,
       exportProject,
+      onSoundscapeGenerated,
       formatDuration,
     };
   },
