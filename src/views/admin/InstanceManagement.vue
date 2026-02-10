@@ -33,8 +33,8 @@
           <p class="mt-3">Loading instance data...</p>
         </div>
 
-        <!-- Error State (only if no data at all) -->
-        <div v-else-if="error && !statusData" class="text-center py-5">
+        <!-- Error State (only if no data and no demo fallback) -->
+        <div v-else-if="error" class="text-center py-5">
           <Message severity="error" :closable="false">
             {{ error }}
           </Message>
@@ -366,12 +366,18 @@ export default {
         lastUpdated.value = new Date().toLocaleTimeString();
       } catch (err) {
         console.error('Error fetching instance status:', err);
-        // Fall back to demo data so the page is always usable
-        if (!statusData.value) {
-          statusData.value = getDemoData();
-          usingDemoData.value = true;
-          lastUpdated.value = new Date().toLocaleTimeString();
+        // Fall back to demo data on first load so the page is always usable
+        if (!statusData.value || !usingDemoData.value) {
+          try {
+            statusData.value = getDemoData();
+            usingDemoData.value = true;
+            lastUpdated.value = new Date().toLocaleTimeString();
+          } catch {
+            // Demo data generation failed — show the real error
+            error.value = err.message || 'Failed to load instance data';
+          }
         }
+        // If already showing demo data, silently ignore refresh failures
       } finally {
         loading.value = false;
       }
