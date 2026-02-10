@@ -335,6 +335,24 @@ const router = createRouter({
           meta: { requiresAuth: true },
           component: () => import("@/views/admin/InstanceManagement.vue"),
         },
+        {
+          path: "/admin/tags",
+          name: "Tags Admin",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/TagsAdmin.vue"),
+        },
+        {
+          path: "/admin/roles",
+          name: "Roles Admin",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/RolesAdmin.vue"),
+        },
+        {
+          path: "/admin/categories",
+          name: "Categories Admin",
+          meta: { requiresAuth: true },
+          component: () => import("@/views/admin/CategoriesAdmin.vue"),
+        },
       ],
     },
     {

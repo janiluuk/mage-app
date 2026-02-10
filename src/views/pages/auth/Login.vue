@@ -98,7 +98,8 @@ export default {
         email
       },
       password: {
-        required
+        required,
+        minLength: minLength(4)
       }
     }
   },

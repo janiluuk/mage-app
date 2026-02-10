@@ -18,12 +18,17 @@ const AuthService = {
    * Confirm an email verification token.
    */
   async verifiedEmail(verifiedEmailData) {
-    const response = await requestService.post(
-      '/auth/verified-email',
-      verifiedEmailData
-    );
-
-    return response?.data?.data;
+    const originalBaseURL = apiClient.defaults.baseURL;
+    apiClient.defaults.baseURL = this._getAuthBaseURL();
+    try {
+      const response = await requestService.post(
+        '/auth/verified-email',
+        verifiedEmailData
+      );
+      return response?.data?.data;
+    } finally {
+      apiClient.defaults.baseURL = originalBaseURL;
+    }
   },
   /**
    * Compute the base API URL without the /v1 suffix.

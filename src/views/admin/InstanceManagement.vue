@@ -33,8 +33,8 @@
           <p class="mt-3">Loading instance data...</p>
         </div>
 
-        <!-- Error State (only if no data and no demo fallback) -->
-        <div v-else-if="error" class="text-center py-5">
+        <!-- Error State (only if no data at all) -->
+        <div v-else-if="error && !statusData" class="text-center py-5">
           <Message severity="error" :closable="false">
             {{ error }}
           </Message>
@@ -48,6 +48,12 @@
 
         <!-- Content -->
         <div v-else>
+          <Message v-if="error && statusData" severity="error" :closable="true" class="mb-4" @close="error = null">
+            <i class="pi pi-exclamation-triangle mr-2"></i>
+            {{ error }}
+            <Button label="Retry" icon="pi pi-refresh" class="p-button-sm p-button-text ml-2" @click="refreshData" />
+          </Message>
+
           <Message v-if="usingDemoData" severity="warn" :closable="false" class="mb-4">
             <i class="pi pi-info-circle mr-2"></i>
             API not reachable — showing demo data. Changes are local only.
@@ -366,18 +372,21 @@ export default {
         lastUpdated.value = new Date().toLocaleTimeString();
       } catch (err) {
         console.error('Error fetching instance status:', err);
-        // Fall back to demo data on first load so the page is always usable
-        if (!statusData.value || !usingDemoData.value) {
+
+        if (!statusData.value) {
+          // First load failed — fall back to demo data so the page is usable
           try {
             statusData.value = getDemoData();
             usingDemoData.value = true;
             lastUpdated.value = new Date().toLocaleTimeString();
           } catch {
-            // Demo data generation failed — show the real error
             error.value = err.message || 'Failed to load instance data';
           }
+        } else {
+          // Subsequent refresh failed — keep existing data (real or demo),
+          // but surface the error so the user knows refreshes aren't working.
+          error.value = err.message || 'Failed to refresh instance data';
         }
-        // If already showing demo data, silently ignore refresh failures
       } finally {
         loading.value = false;
       }
