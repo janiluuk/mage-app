@@ -20,12 +20,12 @@ const checkApi = async () => {
     const timeout = setTimeout(() => controller.abort(), 5000);
     try {
         // Raw fetch to avoid apiClient interceptors (which remove tokens on 401 etc.)
-        // Any HTTP response — even 401/404 — means the server is reachable.
-        await fetch(API_BASE_URL || '/api/v1', {
+        const response = await fetch(API_BASE_URL || '/api/v1', {
             method: 'HEAD',
             signal: controller.signal,
         });
-        apiStatus.value = true;
+        // Mark API healthy only for successful HTTP responses.
+        apiStatus.value = response.ok;
     } catch (err) {
         // AbortError (timeout) or TypeError (network failure) = API unreachable
         apiStatus.value = false;

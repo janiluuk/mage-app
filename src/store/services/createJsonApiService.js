@@ -2,7 +2,6 @@ import qs from 'qs';
 import axios from 'axios';
 import Jsona from 'jsona';
 import { API_BASE_URL, API_V1_BASE_URL } from '@/utils/api-base-urls';
-import AuthService from '@/services/auth/AuthService';
 
 const jsona = new Jsona();
 
@@ -13,7 +12,9 @@ const JSON_API_HEADERS = {
 
 function getHeaders(extra = {}) {
   const headers = { ...JSON_API_HEADERS, ...extra };
-  const token = AuthService.getToken();
+  const token = typeof localStorage !== 'undefined'
+    ? localStorage.getItem('auth.accessToken')
+    : null;
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }

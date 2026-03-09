@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import itemsService from './items.service';
 import requestService from '@/services/request-service/ApiRequestService';
+import apiCache from '@/utils/apiCache';
 
 vi.mock('@/services/request-service/ApiRequestService', () => ({
   default: {
@@ -14,6 +15,7 @@ vi.mock('@/services/request-service/ApiRequestService', () => ({
 describe('items.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    apiCache.clear();
   });
 
   describe('list', () => {
@@ -79,7 +81,7 @@ describe('items.service', () => {
 
   describe('add', () => {
     it('creates new video job', async () => {
-      const newItem = { type: 'video-jobs', title: 'New Job', status: 'pending' };
+      const newItem = { stuff: { type: 'video-jobs', title: 'New Job', status: 'pending' } };
       const mockResponse = {
         data: {
           data: { type: 'video-jobs', id: '2', attributes: newItem }
@@ -180,7 +182,7 @@ describe('items.service', () => {
       const error = new Error('Validation error');
       requestService.post.mockRejectedValue(error);
 
-      await expect(itemsService.add({ type: 'video-jobs', title: '' })).rejects.toThrow('Validation error');
+      await expect(itemsService.add({ stuff: { type: 'video-jobs', title: '' } })).rejects.toThrow('Validation error');
     });
 
     it('propagates errors from update', async () => {

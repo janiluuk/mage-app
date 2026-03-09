@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import AuthMenu from '@/layout/AuthMenu.vue';
+import * as authActions from '@/store/modules/auth/types/actions';
+import * as notificationActions from '@/store/modules/notification/types/actions';
 
 describe('AuthMenu Dropdown Functionality', () => {
   let store;
@@ -20,13 +22,13 @@ describe('AuthMenu Dropdown Functionality', () => {
             getLoggedUser: () => ({ email: 'test@example.com' })
           },
           actions: {
-            signOut: vi.fn()
+            [authActions.SIGN_OUT]: vi.fn()
           }
         },
         notification: {
           namespaced: true,
           actions: {
-            setErrorNotification: vi.fn()
+            [notificationActions.SET_ERROR_NOTIFICATION]: vi.fn()
           }
         }
       }

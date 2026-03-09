@@ -1,7 +1,9 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { mount } from '@vue/test-utils';
+import { mount, flushPromises } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import AuthMenu from '@/layout/AuthMenu.vue';
+import * as authActions from '@/store/modules/auth/types/actions';
+import * as notificationActions from '@/store/modules/notification/types/actions';
 
 describe('AuthMenu', () => {
   let store;
@@ -24,13 +26,13 @@ describe('AuthMenu', () => {
             getLoggedUser: () => ({ email: 'test@example.com' })
           },
           actions: {
-            signOut
+            [authActions.SIGN_OUT]: signOut
           }
         },
         notification: {
           namespaced: true,
           actions: {
-            setErrorNotification
+            [notificationActions.SET_ERROR_NOTIFICATION]: setErrorNotification
           }
         }
       }
@@ -125,6 +127,7 @@ describe('AuthMenu', () => {
     });
 
     await wrapper.vm.userMenuItems[0].items[2].command();
+    await flushPromises();
     expect(signOut).toHaveBeenCalled();
     expect(push).toHaveBeenCalledWith('/login');
   });
