@@ -486,4 +486,3 @@ export default {
   font-family: 'Fira Code', 'Consolas', monospace;
 }
 </style>
-

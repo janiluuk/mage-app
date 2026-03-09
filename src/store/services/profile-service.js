@@ -5,44 +5,33 @@ import { API_BASE_URL } from '@/utils/api-base-urls';
 const url = API_BASE_URL;
 const jsona = new Jsona();
 
-function get() {
-  const options = {
-    headers: {
-      'Accept': 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json',
-    }
-  };
+const JSON_API_HEADERS = {
+  Accept: 'application/vnd.api+json',
+  'Content-Type': 'application/vnd.api+json',
+};
 
-  return axios.get(`${url}/me?include=roles`, options)
-    .then(response => {
-      return {
-        list: jsona.deserialize(response.data),
-        meta: response.data.meta
-      };
-    });
+/**
+ * Profile service - slightly different from standard CRUD (uses /me endpoint).
+ * Kept as a standalone service since it doesn't follow the standard resource pattern.
+ */
+function get() {
+  return axios
+    .get(`${url}/me?include=roles`, { headers: JSON_API_HEADERS })
+    .then((response) => ({
+      list: jsona.deserialize(response.data),
+      meta: response.data.meta,
+    }));
 }
 
 function update(profile) {
-
   const payload = jsona.serialize({
     stuff: profile,
-    includeNames: []
+    includeNames: [],
   });
 
-  const options = {
-    headers: {
-      'Accept': 'application/vnd.api+json',
-      'Content-Type': 'application/vnd.api+json',
-    }
-  };
-
-  return axios.patch(`${url}/me`, payload, options)
-    .then(response => {
-      return jsona.deserialize(response.data);
-    });
+  return axios
+    .patch(`${url}/me`, payload, { headers: JSON_API_HEADERS })
+    .then((response) => jsona.deserialize(response.data));
 }
 
-export default {
-  get,
-  update
-};
+export default { get, update };

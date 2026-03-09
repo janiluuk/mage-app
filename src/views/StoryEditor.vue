@@ -31,7 +31,7 @@
             icon="pi pi-save" 
             @click="saveStory"
             :loading="saving"
-            :disabled="saving"
+            :disabled="saving || !hasUnsavedChanges"
           />
         </div>
       </div>
@@ -49,6 +49,7 @@
                     v-model="storyForm.name" 
                     placeholder="Enter story name"
                     class="w-full"
+                    @input="markDirty"
                   />
                 </div>
                 <div>
@@ -59,6 +60,7 @@
                     placeholder="Enter story description"
                     rows="3"
                     class="w-full"
+                    @input="markDirty"
                   />
                 </div>
                 <div class="flex gap-3">
@@ -198,6 +200,7 @@ const storyForm = ref({
   description: ''
 })
 const showAddJobsDialog = ref(false)
+const hasUnsavedChanges = ref(false)
 
 const orderedJobs = computed(() => {
   if (!story.value?.jobs) return []
@@ -245,6 +248,7 @@ const loadStory = async () => {
       name: data.name || '',
       description: data.description || ''
     }
+    hasUnsavedChanges.value = false
   } catch (err) {
     console.error('Error loading story:', err)
     error.value = err.message || 'Failed to load story'
@@ -261,7 +265,7 @@ const loadStory = async () => {
 }
 
 const markDirty = () => {
-  // Mark that changes need to be saved
+  hasUnsavedChanges.value = true
 }
 
 const saveStory = async () => {
@@ -288,6 +292,7 @@ const saveStory = async () => {
     await storyService.updateJobOrder(story.value.id, jobOrders)
 
     saveSuccess.value = true
+    hasUnsavedChanges.value = false
     
     // Reload story to get updated data
     await loadStory()
@@ -331,7 +336,7 @@ const goBack = () => {
 }
 
 const goToLogin = () => {
-  router.push('/auth/login')
+  router.push('/login')
 }
 
 onMounted(() => {

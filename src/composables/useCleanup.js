@@ -180,6 +180,12 @@ export function useWebSocket(url, options = {}) {
       return ws;
     }
 
+    // Close existing socket in CONNECTING or CLOSING state to prevent leaks
+    if (ws) {
+      try { ws.close(); } catch (_) { /* ignore */ }
+      ws = null;
+    }
+
     ws = new WebSocket(url);
 
     ws.onopen = (event) => {

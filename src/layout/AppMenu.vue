@@ -52,7 +52,10 @@ const model = ref([
         label: 'Administration',
         items: [
             { label: 'Instance Management', icon: 'pi pi-fw pi-server', to: '/admin/instances' },
-            { label: 'Video Processing', icon: 'pi pi-fw pi-video', to: '/admin/video-processing' }
+            { label: 'Video Processing', icon: 'pi pi-fw pi-video', to: '/admin/video-processing' },
+            { label: 'Tags', icon: 'pi pi-fw pi-tags', to: '/admin/tags' },
+            { label: 'Roles', icon: 'pi pi-fw pi-shield', to: '/admin/roles' },
+            { label: 'Categories', icon: 'pi pi-fw pi-th-large', to: '/admin/categories' },
         ]
     },
     {

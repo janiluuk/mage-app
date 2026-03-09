@@ -193,7 +193,7 @@ describe('VideoJobService', () => {
       const result = await VideoJobService.finalize(mockParams);
 
       expect(requestService.post).toHaveBeenCalledWith(
-        'http://localhost:3000/api/finalize',
+        '/finalize',
         mockParams,
         expect.objectContaining({
           headers: expect.objectContaining({
@@ -211,7 +211,7 @@ describe('VideoJobService', () => {
       const result = await VideoJobService.finalizeDeforum(mockParams);
 
       expect(requestService.post).toHaveBeenCalledWith(
-        'http://localhost:3000/api/finalize',
+        '/finalize',
         mockParams,
         expect.objectContaining({
           headers: expect.objectContaining({

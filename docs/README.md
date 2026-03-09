@@ -100,22 +100,126 @@ Backend (Laravel 10 API)
       └── LoadBalancerService      — Instance routing (SD Forge / ComfyUI / Ollama)
 ```
 
-## 📄 Page Descriptions
+## 📸 Screenshots & Page Descriptions
 
-### Audio-Reactive Video Generator (`/audio-visualizer`)
-Upload an audio file (MP3, WAV, etc.) and visualise its waveform and frequency spectrum in real time. The page analyses the audio into seven frequency bands (sub-bass through brilliance) and lets you map each band to a Deforum animation parameter — translation, rotation, strength, noise, contrast, zoom, or angle. Adjust min/max ranges per mapping, preview the generated Parseq-style keyframe schedules, and export the full Deforum configuration as JSON or send it directly to the generation pipeline.
+### Authentication
 
-### Movie Editor (`/film-projects/:id/editor`)
-A timeline-based editor for assembling film project shots into a finished sequence. Drag-and-drop clips to reorder scenes, pick transitions between clips (cut, crossfade, fade-to-black, wipe, dissolve) with adjustable durations, and add text overlays with customisable position, font, colour, and entrance/exit animations (fade, slide, zoom). The zoomable timeline shows clip and overlay tracks with a red playhead synced to the canvas preview. Export the assembled project configuration (clips, transitions, overlays) to JSON.
+#### Login (`/login`)
+Enter your email and password to sign in. Includes a "Forgot Password" link and a registration link.
 
-### Film Projects (`/film-projects`)
-Create and manage film projects with hierarchical organisation: Projects → Sequences → Shots. Each level supports AI-assisted content generation — generate scripts at the project level, scenes at the sequence level, and individual shot videos at the shot level. Navigate to the Movie Editor from any project detail page.
+![Login](screenshots/01-login-page.png)
 
-### Preset Library (`/presets`)
-Manage generation presets with full CRUD, categories, favorites, usage tracking, and JSON import/export. Search and filter presets, duplicate public presets to your collection, and track which presets are most popular.
+#### Sign Up (`/signup`)
+Create a new account with name, email, and password.
 
-### Instance Management (`/admin/instances`)
-Monitor and manage generator instances (Stable Diffusion Forge, ComfyUI, Ollama). View real-time status, toggle instances on/off, create new instances, and configure connection URLs. Ollama instances support LLM text generation alongside the image/video backends.
+![Sign Up](screenshots/02-signup-page.png)
+
+#### Forgot Password (`/forgot-password`)
+Request a password-reset email.
+
+![Forgot Password](screenshots/03-forgot-password.png)
+
+---
+
+### Dashboard (`/`)
+Overview of video processing activity: total videos ready, jobs in progress, completed today, and a "Recent Video Jobs" table with pagination.
+
+![Dashboard](screenshots/dashboard.png)
+
+---
+
+### Video Studio
+
+#### Upload / Create (`/upload`)
+Choose a workflow — animation, deforum video, or vid2vid — with large preview cards. Drag-and-drop file upload, prompt entry, and multi-file batch support with progress tracking.
+
+![Upload](screenshots/upload.png)
+
+#### My Library (`/library`)
+Filterable, sortable grid or list of all generated videos. Filter by generator or status, search by prompt, toggle layouts. Empty state shows a camera icon and "Create your first video!" button.
+
+![Library Empty State](screenshots/library-empty.png)
+
+Each library card shows a thumbnail (animated on hover), status badge, prompt text, duration, and a context menu for download, reprocess, delete, and batch operations.
+
+![Media Library](screenshots/04-media-library.png)
+
+#### Media Browser (`/browser`)
+Advanced filtering and sorting with a responsive grid. Filter by tags, status, or generator, and search for specific items.
+
+![Browser Grid View](screenshots/09-browser-grid-view.png)
+
+![Browser Filtered View](screenshots/07-browser-filtered-view.png)
+
+---
+
+### Film Projects & Movie Editor
+
+#### Film Projects (`/projects`)
+Manage film projects in a hierarchical structure: **Projects → Sequences → Shots**. DataTable lists all projects with name, description, status, created date, and actions. AI-assisted content generation at every level.
+
+![Film Projects](screenshots/film-projects.png)
+
+#### Movie Editor (`/projects/:id/editor`)
+Assemble shots into a finished film:
+- **Preview Player** — canvas-based video preview with play/pause and skip controls
+- **Clip List** — drag-and-drop scene ordering with configurable transitions (cut, crossfade, fade-to-black, wipe, dissolve)
+- **Text Overlays** — animated text with position, font, colour, and entrance/exit animations (fade, slide, zoom)
+- **Timeline** — zoomable track view with clip and overlay lanes, red playhead synced to the preview
+- **Export** — save the assembled project configuration as JSON
+
+![Movie Editor](screenshots/movie-editor.png)
+
+---
+
+### AI Tools
+
+#### Story Creator (`/story`)
+Build multi-scene narrative animations. The Story Builder shows a summary (scenes, frames, duration, keyframes). Tabs for Advanced Settings, Live Preview, and Export & Share. One-click "Generate All Frames" sends the story to the pipeline.
+
+![Story Creator](screenshots/story-creator.png)
+
+#### Soundscape Creator (`/soundscape`)
+Create audio-driven animations by describing a mood. Type a description or use speech input, pick "Relaxing" or "Energizing" presets, and generate.
+
+![Soundscape Creator](screenshots/soundscape-creator.png)
+
+#### Audio-Reactive Video Generator (`/audio-visualizer`)
+Upload audio (MP3, WAV, OGG), set FPS and keyframe interval, then analyse frequency bands. Maps seven bands (sub-bass through brilliance) to Deforum parameters — translation, rotation, strength, noise, contrast, zoom, angle. Adjust sensitivity, preview Parseq-style keyframe schedules, export config or generate video directly.
+
+![Audio Visualizer](screenshots/audio-visualizer.png)
+
+---
+
+### Tools
+
+#### Preset Library (`/presets`)
+Manage generation presets with Import/Export toolbar, summary stats, and searchable list with category filters (All, Camera Movements, Effects, Styles, General, Custom). Grid and list views, favorites.
+
+![Preset Library](screenshots/preset-library.png)
+
+#### Timeline (`/timeline`)
+Studio timeline view for sequencing video clips. Upload or select media, arrange on the track, and manage content.
+
+![Timeline](screenshots/timeline.png)
+
+---
+
+### Account
+
+#### User Profile (`/profile`)
+Profile tab for viewing/editing personal information. Password tab for changing credentials. Clean tabbed interface.
+
+![Profile](screenshots/profile.png)
+
+---
+
+### Administration
+
+#### Instance Management (`/admin/instances`)
+Monitor and manage **Stable Diffusion Forge**, **ComfyUI**, and **Ollama** instances. Add new instances, view real-time status, toggle on/off, retry connections. Ollama supports LLM text generation alongside image/video backends.
+
+![Admin Instances](screenshots/admin-instances.png)
 
 ## 🚀 Quick Start
 
@@ -151,4 +255,4 @@ npm run test:frontend -- src/path/to/test.spec.js
 
 ---
 
-**Last Updated:** February 8, 2026
+**Last Updated:** February 9, 2026

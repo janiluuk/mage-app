@@ -1,0 +1,108 @@
+# Full stack override: build mage-api from source instead of using pre-built image
+#
+# Prerequisites:
+#   - mage-api at ../mage-api (sibling directory)
+#   - .env.docker in mage-app (see .env.docker.example)
+#
+# Run:
+#   cd mage-app
+#   docker compose -f docker-compose.yml -f docker-compose.stack.yml up -d
+#
+# The mage-api will be built from ../mage-api. Set MAGE_API_SOURCE to override:
+#   MAGE_API_SOURCE=/path/to/mage-api docker compose -f docker-compose.yml -f docker-compose.stack.yml up -d
+#
+# Mage-api runs as app+nginx (same as mage-api's own docker-compose).
+# Mage-app's nginx proxies /mage-api/ to mage-api-nginx. We add mage-api-nginx
+# with network alias "mage-api" so the existing proxy config works.
+
+version: "3.9"
+
+services:
+  app:
+    depends_on:
+      - api
+      - mage-api-nginx
+
+  # Replace mage-api image with build from source (PHP-FPM container)
+  mage-api:
+    build:
+      context: ${MAGE_API_SOURCE:-../mage-api}
+      dockerfile: Dockerfile
+      args:
+        user: www-data
+        uid: ${UID:-1000}
+    image: mage-api:local
+    container_name: mage-api
+    hostname: mage-api-app
+    environment:
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${MYSQL_DATABASE:-mage_api}
+      DB_USERNAME: ${MYSQL_USER:-mage_api}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      QUEUE_CONNECTION: sync
+    volumes:
+      - ${MAGE_API_SOURCE:-../mage-api}:/var/www
+      - mage-api-filestorage:/var/www/filestorage
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    networks:
+      mage:
+        aliases:
+          - mage-api-app.localhost
+
+  mage-api-nginx:
+    image: nginx:alpine
+    container_name: mage-api-nginx
+    hostname: mage-api
+    volumes:
+      - ${MAGE_API_SOURCE:-../mage-api}:/var/www
+      - ./docker/mage-api-app.stack.conf:/etc/nginx/conf.d/app.conf:ro
+    depends_on:
+      - mage-api
+    networks:
+      mage:
+        aliases:
+          - mage-api.localhost
+
+  redis:
+    image: redis:7-alpine
+    container_name: mage-redis
+    hostname: redis
+    networks:
+      mage:
+        aliases:
+          - redis.localhost
+
+  nginx:
+    depends_on:
+      - app
+      - api
+      - mage-api-nginx
+    volumes:
+      - ./docker/nginx.stack.conf:/etc/nginx/nginx.conf:ro
+
+  mysql:
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-mage_api}
+      MYSQL_USER: ${MYSQL_USER:-mage_api}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootsecret}
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  mage-api-filestorage:

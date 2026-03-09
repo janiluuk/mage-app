@@ -230,4 +230,3 @@ export default {
   border: 1px solid var(--surface-border);
 }
 </style>
-

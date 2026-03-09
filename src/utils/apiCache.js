@@ -140,7 +140,9 @@ class ApiCache {
     promise
       .finally(() => {
         this.pendingRequests.delete(key);
-      });
+      })
+      // Avoid unhandled rejections from the detached finally-chain promise.
+      .catch(() => {});
 
     return promise;
   }

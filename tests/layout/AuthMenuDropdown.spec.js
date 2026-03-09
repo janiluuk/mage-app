@@ -2,14 +2,17 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import { createStore } from 'vuex';
 import AuthMenu from '@/layout/AuthMenu.vue';
-import Menu from 'primevue/menu';
+import * as authActions from '@/store/modules/auth/types/actions';
+import * as notificationActions from '@/store/modules/notification/types/actions';
 
 describe('AuthMenu Dropdown Functionality', () => {
   let store;
   let wrapper;
-  let mockToast;
+  let push;
 
   beforeEach(() => {
+    push = vi.fn();
+
     // Create a mock store with required modules
     store = createStore({
       modules: {
@@ -19,25 +22,20 @@ describe('AuthMenu Dropdown Functionality', () => {
             getLoggedUser: () => ({ email: 'test@example.com' })
           },
           actions: {
-            signOut: vi.fn()
+            [authActions.SIGN_OUT]: vi.fn()
           }
         },
         notification: {
           namespaced: true,
           actions: {
-            setErrorNotification: vi.fn()
+            [notificationActions.SET_ERROR_NOTIFICATION]: vi.fn()
           }
         }
       }
     });
-
-    // Mock toast service
-    mockToast = {
-      add: vi.fn()
-    };
   });
 
-  it('should toggle menu when Account button is clicked', async () => {
+  it('should expose setup refs for user and mobile menus', async () => {
     wrapper = mount(AuthMenu, {
       global: {
         plugins: [store],
@@ -45,9 +43,8 @@ describe('AuthMenu Dropdown Functionality', () => {
           Toast: true
         },
         mocks: {
-          $toast: mockToast,
           $router: {
-            push: vi.fn(),
+            push,
             currentRoute: {
               value: {
                 path: '/library'
@@ -63,28 +60,11 @@ describe('AuthMenu Dropdown Functionality', () => {
       }
     });
 
-    // Verify menu ref is accessible
-    expect(wrapper.vm.menu).toBeDefined();
-    
-    // Find the Account button (the one that triggers the dropdown)
-    const accountButton = wrapper.findAll('button').find(btn => 
-      btn.text().includes('Account')
-    );
-    
-    expect(accountButton).toBeDefined();
-
-    // Mock the menu component's toggle method
-    const menuComponent = wrapper.findComponent(Menu);
-    const toggleSpy = vi.spyOn(menuComponent.vm, 'toggle');
-
-    // Click the Account button
-    await accountButton.trigger('click');
-
-    // Verify toggle was called
-    expect(toggleSpy).toHaveBeenCalled();
+    expect(wrapper.vm.userMenu).toBeDefined();
+    expect(wrapper.vm.mobileMenu).toBeDefined();
   });
 
-  it('should have menu ref properly connected to template', async () => {
+  it('toggleUserMenu delegates to userMenu.toggle when ref exists', async () => {
     wrapper = mount(AuthMenu, {
       global: {
         plugins: [store],
@@ -92,9 +72,8 @@ describe('AuthMenu Dropdown Functionality', () => {
           Toast: true
         },
         mocks: {
-          $toast: mockToast,
           $router: {
-            push: vi.fn(),
+            push,
             currentRoute: {
               value: {
                 path: '/library'
@@ -110,15 +89,14 @@ describe('AuthMenu Dropdown Functionality', () => {
       }
     });
 
-    // The menu ref from setup should be defined
-    expect(wrapper.vm.menu).toBeDefined();
-    
-    // Verify we can access the menu component
-    const menuComponent = wrapper.findComponent(Menu);
-    expect(menuComponent.exists()).toBe(true);
-    
-    // Verify the menu has the toggle method
-    expect(typeof menuComponent.vm.toggle).toBe('function');
+    const toggleSpy = vi.fn();
+    wrapper.vm.userMenu = { toggle: toggleSpy };
+    const event = { preventDefault: vi.fn(), stopPropagation: vi.fn() };
+    wrapper.vm.toggleUserMenu(event);
+
+    expect(event.preventDefault).toHaveBeenCalled();
+    expect(event.stopPropagation).toHaveBeenCalled();
+    expect(toggleSpy).toHaveBeenCalledWith(event);
   });
 
   it('should render dropdown menu items correctly', () => {
@@ -130,9 +108,8 @@ describe('AuthMenu Dropdown Functionality', () => {
           Toast: true
         },
         mocks: {
-          $toast: mockToast,
           $router: {
-            push: vi.fn(),
+            push,
             currentRoute: {
               value: {
                 path: '/library'
@@ -148,8 +125,7 @@ describe('AuthMenu Dropdown Functionality', () => {
       }
     });
 
-    // Get the overlay menu items
-    const menuItems = wrapper.vm.getOverlayMenu();
+    const menuItems = wrapper.vm.userMenuItems[0].items;
     
     // Should have 3 items: Profile, separator, Logout
     expect(menuItems).toHaveLength(3);

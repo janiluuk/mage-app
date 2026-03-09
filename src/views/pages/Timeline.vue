@@ -1,5 +1,8 @@
 <script setup>
 import { ref } from 'vue';
+import Timeline from 'primevue/timeline';
+import Card from 'primevue/card';
+import Button from 'primevue/button';
 
 const customEvents = ref([
     {
@@ -134,7 +137,7 @@ const horizontalEvents = ref(['2020', '2021', '2022', '2023']);
 
 <style lang="scss" scoped>
 @media screen and (max-width: 960px) {
-    ::v-deep(.customized-timeline) {
+    :deep(.customized-timeline) {
         .p-timeline-event:nth-child(even) {
             flex-direction: row !important;
 

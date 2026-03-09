@@ -5,31 +5,152 @@ Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich 
 ## Features
 
 ### 🎬 Video Studio
-- **Media Library & Browser**: tagging, filtering, sortable grids, metadata, previews, and batch operations (download, reprocess, apply preset).
+- **Media Library & Browser**: tagging, filtering, sortable grids, metadata, previews, and batch operations (download, reprocess, apply preset). Group files by tags, view as video jobs or files.
 - **Upload**: drag-and-drop upload for vid2vid and deforum workflows with multi-file batch progress tracking.
 - **Video Editor**: timeline-based editor with trim panel, start/end point editing, fragment splitting, and export.
 - **Video Trimming**: integrated trim panel in the editor — set start/end by time or current playback position, preview trim, and apply.
+- **Soundtrack & Extension**: add soundtracks to finished videos or extend video length from the library context menu.
 
 ### 🎬 Film Projects & Movie Editor
 - **Film Projects**: hierarchical project management (Projects → Sequences → Shots) with AI-assisted script and scene generation at every level.
 - **Movie Editor**: assemble project shots into a finished sequence with drag-and-drop scene ordering, configurable clip transitions (cut, crossfade, fade-to-black, wipe, dissolve), animated text overlays, a zoomable timeline, and JSON export.
 
 ### 🤖 AI Tools
-- **Story Creator**: multi-scene narrative builder with live status, saved configs, and exports.
+- **Story Creator**: multi-scene narrative builder with live status, saved configs, exports, and frame insertion between keyframes.
 - **Soundscape Creator**: audio-driven animation with queue/status feedback.
 - **Audio-Reactive Video Generator**: upload audio, analyse frequency bands, map them to Deforum animation parameters (translation, rotation, strength, noise, etc.), preview Parseq-style keyframe schedules, and export or generate video.
+- **Story Browser**: browse and manage stories with pagination, view/edit modes.
 
 ### 🛠️ Tools
 - **Preset Library**: manage generation presets with categories, favorites, usage tracking, and JSON import/export.
 - **Timeline**: studio timeline view for sequencing.
+- **Mage Helper**: monitor backend queue and live processing state.
 
 ### 🔧 Admin & Ops
 - **Instance Management**: monitor and manage ComfyUI, Stable Diffusion Forge, and Ollama instances with real-time status.
 - **Video Processing**: admin queue monitoring and job management.
+- **Tags & Categories Admin**: manage tags and preset categories.
+
+## Screenshots & Page Descriptions
+
+### Authentication
+
+#### Login
+Enter your email and password to sign in. Includes a "Forgot Password" link for account recovery and a link to register a new account.
+
+![Login](docs/screenshots/01-login-page.png)
+
+---
+
+### Dashboard
+The main landing page showing an overview of your video processing activity: total videos ready for processing, jobs currently in progress, completed jobs today, and a "Recent Video Jobs" table with pagination.
+
+![Dashboard](docs/screenshots/02-dashboard.png)
+
+---
+
+### Video Studio
+
+#### Upload / Create
+Choose what to create — animation, deforum video, or vid2vid — with large preview cards for each workflow. Drag-and-drop file upload, prompt entry, and multi-file batch support with progress tracking.
+
+![Upload](docs/screenshots/05-upload.png)
+
+#### My Library
+Browse all your generated videos in a filterable, sortable grid or list view. Filter by generator type or status, search by prompt, and toggle between grid and list layouts. When you have no items yet, the page shows a friendly empty state with a camera icon and a "Create your first video!" button.
+
+![Library](docs/screenshots/03-library.png)
+
+#### Media Browser
+The media browser offers advanced filtering and sorting with a responsive grid layout. Filter by tags, status, or generator and use the search bar to find specific items. Group by tags, view as video jobs or files.
+
+![Browser](docs/screenshots/04-browser.png)
+
+---
+
+### Film Projects & Movie Editor
+
+#### Film Projects
+Manage your film projects in a hierarchical structure: **Projects → Sequences → Shots**. The DataTable lists all projects with name, description, status, creation date, and action buttons. Create new projects, search existing ones, and open any project to manage its sequences and shots. Each level supports AI-assisted content generation.
+
+![Film Projects](docs/screenshots/06-film-projects.png)
+
+#### Movie Editor
+Assemble shots from a film project into a finished film. The editor features:
+- **Preview Player** — canvas-based video preview with play/pause, skip-to-start, and skip-to-end controls
+- **Clip List** — drag-and-drop scene ordering with configurable transitions between clips (cut, crossfade, fade-to-black, wipe, dissolve)
+- **Text Overlays** — add animated text with customisable position, font, colour, and entrance/exit animations (fade, slide, zoom)
+- **Timeline** — zoomable track view with clip and overlay lanes, red playhead synced to the preview
+- **Export** — save the assembled project configuration as JSON
+
+![Movie Editor](docs/screenshots/movie-editor.png)
+
+---
+
+### AI Tools
+
+#### Story Creator
+Build multi-scene narrative-driven animations. The Story Builder tab shows a story summary with total scenes, frames, estimated duration, and keyframe count. Use the Advanced Settings tab to fine-tune parameters, the Live Preview tab to watch the animation in real time, and Export & Share to save or distribute configs. One-click "Generate All Frames" sends the story to the generation pipeline.
+
+![Story Creator](docs/screenshots/07-story-creator.png)
+
+#### Soundscape Creator
+Create audio-driven animations by describing a soundscape or mood. Type a description or use the microphone for speech input, pick between "Relaxing" and "Energizing" mood presets, and hit Generate to produce a soundscape-driven animation.
+
+![Soundscape Creator](docs/screenshots/08-soundscape-creator.png)
+
+#### Audio-Reactive Video Generator
+Upload an audio file (MP3, WAV, OGG), set FPS and keyframe interval, then click "Analyse Audio" to extract frequency bands. The analyser splits audio into seven bands (sub-bass, bass, low-mid, mid, upper-mid, presence, brilliance) and lets you map each band to a Deforum animation parameter — X/Y/Z translation, rotation, strength, noise, contrast, zoom, or angle. Adjust sensitivity with min/max ranges, preview the generated Parseq-style keyframe schedules, then export the full configuration as JSON or send it directly to generate video.
+
+![Audio Visualizer](docs/screenshots/16-audio-visualizer.png)
+
+---
+
+### Tools
+
+#### Preset Library
+Manage generation presets with a toolbar for Import/Export, summary stats (total presets, categories, favorites), and a searchable list with category filter buttons (All, Camera Movements, Effects, Styles, General, Custom). Create new presets, toggle between grid and list views, and mark favorites for quick access.
+
+![Preset Library](docs/screenshots/13-preset-library.png)
+
+#### Timeline
+Studio timeline view for sequencing video clips. Upload or select media, arrange on the timeline track, and use the upload/cancel controls to manage content.
+
+![Timeline](docs/screenshots/14-timeline.png)
+
+#### Story Browser
+Browse and manage your stories with pagination. View or edit stories from the list.
+
+![Story Browser](docs/screenshots/19-story-browser.png)
+
+#### Mage Helper
+Monitor the backend queue and live processing state.
+
+![Mage Helper](docs/screenshots/15-mage-helper.png)
+
+---
+
+### Account
+
+#### User Profile
+View and edit your profile information under the Profile tab, or change your password under the Password tab. The tabbed interface keeps account management clean and organised.
+
+![Profile](docs/screenshots/09-profile.png)
+
+---
+
+### Administration
+
+#### Instance Management
+Monitor and manage AI backend instances — **Stable Diffusion Forge**, **ComfyUI**, and **Ollama**. Add new instances with the "+ Add Instance" button, view real-time connection status, toggle instances on/off, and retry failed connections. Ollama instances support LLM text generation alongside the image and video backends.
+
+![Admin Instances](docs/screenshots/10-admin-instances.png)
 
 ## Setup
 
 Requires Node.js 18+, a running Mage API backend, and optional Docker for containers.
+
+### Option 1: Development (separate processes)
 
 ```bash
 # Install dependencies
@@ -37,13 +158,63 @@ npm install --legacy-peer-deps
 
 # Configure environment
 cp .env.example .env
-# Set VITE_API_URL and VITE_API_BASE_URL
+# Set VITE_API_URL and VITE_API_BASE_URL to your Mage API URL
 
 # Start dev server
 npm run dev
 
 # Build for production
 npm run build
+```
+
+### Option 2: Full stack with Docker (mage-app + mage-api)
+
+Run both frontend and API in one stack, with mage-api built from local source.
+
+**Prerequisites:** mage-api and mage-app as sibling directories (e.g. `workspace/mage-api`, `workspace/mage-app`).
+
+```bash
+# 1. Create environment file
+cd mage-app
+cp .env.docker.example .env.docker
+# Edit .env.docker — set VUE_APP_API_URL to http://localhost (or your gateway URL)
+
+# 2. Start the full stack (builds mage-api from ../mage-api)
+docker compose -f docker-compose.yml -f docker-compose.stack.yml up -d
+
+# 3. First-time mage-api setup (migrations run automatically; run these if needed)
+docker exec mage-api php artisan key:generate
+docker exec mage-api php artisan jwt:secret
+```
+
+**Access:**
+- **App**: http://localhost (via nginx gateway)
+- **mage-api**: http://localhost:8000 (direct) or http://localhost/mage-api (via gateway)
+
+**Optional:** Override mage-api source path:
+```bash
+MAGE_API_SOURCE=/path/to/mage-api docker compose -f docker-compose.yml -f docker-compose.stack.yml up -d
+```
+
+**Stop the stack:**
+```bash
+docker compose -f docker-compose.yml -f docker-compose.stack.yml down
+```
+
+**Troubleshooting:** If you see container name conflicts, stop any existing mage containers first:
+```bash
+docker compose -f docker-compose.yml -f docker-compose.stack.yml down
+docker ps -a | grep mage  # inspect leftover containers
+```
+
+### Option 3: Docker with pre-built mage-api image
+
+If you prefer the pre-built mage-api image instead of building from source:
+
+```bash
+cd mage-app
+cp .env.docker.example .env.docker
+docker compose up -d
 ```
 
 ## Tech Stack

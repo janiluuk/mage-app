@@ -11,6 +11,7 @@ import SoundtrackDialog from '@/components/video/SoundtrackDialog.vue';
 import VideoExtensionDialog from '@/components/video/VideoExtensionDialog.vue';
 
 
+const store = useStore();
 const toast = useToast();
 const confirmPopup = useConfirm();
 const destroy = (id) => {
@@ -84,10 +85,9 @@ const router = useRouter();
 const dataviewValue = ref(null);
 const total = ref(null);
 const layout = ref('grid');
-const query = ref(null);
 const sortKey = ref(null);
-const store = useStore();
 const menuRefs = ref([]);
+const menuOptions = ref([]);
 const sortOrder = ref('-updated_at');
 const sortField = ref(null);
 const generatorFilterKey = ref('');
@@ -190,42 +190,24 @@ const getJobList = () => {
         dataviewValue.value = (generatorFilter.value || statusFilter.value || queryFilter.value)
             ? store.getters["videojobs/filterList"](queryFilter.value, statusFilter.value, generatorFilter.value)
             : store.getters["videojobs/listWithoutPending"]();
-        total.total = store.getters["videojobs/listTotal"];
+        total.value = store.getters["videojobs/listTotal"];
     });
 };
 
 function addInputRef(el, id) {
     var elementId = "menu-" + id;
-    menuRefs[elementId] = el;
+    menuRefs.value[elementId] = el;
     return elementId;
 }
 
 const toggleMenu = (id, event) => {
     var refitem = "menu-" + id;
-    var refmenu = menuRefs[refitem];
+    var refmenu = menuRefs.value[refitem];
     if (refmenu) refmenu.toggle(event);
     event.stopPropagation();
     return false;
 };
 
-const mapStates = () => {
-    const store = useStore();
-    return Object.fromEntries(
-        Object.keys(store.state.videojobs).map(
-            key => [key, computed(() => store.videojobs.getters[key])]
-        )
-    )
-
-}
-const mapGetters = () => {
-    const store = useStore();
-    return Object.fromEntries(
-
-        Object.keys(store.getters['videojobs']).map(
-            key => [key, computed(() => store.getters.videojobs[key])]
-        )
-    )
-}
 // Normalize generator type to ensure it matches router routes
 const normalizeGeneratorType = (generator) => {
     if (!generator) return 'vid2vid';
@@ -380,7 +362,7 @@ const onStatusFilterChange = (event) => {
                         </div>
                         <span class="p-input-icon-left">
                           <i class="pi pi-search" />
-                          <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" placeholder="Search" />
+                          <InputText type="text" v-model="queryFilterKey" @change="onQueryFilterChange($event)" :placeholder="queryFilter.value ? queryFilter.value : 'Search ...'" />
                         </span>
                       </div>
                     </template>
@@ -389,6 +371,18 @@ const onStatusFilterChange = (event) => {
 
             </template>
 
+            <template #empty>
+                <div class="empty-state flex flex-column align-items-center justify-content-center py-8">
+                    <i class="pi pi-video text-6xl text-primary mb-4" style="font-size: 5rem; opacity: 0.4;"></i>
+                    <h3 class="text-xl font-semibold mb-2" style="color: var(--text-color);">Your library is empty</h3>
+                    <p class="text-color-secondary mb-4 text-center" style="max-width: 400px;">
+                        You haven't created any videos yet. Start by uploading a video or creating one with AI.
+                    </p>
+                    <Button icon="pi pi-plus" label="Create your first video!" 
+                        class="p-button-lg p-button-rounded"
+                        @click="$router.push('/upload/')" />
+                </div>
+            </template>
 
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">
@@ -408,13 +402,11 @@ const onStatusFilterChange = (event) => {
                             </div>
 
                             <span class="card-thumbnail-image">
-                                <img crossorigin="anonymous" v-if="slotProps.data.id != 1171" class="top"
+                                <img crossorigin="anonymous" class="top"
                                     v-lazy="{ src: slotProps.data.preview_img ? slotProps.data.preview_img : slotProps.data.thumbnail || fallbackImage, lifecycle: lazyOptions.lifecycle }"
                                     width="100" preview />
-                                <img  crossorigin="anonymous" class="top" v-if="slotProps.data.id == 1171" lazy="loading" width="100" />
-
                                 <img crossorigin="anonymous" class="bottom"
-                                        v-if="slotProps.data.id != 1171 && slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
+                                        v-if="slotProps.data.preview_animation && (slotProps.data.preview_animation.includes('png') ||  slotProps.data.preview_animation.includes('gif'))"
                                     v-lazy="{ src: slotProps.data.preview_animation ? slotProps.data.preview_animation : slotProps.data.preview_img, lifecycle: lazyOptions.lifecycle }"
                                     width="100" />
                             </span>
@@ -526,8 +518,6 @@ span>img[lazy=error] {
 	animation: pulse 0.5s infinite;
   }
 
-  img[lazy=loaded] {
-  }
 .library {
   :deep .p-dataview-header {
     border-width: 0;

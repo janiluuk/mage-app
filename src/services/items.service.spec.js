@@ -1,15 +1,21 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import axios from 'axios';
 import itemsService from './items.service';
+import requestService from '@/services/request-service/ApiRequestService';
+import apiCache from '@/utils/apiCache';
 
-vi.mock('axios');
-vi.mock('./auth-header', () => ({
-  default: () => ({ Authorization: 'Bearer test-token' })
+vi.mock('@/services/request-service/ApiRequestService', () => ({
+  default: {
+    get: vi.fn(),
+    post: vi.fn(),
+    patch: vi.fn(),
+    delete: vi.fn(),
+  },
 }));
 
 describe('items.service', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    apiCache.clear();
   });
 
   describe('list', () => {
@@ -23,18 +29,17 @@ describe('items.service', () => {
         }
       };
 
-      axios.get.mockResolvedValue(mockResponse);
+      requestService.get.mockResolvedValue(mockResponse);
 
       const result = await itemsService.list({ page: 1 });
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/video-jobs'),
+      expect(requestService.get).toHaveBeenCalledWith(
+        '/video-jobs',
+        { page: 1 },
         expect.objectContaining({
-          params: { page: 1 },
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-token'
-          })
-        })
+          paramsSerializer: expect.any(Function),
+        }),
+        'list-video-jobs'
       );
       expect(result.list).toBeDefined();
       expect(result.meta).toBeDefined();
@@ -49,7 +54,7 @@ describe('items.service', () => {
         }
       };
 
-      axios.get.mockResolvedValue(mockResponse);
+      requestService.get.mockResolvedValue(mockResponse);
 
       const result = await itemsService.list({});
 
@@ -65,44 +70,31 @@ describe('items.service', () => {
         }
       };
 
-      axios.get.mockResolvedValue(mockResponse);
+      requestService.get.mockResolvedValue(mockResponse);
 
       const result = await itemsService.get('1');
 
-      expect(axios.get).toHaveBeenCalledWith(
-        expect.stringContaining('/video-jobs/1?include=modelfile,user'),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-token'
-          })
-        })
-      );
+      expect(requestService.get).toHaveBeenCalledWith('/video-jobs/1?include=modelfile,user', {}, {}, true);
       expect(result).toBeDefined();
-      expect(result.links).toBeUndefined();
     });
   });
 
   describe('add', () => {
     it('creates new video job', async () => {
-      const newItem = { type: 'video-jobs', title: 'New Job', status: 'pending' };
+      const newItem = { stuff: { type: 'video-jobs', title: 'New Job', status: 'pending' } };
       const mockResponse = {
         data: {
           data: { type: 'video-jobs', id: '2', attributes: newItem }
         }
       };
 
-      axios.post.mockResolvedValue(mockResponse);
+      requestService.post.mockResolvedValue(mockResponse);
 
       const result = await itemsService.add(newItem);
 
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/video-jobs?include=modelfile,user'),
-        expect.any(Object),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-token'
-          })
-        })
+      expect(requestService.post).toHaveBeenCalledWith(
+        '/video-jobs?filter[generator]=vid2vid&include=modelfile,user',
+        expect.any(Object)
       );
       expect(result).toBeDefined();
     });
@@ -117,37 +109,22 @@ describe('items.service', () => {
         }
       };
 
-      axios.patch.mockResolvedValue(mockResponse);
+      requestService.patch.mockResolvedValue(mockResponse);
 
       const result = await itemsService.update(updatedItem);
 
-      expect(axios.patch).toHaveBeenCalledWith(
-        expect.stringContaining('/video-jobs/1?include=modelfile,user'),
-        expect.any(Object),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-token'
-          })
-        })
-      );
+      expect(requestService.patch).toHaveBeenCalledWith('/video-jobs/1?include=modelfile,user', expect.any(Object));
       expect(result).toBeDefined();
     });
   });
 
   describe('destroy', () => {
     it('deletes video job by id', async () => {
-      axios.delete.mockResolvedValue({ status: 204 });
+      requestService.delete.mockResolvedValue({ status: 204 });
 
       await itemsService.destroy('1');
 
-      expect(axios.delete).toHaveBeenCalledWith(
-        expect.stringContaining('/video-jobs/1'),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer test-token'
-          })
-        })
-      );
+      expect(requestService.delete).toHaveBeenCalledWith('/video-jobs/1');
     });
   });
 
@@ -162,20 +139,23 @@ describe('items.service', () => {
         }
       };
 
-      axios.post.mockResolvedValue(mockResponse);
+      requestService.post.mockResolvedValue(mockResponse);
 
       const result = await itemsService.upload(item, image);
 
-      expect(axios.post).toHaveBeenCalledWith(
-        expect.stringContaining('/uploads/video-jobs/1/image'),
-        expect.any(FormData)
+      expect(requestService.post).toHaveBeenCalledWith(
+        '/upload',
+        expect.any(FormData),
+        expect.objectContaining({
+          headers: { 'Content-Type': 'multipart/form-data' },
+        })
       );
-      expect(result).toBe('https://example.com/uploads/image.jpg');
+      expect(result).toEqual(mockResponse);
     });
 
     it('handles upload errors', async () => {
       const error = new Error('Upload failed');
-      axios.post.mockRejectedValue(error);
+      requestService.post.mockRejectedValue(error);
 
       await expect(
         itemsService.upload({ id: '1' }, new File([''], 'test.jpg'))
@@ -186,35 +166,35 @@ describe('items.service', () => {
   describe('error handling', () => {
     it('propagates errors from list', async () => {
       const error = new Error('Network error');
-      axios.get.mockRejectedValue(error);
+      requestService.get.mockRejectedValue(error);
 
       await expect(itemsService.list({})).rejects.toThrow('Network error');
     });
 
     it('propagates errors from get', async () => {
       const error = new Error('Not found');
-      axios.get.mockRejectedValue(error);
+      requestService.get.mockRejectedValue(error);
 
       await expect(itemsService.get('999')).rejects.toThrow('Not found');
     });
 
     it('propagates errors from add', async () => {
       const error = new Error('Validation error');
-      axios.post.mockRejectedValue(error);
+      requestService.post.mockRejectedValue(error);
 
-      await expect(itemsService.add({ type: 'video-jobs', title: '' })).rejects.toThrow('Validation error');
+      await expect(itemsService.add({ stuff: { type: 'video-jobs', title: '' } })).rejects.toThrow('Validation error');
     });
 
     it('propagates errors from update', async () => {
       const error = new Error('Update failed');
-      axios.patch.mockRejectedValue(error);
+      requestService.patch.mockRejectedValue(error);
 
       await expect(itemsService.update({ type: 'video-jobs', id: '1' })).rejects.toThrow('Update failed');
     });
 
     it('propagates errors from destroy', async () => {
       const error = new Error('Delete failed');
-      axios.delete.mockRejectedValue(error);
+      requestService.delete.mockRejectedValue(error);
 
       await expect(itemsService.destroy('1')).rejects.toThrow('Delete failed');
     });

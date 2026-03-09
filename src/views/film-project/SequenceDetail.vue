@@ -558,4 +558,3 @@ onMounted(async () => {
   padding: 1rem;
 }
 </style>
-

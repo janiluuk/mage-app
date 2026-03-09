@@ -1,11 +1,8 @@
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
-import { useLayout } from '@/layout/composables/layout';
 import RecentJobs from '@/pages/Dashboard/RecentJobs.vue';
 import BalanceAvailable from '@/pages/Dashboard/BalanceAvailable.vue';
 import videoStatsService from '@/services/stats/VideoStatsService';
-
-const { isDarkTheme } = useLayout();
 
 const videoStats = ref({
     totalVideos: 0,

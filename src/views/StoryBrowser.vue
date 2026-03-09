@@ -67,7 +67,7 @@
                 outlined
               />
               <Button 
-                label="View" 
+                label="Open" 
                 icon="pi pi-eye" 
                 @click="viewStory(story.id)"
                 severity="info"
@@ -135,19 +135,31 @@ const loadStories = async (page = 1) => {
     isAuthError.value = false
 
     const response = await storyService.listStories({ per_page: 12, page })
-    
-    if (response.data) {
+
+    if (Array.isArray(response)) {
+      stories.value = response
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        per_page: response.length || 12,
+        total: response.length || 0
+      }
+    } else if (response && Array.isArray(response.data)) {
       stories.value = response.data
       pagination.value = {
         current_page: response.current_page || page,
         last_page: response.last_page || 1,
         per_page: response.per_page || 12,
-        total: response.total || 0
+        total: response.total ?? response.data.length ?? 0
       }
     } else {
-      // Handle paginated response format
-      stories.value = response
-      pagination.value = null
+      stories.value = []
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        per_page: 12,
+        total: 0
+      }
     }
   } catch (err) {
     console.error('Error loading stories:', err)
@@ -173,7 +185,7 @@ const editStory = (id) => {
 }
 
 const viewStory = (id) => {
-  router.push(`/stories/${id}/edit`)
+  router.push({ path: `/stories/${id}/edit`, query: { mode: 'view' } })
 }
 
 const goToNewStory = () => {
@@ -181,7 +193,7 @@ const goToNewStory = () => {
 }
 
 const goToLogin = () => {
-  router.push('/auth/login')
+  router.push('/login')
 }
 
 onMounted(() => {

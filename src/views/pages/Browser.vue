@@ -315,6 +315,19 @@
         :video-fps="selectedVideoForExtension.fps || 30"
         @video-extended="onVideoExtended"
       />
+
+      <Dialog
+        v-model:visible="showBatchPresetDialog"
+        header="Apply Preset to Selection"
+        :modal="true"
+        :style="{ width: '28rem' }"
+        :closable="true"
+      >
+        <p class="text-color-secondary">Batch preset selection will be implemented here. For now, apply presets to individual items from the editor.</p>
+        <template #footer>
+          <Button label="Close" @click="showBatchPresetDialog = false" />
+        </template>
+      </Dialog>
     </div>
   </div>
 </template>
@@ -341,9 +354,7 @@ import { useVideoCollection } from "@/browser/composables/useVideoCollection";
 import { useFullScreenModal } from "@/browser/composables/useFullScreenModal";
 import { useZoomControls } from "@/browser/composables/useZoomControls";
 import { useHotkeys } from "@/browser/composables/useHotkeys";
-import { useBrowserData } from "@/browser/composables/useBrowserData";
 import { useBrowserMetadata } from "@/browser/composables/useBrowserMetadata";
-import FileService from "@/services/file.service";
 import { SortKey } from "@/browser/utils/sorting";
 import { parseSortValue, formatSortValue } from "@/browser/utils/sortOption";
 import {
@@ -366,10 +377,6 @@ const router = useRouter();
 const store = useStore();
 const confirm = useConfirm();
 
-// Request cancellation for API calls
-const activeRequestIds = ref(new Set());
-const generateRequestId = () => `req_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
-
 const filtersButtonRef = ref(null);
 const filtersPopoverRef = ref(null);
 const contentRegionRef = ref(null);
@@ -380,6 +387,20 @@ const metadataPanelRef = ref(null);
 const isLoading = ref(false);
 const refreshInterval = ref(null);
 
+const startAutoRefresh = (ms = 10000) => {
+  stopAutoRefresh();
+  refreshInterval.value = window.setInterval(() => {
+    refreshData();
+  }, ms);
+};
+
+const stopAutoRefresh = () => {
+  if (refreshInterval.value) {
+    window.clearInterval(refreshInterval.value);
+    refreshInterval.value = null;
+  }
+};
+
 // Ensure we always get arrays from the store
 const rawJobs = computed(() => {
   const list = store.getters["videojobs/list"];
@@ -389,6 +410,7 @@ const rawFiles = computed(() => {
   const list = store.getters["files/list"];
   return Array.isArray(list) ? list : [];
 });
+const selection = useSelectionState();
 // Use browser metadata composable
 const {
   metadataOverrides,
@@ -419,14 +441,14 @@ const groupedByTags = computed(() => store.getters["files/groupedByTags"] || [])
 // Normalize files from API
 const normalizedFiles = computed(() => {
   if (!Array.isArray(rawFiles.value)) return [];
-  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
+  return rawFiles.value.map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
 });
 
 // Combine videojobs and files, or use one based on view mode
 // When viewing by tag, use files from the tag endpoint
 const tagFiles = computed(() => {
   if (selectedTagId.value && viewMode.value === 'files') {
-    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverridesWithNormalization);
+    return (store.getters["files/currentTagFiles"] || []).map(normalizeFile).filter(Boolean).map(applyMetadataOverrides);
   }
   return [];
 });
@@ -440,10 +462,8 @@ const videos = computed(() => {
   }
   // Ensure rawJobs.value is an array before mapping
   if (!Array.isArray(rawJobs.value)) return [];
-  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverridesWithNormalization);
+  return rawJobs.value.map(normalizeVideoJob).map(applyMetadataOverrides);
 });
-
-const selection = useSelectionState();
 
 const showFilenames = ref(true);
 const renderLimitStep = ref(RENDER_LIMIT_STEPS);
@@ -1031,17 +1051,6 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
-  // Cancel all active API requests
-  if (activeRequestIds.value && activeRequestIds.value.size > 0) {
-    import('@/services/request-service/ApiRequestService').then(({ default: requestService }) => {
-      activeRequestIds.value.forEach(requestId => {
-        requestService.cancelRequest(requestId);
-      });
-      activeRequestIds.value.clear();
-    });
-  }
-  
-  // Stop auto-refresh
   stopAutoRefresh();
 });
 

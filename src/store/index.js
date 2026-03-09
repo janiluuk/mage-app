@@ -12,19 +12,14 @@ import { videoeditor } from './videoeditor.module';
 import {
   alertsModule,
   authServiceModule,
-  categoriesModule,
   chatModule,
   financeOperationModule,
-  itemsModule,
   messageModule,
   notificationModule,
   orderModule,
   productModule,
-  profileModule,
-  rolesModule,
   statusServiceModule,
   supportRequestModule,
-  tagsModule,
   userModule,
   userWalletModule,
   walletTypeModule,
@@ -98,35 +93,43 @@ const uiGetters = {
 };
 
 const featureModules = {
+  // Core auth & profile
   auth,
   profile,
+  AuthService: authServiceModule,
+
+  // Resource CRUD (factory-generated modules via createCrudModule)
   roles,
   modelfiles,
   categories,
-  videojobs,
   tags,
   items,
+
+  // Video & media
+  videojobs,
   files,
   videoeditor,
-  CategoriesV2: categoriesModule,
-  TagsV2: tagsModule,
-  RolesV2: rolesModule,
+  FilmProject,
+
+  // Products, orders & finance
   Product: productModule,
-  Message: messageModule,
-  SupportRequest: supportRequestModule,
-  chat: chatModule,
-  StatusService: statusServiceModule,
+  Order: orderModule,
   FinanceOperation: financeOperationModule,
   WalletType: walletTypeModule,
   UserWallet: userWalletModule,
-  AuthService: authServiceModule,
+
+  // Users & permissions
   User: userModule,
+
+  // Communication
+  Message: messageModule,
+  SupportRequest: supportRequestModule,
+  chat: chatModule,
   notification: notificationModule,
   Alerts: alertsModule,
-  Order: orderModule,
-  ItemsV2: itemsModule,
-  ProfileV2: profileModule,
-  FilmProject,
+
+  // System
+  StatusService: statusServiceModule,
 };
 
 export default createStore({

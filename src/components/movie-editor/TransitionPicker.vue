@@ -133,4 +133,3 @@ export default {
   color: var(--primary-700);
 }
 </style>
-

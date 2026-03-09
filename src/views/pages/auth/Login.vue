@@ -13,7 +13,7 @@
                 <a class="font-medium no-underline ml-2 text-right cursor-pointer" @click="navigate"
                   style="color: var(--primary-color)">Sign up here</a></router-link></span>
           </div>
-          <Form role="form" class="text-start mt-3" @submit.prevent="login">
+          <form role="form" class="text-start mt-3" @submit.prevent="login">
             <div>
               <label for="email1" class="block text-900 text-xl font-medium mb-2">Email</label>
               <InputText id="email1" type="text" v-model="loginData.email" placeholder="Email address"
@@ -21,11 +21,11 @@
 
               <label for="password1" class="block text-900 font-medium text-xl mb-2">Password</label>
               <Password id="password1" placeholder="Password" v-model="loginData.password" :toggleMask="false"
-                class="w-full mb-3" inputClass="w-full" inputStyle="padding:1rem"></Password>
+                class="w-full mb-3" inputClass="w-full" :inputStyle="{ padding: '1rem' }"></Password>
 
               <div class="flex align-items-center justify-content-between mb-5 gap-5">
                 <div class="flex align-items-center">
-                  <Checkbox v-model="checked" id="rememberme1" binary class="mr-2"></Checkbox>
+                  <Checkbox v-model="loginData.checked" id="rememberme1" binary class="mr-2"></Checkbox>
                   <label for="rememberme1">Remember me</label>
                 </div><router-link to="/password-forgot" custom v-slot="{ navigate }">
                 <a class="font-medium no-underline ml-2 text-right cursor-pointer" @click="navigate"
@@ -56,12 +56,12 @@
               </Button>
             </div>
 
-          </Form>
+          </form>
         </div>
       </div>
     </div>
   </div>
-  <AppConfig simple />
+  <!-- AppConfig removed - not needed on login page -->
 </template>
 
 <script>
@@ -98,7 +98,8 @@ export default {
         email
       },
       password: {
-        required
+        required,
+        minLength: minLength(4)
       }
     }
   },
@@ -128,23 +129,23 @@ export default {
       return this.v.$invalid;
     },
     async login() {
+      if (this.validationLoginForm()) {
+        // Form is invalid — don't proceed
+        return;
+      }
+
       this.loading = true;
-      if (!this.validationLoginForm()) {
-        try {
+      try {
+        const isSignInSuccessful = await this.signIn(this.loginData);
 
-          const isSignInSuccessful = await this.signIn(this.loginData);
-          this.setErrorNotification("welcome notification");
-
-          if (isSignInSuccessful !== false) {
-            await this.fetchLoggedUser();
-            this.$router.replace(this.$route.query.redirect || '/library/');
-          }
-          this.loading = false;
-          
-        } catch (error) {
-          this.setErrorNotification(error.message);
+        if (isSignInSuccessful !== false) {
+          await this.fetchLoggedUser();
+          this.$router.replace(this.$route.query.redirect || '/library');
         }
-        return false;
+      } catch (error) {
+        this.setErrorNotification(error.message || 'Login failed');
+      } finally {
+        this.loading = false;
       }
     },
     async socialite(provider) {

@@ -1,13 +1,40 @@
 <script setup>
-import { computed, watch, ref } from 'vue';
+import { computed, watch, ref, onMounted } from 'vue';
 import AppTopbar from './AppTopbar.vue';
 import AppFooter from './AppFooter.vue';
 import AppSidebar from './AppSidebar.vue';
 import AppConfig from './AppConfig.vue';
+import ApiUnavailable from '@/views/pages/ApiUnavailable.vue';
 import { useLayout } from '@/layout/composables/layout';
 import NotificationsComponent from '@/components/notification/NotificationsComponent.vue';
+import { API_BASE_URL } from '@/utils/api-base-urls';
 
 const { layoutConfig, layoutState, isSidebarActive } = useLayout();
+
+// API health check — null = checking, true = reachable, false = unreachable
+const apiStatus = ref(null);
+
+const checkApi = async () => {
+    apiStatus.value = null;
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 5000);
+    try {
+        // Raw fetch to avoid apiClient interceptors (which remove tokens on 401 etc.)
+        const response = await fetch(API_BASE_URL || '/api/v1', {
+            method: 'HEAD',
+            signal: controller.signal,
+        });
+        // Mark API healthy only for successful HTTP responses.
+        apiStatus.value = response.ok;
+    } catch (err) {
+        // AbortError (timeout) or TypeError (network failure) = API unreachable
+        apiStatus.value = false;
+    } finally {
+        clearTimeout(timeout);
+    }
+};
+
+onMounted(checkApi);
 
 const outsideClickListener = ref(null);
 const visibleFull = ref(false);
@@ -47,7 +74,7 @@ const bindOutsideClickListener = () => {
 };
 const unbindOutsideClickListener = () => {
     if (outsideClickListener.value) {
-        document.removeEventListener('click', outsideClickListener);
+        document.removeEventListener('click', outsideClickListener.value);
         outsideClickListener.value = null;
     }
 };
@@ -60,7 +87,11 @@ const isOutsideClicked = (event) => {
 </script>
 
 <template>
-    <div class="layout-wrapper" :class="containerClass">
+    <!-- API unreachable — show full-screen unavailable page -->
+    <ApiUnavailable v-if="apiStatus === false" @retry="checkApi" />
+
+    <!-- API reachable — normal layout -->
+    <div v-else-if="apiStatus === true" class="layout-wrapper" :class="containerClass">
 
         <app-topbar></app-topbar>
         
@@ -71,13 +102,17 @@ const isOutsideClicked = (event) => {
             <NotificationsComponent></NotificationsComponent>
 
             <div class="layout-main">
-
                 <router-view></router-view>
             </div>
             <app-footer></app-footer>
         </div>
         <div class="layout-mask"></div>
 
+    </div>
+
+    <!-- Checking API — brief loading state -->
+    <div v-else class="surface-ground flex align-items-center justify-content-center min-h-screen">
+        <i class="pi pi-spin pi-spinner text-4xl text-500"></i>
     </div>
 </template>
 

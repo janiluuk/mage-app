@@ -69,7 +69,8 @@ const error = ref('')
 const autoRefresh = ref(true)
 let intervalId
 
-const queueWarning = computed(() => status.value.queued > 3 || queue.value.processing.length > 0)
+// Backlog = too many queued items; processing is normal operation
+const queueWarning = computed(() => status.value.queued > 3)
 
 const formatTime = (time) => {
   if (!time) return 'unknown time'
@@ -105,8 +106,10 @@ function schedule() {
 }
 
 onMounted(() => {
-  refresh()
-  schedule()
+  if (MageApiService.isConfigured()) {
+    refresh()
+    schedule()
+  }
 })
 
 onBeforeUnmount(() => {
