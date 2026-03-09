@@ -1,6 +1,10 @@
 import createJsonApiService from './createJsonApiService';
 
-export default createJsonApiService('/users', {
+const createService = typeof createJsonApiService === 'function'
+  ? createJsonApiService
+  : createJsonApiService?.default;
+
+export default createService('/users', {
   getInclude: 'roles',
   addInclude: 'roles',
   hasUpload: true,

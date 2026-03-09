@@ -1,7 +1,11 @@
 import createJsonApiService from './createJsonApiService';
 import { API_V1_BASE_URL } from '@/utils/api-base-urls';
 
-export default createJsonApiService('/items', {
+const createService = typeof createJsonApiService === 'function'
+  ? createJsonApiService
+  : createJsonApiService?.default;
+
+export default createService('/items', {
   baseUrl: API_V1_BASE_URL,
   getInclude: 'category,tags',
   addInclude: 'category,tags',

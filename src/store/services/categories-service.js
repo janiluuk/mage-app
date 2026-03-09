@@ -1,3 +1,7 @@
 import createJsonApiService from './createJsonApiService';
 
-export default createJsonApiService('/categories');
+const createService = typeof createJsonApiService === 'function'
+  ? createJsonApiService
+  : createJsonApiService?.default;
+
+export default createService('/categories');

@@ -37,6 +37,14 @@ export default {
   [actions.SIGN_IN]: async ({ commit, dispatch }, loginData) => {
     try {
       const data = await AuthService.signIn(loginData);
+      const loggedUser = data?.user || data;
+
+      // Persist authenticated user in Vuex when present.
+      // Some responses may only include token metadata.
+      if (loggedUser && loggedUser.id) {
+        commit(mutations.SET_LOGGED_USER, loggedUser);
+      }
+
       return data;
     } catch (error) {
       dispatch(

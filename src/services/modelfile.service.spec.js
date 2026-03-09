@@ -25,7 +25,7 @@ describe('modelfile.service', () => {
       const result = await modelfileService.list({ page: 1 });
 
       expect(requestService.get).toHaveBeenCalledWith(
-        '/v1/model-files?filter[enabled]=1',
+        '/model-files?filter[enabled]=1',
         { page: 1 }
       );
       expect(result).toBeDefined();

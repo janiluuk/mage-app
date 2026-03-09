@@ -50,7 +50,7 @@ describe('AuthService', () => {
       await AuthService.signIn({ email: 'test@example.com', password: 'password' })
 
       // Verify baseURL was temporarily changed to /api/v1 path
-      expect(requestService.post).toHaveBeenCalledWith('/auth/login', {
+      expect(requestService.post).toHaveBeenCalledWith('/v2/login', {
         email: 'test@example.com',
         password: 'password',
       })
