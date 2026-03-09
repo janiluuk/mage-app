@@ -76,7 +76,9 @@ async function listFiles(prefix = '') {
 
   if (config.mode === 'api') {
     try {
-      const response = await requestService.get('/v1/cloud/files', { prefix });
+      const response = await requestService.get('/v1/cloud/files', {
+        params: { prefix }
+      });
       return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
       console.warn('Cloud storage API unavailable, falling back to local index.', error);

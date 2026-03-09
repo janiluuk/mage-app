@@ -13,7 +13,7 @@ class StoryService {
    */
   async listStories(params = {}) {
     try {
-      const response = await this.request.get('/story', params)
+      const response = await this.request.get('/story', { params })
       return response.data
     } catch (error) {
       const normalized = normalizeError(error, 'StoryService.listStories');
