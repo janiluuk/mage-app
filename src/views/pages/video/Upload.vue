@@ -8,9 +8,9 @@
       <div class="banner-item" v-on:drop="uploadHandler($event, 'deforum')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="image/*" multiple @change="uploadHandler($event, 'deforum')">
         <div class="banner-media-container">
-          <img src="/public/img/mona.gif" class="banner-media-main"/>
+          <img src="/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="/public/img/mona2.gif" />
+            <img src="/img/mona2.gif" />
           </div>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
@@ -32,9 +32,9 @@
       <div class="banner-item" v-on:drop="uploadHandler($event, 'vid2vid')" v-on:dragover.prevent>
         <input class="file-input" type="file" accept="video/*" multiple @change="uploadHandler($event, 'vid2vid')">
         <div class="banner-media-container">
-          <img src="/public/img/mona.jpg" class="banner-media-main"/>
+          <img src="/img/mona.jpg" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="/public/img/mona.jpg" />
+            <img src="/img/mona.jpg" />
           </div>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
@@ -53,9 +53,9 @@
       </div>
       <div class="banner-item" @click="showAudioJobDialog = true">
         <div class="banner-media-container">
-          <img src="/public/img/mona.gif" class="banner-media-main"/>
+          <img src="/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="/public/img/mona2.gif" />
+            <img src="/img/mona2.gif" />
           </div>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
@@ -191,8 +191,6 @@ export default {
     }),
     cancel() {
       this.isLoading = false;
-      this.videoShow = false;
-      this.videoFile = false;
       this.status = '';
       this.errorMessage = false;
     },
@@ -241,13 +239,20 @@ export default {
 
       // Multiple files — batch upload
       const validated = [];
+      const rejected = [];
       for (const file of files) {
         const validation = this.validateFile(file, type);
         if (validation.valid) {
           validated.push(file);
         } else {
-          this.setErrorNotification(`${file.name}: ${validation.error}`);
+          rejected.push(`${file.name}: ${validation.error}`);
         }
+      }
+
+      if (rejected.length) {
+        const preview = rejected.slice(0, 2).join(' | ');
+        const suffix = rejected.length > 2 ? ` (+${rejected.length - 2} more)` : '';
+        this.setErrorNotification(`Some files were rejected: ${preview}${suffix}`);
       }
 
       if (validated.length === 0) return;

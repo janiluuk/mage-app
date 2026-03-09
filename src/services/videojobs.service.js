@@ -2,14 +2,10 @@ import axios from "axios";
 import Jsona from "jsona";
 import qs from "qs";
 import requestService from "@/services/request-service/ApiRequestService";
-import authHeader from "@/services/auth-header";
-import { API_V1_BASE_URL } from "@/utils/api-base-urls";
-import env from "@/utils/env";
 import { normalizeError, getUserFriendlyMessage } from "@/utils/errorHandler";
 import apiCache from "@/utils/apiCache";
 
 const jsona = new Jsona();
-const url = API_V1_BASE_URL;
 const includeParams = "modelfile,user";
 
 export default {
@@ -27,18 +23,15 @@ export default {
       return pending;
     }
 
-    const options = {
-      params: params,
-      paramsSerializer: function (params) {
-        return qs.stringify(params, { encode: false });
-      },
-    };
-    
     const requestPromise = requestService.get(
       "/video-jobs",
-      options,
-      {},
-      true
+      params,
+      {
+        paramsSerializer: function (p) {
+          return qs.stringify(p, { encode: false });
+        },
+      },
+      'list-video-jobs'
     ).then(response => {
       const meta = response.data.meta === undefined 
         ? { page: { total: 1 } } 
@@ -96,15 +89,11 @@ export default {
       ...item,
     });
 
-    const options = {
-      headers: authHeader(),
-    };
-
-    return axios
-      .post(`${url}/video-jobs?filter[generator]=vid2vid&include=modelfile,user`, payload, options)
-      .then((response) => {
-        return jsona.deserialize(response.data);
-      });
+    const response = await requestService.post(
+      '/video-jobs?filter[generator]=vid2vid&include=modelfile,user',
+      payload
+    );
+    return jsona.deserialize(response.data);
   },
   async downloadJob(url, title) {
     try {
@@ -133,19 +122,11 @@ export default {
       includeNames: [],
     });
 
-    const options = {
-      headers: authHeader(),
-    };
-
-    return axios
-      .patch(
-        `${url}/video-jobs/${item.id}?include=modelfile,user`,
-        payload,
-        options
-      )
-      .then((response) => {
-        return jsona.deserialize(response.data);
-      });
+    const response = await requestService.patch(
+      `/video-jobs/${item.id}?include=modelfile,user`,
+      payload
+    );
+    return jsona.deserialize(response.data);
   },
 
   async destroy(id) {
@@ -177,19 +158,13 @@ export default {
   },
 
   async getModels() {
-    const options = {
-      headers: authHeader(),
-    };
-    return axios.get(`${url}/model-files`, options).then((response) => {
-      return jsona.deserialize(response.data);
-    });
+    const response = await requestService.get('/model-files');
+    return jsona.deserialize(response.data);
   },
 
   async _callFinalizeEndpoint(params) {
-    const API_URL = env.VITE_API_URL || '';
-    const response = await requestService.post(`${API_URL}/api/finalize`, params, {
+    const response = await requestService.post('/finalize', params, {
       headers: {
-        ...authHeader(),
         'Content-Type': 'application/json',
       },
     });
@@ -258,9 +233,7 @@ export default {
       includeNames: []
     });
     
-    return await requestService.post('/video-jobs/extend', payload, {
-      headers: authHeader()
-    });
+    return await requestService.post('/video-jobs/extend', payload);
   },
 
 };

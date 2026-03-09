@@ -27,26 +27,13 @@
           </div>
         </div>
 
-        <!-- Loading State -->
+        <!-- Loading State (only on very first load before any data exists) -->
         <div v-if="loading && !statusData" class="text-center py-5">
           <ProgressSpinner />
           <p class="mt-3">Loading instance data...</p>
         </div>
 
-        <!-- Error State (only if no data at all) -->
-        <div v-else-if="error && !statusData" class="text-center py-5">
-          <Message severity="error" :closable="false">
-            {{ error }}
-          </Message>
-          <Button 
-            label="Retry" 
-            icon="pi pi-refresh" 
-            @click="refreshData"
-            class="mt-3"
-          />
-        </div>
-
-        <!-- Content -->
+        <!-- Content (always shown once data exists — real or demo) -->
         <div v-else>
           <Message v-if="error && statusData" severity="error" :closable="true" class="mb-4" @close="error = null">
             <i class="pi pi-exclamation-triangle mr-2"></i>
@@ -374,17 +361,12 @@ export default {
         console.error('Error fetching instance status:', err);
 
         if (!statusData.value) {
-          // First load failed — fall back to demo data so the page is usable
-          try {
-            statusData.value = getDemoData();
-            usingDemoData.value = true;
-            lastUpdated.value = new Date().toLocaleTimeString();
-          } catch {
-            error.value = err.message || 'Failed to load instance data';
-          }
+          // First load failed — fall back to demo data so the page is always usable
+          statusData.value = getDemoData();
+          usingDemoData.value = true;
+          lastUpdated.value = new Date().toLocaleTimeString();
         } else {
-          // Subsequent refresh failed — keep existing data (real or demo),
-          // but surface the error so the user knows refreshes aren't working.
+          // Subsequent refresh failed — keep existing data, surface a dismissible warning
           error.value = err.message || 'Failed to refresh instance data';
         }
       } finally {

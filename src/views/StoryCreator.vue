@@ -516,7 +516,27 @@ function handleFrameListChange(newFrameList) {
 }
 
 function handleAddFrameBetween(index) {
-  // Implementation from Deforum.vue
+  const frames = deforumConfig.value.frames
+  if (!Array.isArray(frames)) return
+  const stepIncrement = userConfig.value.stepIncrement ?? 1
+  const prevFrame = frames[index - 1]
+  const nextFrame = frames[index]
+  const newFrame = {
+    id: prevFrame ? prevFrame.id + stepIncrement : (nextFrame?.id ?? 0) - stepIncrement,
+    prompt: prevFrame?.prompt ?? nextFrame?.prompt ?? '',
+    angle: prevFrame?.angle ?? nextFrame?.angle ?? '0',
+    zoom: prevFrame?.zoom ?? nextFrame?.zoom ?? '1',
+    translation_x: prevFrame?.translation_x ?? nextFrame?.translation_x ?? '0',
+    translation_y: prevFrame?.translation_y ?? nextFrame?.translation_y ?? '0',
+    translation_z: prevFrame?.translation_z ?? nextFrame?.translation_z ?? '0',
+    rotation_3d_x: prevFrame?.rotation_3d_x ?? nextFrame?.rotation_3d_x ?? '0',
+    rotation_3d_y: prevFrame?.rotation_3d_y ?? nextFrame?.rotation_3d_y ?? '0',
+    rotation_3d_z: prevFrame?.rotation_3d_z ?? nextFrame?.rotation_3d_z ?? '0',
+    noise_schedule: prevFrame?.noise_schedule ?? nextFrame?.noise_schedule ?? '0.02',
+    strength_schedule: prevFrame?.strength_schedule ?? nextFrame?.strength_schedule ?? '0.65',
+    contrast_schedule: prevFrame?.contrast_schedule ?? nextFrame?.contrast_schedule ?? '1'
+  }
+  frames.splice(index, 0, newFrame)
   showSaveNotification()
 }
 
@@ -660,29 +680,40 @@ function exportDeforumSettings() {
   })
 }
 
-function copyToClipboard() {
-  const exportData = {
-    story: currentStory.value,
-    config: deforumConfig.value
+async function copyToClipboard() {
+  const text = JSON.stringify(
+    { story: currentStory.value, config: deforumConfig.value },
+    null,
+    2
+  )
+  try {
+    if (navigator?.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const el = document.createElement('textarea')
+      el.value = text
+      el.setAttribute('readonly', '')
+      el.style.position = 'absolute'
+      el.style.left = '-9999px'
+      document.body.appendChild(el)
+      el.select()
+      document.execCommand('copy')
+      document.body.removeChild(el)
+    }
+    toast.add({
+      severity: 'success',
+      summary: 'Copied',
+      detail: 'Configuration copied to clipboard',
+      life: 3000
+    })
+  } catch {
+    toast.add({
+      severity: 'error',
+      summary: 'Error',
+      detail: 'Failed to copy to clipboard',
+      life: 3000
+    })
   }
-  
-  navigator.clipboard.writeText(JSON.stringify(exportData, null, 2))
-    .then(() => {
-      toast.add({
-        severity: 'success',
-        summary: 'Copied',
-        detail: 'Configuration copied to clipboard',
-        life: 3000
-      })
-    })
-    .catch(() => {
-      toast.add({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to copy to clipboard',
-        life: 3000
-      })
-    })
 }
 
 function exportStoryPackage() {

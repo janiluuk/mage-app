@@ -62,6 +62,9 @@ function onGenerated(event) {
 }
 
 async function refreshQueue() {
+  // Skip polling entirely if the helper API URL isn't configured
+  if (!MageApiService.isConfigured()) return
+
   try {
     const [latestStatus, queue] = await Promise.all([
       MageApiService.getStatus(),
@@ -71,17 +74,18 @@ async function refreshQueue() {
     queueItems.value = queue.queued || []
   } catch {
     // API not available — silently ignore
-    // Don't clear existing data and don't show error
   }
 }
 
 onMounted(() => {
-  refreshQueue()
-  intervalId = window.setInterval(refreshQueue, 5000)
+  if (MageApiService.isConfigured()) {
+    refreshQueue()
+    intervalId = window.setInterval(refreshQueue, 5000)
+  }
 })
 
 onBeforeUnmount(() => {
-  window.clearInterval(intervalId)
+  if (intervalId) window.clearInterval(intervalId)
 })
 </script>
 

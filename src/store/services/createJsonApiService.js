@@ -2,6 +2,7 @@ import qs from 'qs';
 import axios from 'axios';
 import Jsona from 'jsona';
 import { API_BASE_URL, API_V1_BASE_URL } from '@/utils/api-base-urls';
+import AuthService from '@/services/auth/AuthService';
 
 const jsona = new Jsona();
 
@@ -9,6 +10,15 @@ const JSON_API_HEADERS = {
   Accept: 'application/vnd.api+json',
   'Content-Type': 'application/vnd.api+json',
 };
+
+function getHeaders(extra = {}) {
+  const headers = { ...JSON_API_HEADERS, ...extra };
+  const token = AuthService.getToken();
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  return headers;
+}
 
 /**
  * Factory that creates a standard JSON:API CRUD service for a given resource.
@@ -36,7 +46,7 @@ export default function createJsonApiService(resourcePath, options = {}) {
       .get(`${baseUrl}${resourcePath}`, {
         params,
         paramsSerializer: (p) => qs.stringify(p, { encode: false }),
-        headers: JSON_API_HEADERS,
+        headers: getHeaders(),
       })
       .then((response) => ({
         list: jsona.deserialize(response.data),
@@ -48,7 +58,7 @@ export default function createJsonApiService(resourcePath, options = {}) {
     const include = options.getInclude ? `?include=${options.getInclude}` : '';
     return axios
       .get(`${baseUrl}${resourcePath}/${id}${include}`, {
-        headers: JSON_API_HEADERS,
+        headers: getHeaders(),
       })
       .then((response) => {
         const resource = jsona.deserialize(response.data);
@@ -66,7 +76,7 @@ export default function createJsonApiService(resourcePath, options = {}) {
     const include = options.addInclude ? `?include=${options.addInclude}` : '';
     return axios
       .post(`${baseUrl}${resourcePath}${include}`, payload, {
-        headers: JSON_API_HEADERS,
+        headers: getHeaders(),
       })
       .then((response) => jsona.deserialize(response.data));
   }
@@ -84,14 +94,14 @@ export default function createJsonApiService(resourcePath, options = {}) {
       .patch(
         `${baseUrl}${resourcePath}/${resource.id}${include}`,
         payload,
-        { headers: JSON_API_HEADERS }
+        { headers: getHeaders() }
       )
       .then((response) => jsona.deserialize(response.data));
   }
 
   function destroy(id) {
     return axios.delete(`${baseUrl}${resourcePath}/${id}`, {
-      headers: JSON_API_HEADERS,
+      headers: getHeaders(),
     });
   }
 
@@ -103,8 +113,10 @@ export default function createJsonApiService(resourcePath, options = {}) {
       const bodyFormData = new FormData();
       bodyFormData.append('attachment', image);
       const path = options.uploadPath.replace(':id', resource.id);
+      const uploadHeaders = getHeaders();
+      delete uploadHeaders['Content-Type'];
       return axios
-        .post(`${baseUrl}${path}`, bodyFormData)
+        .post(`${baseUrl}${path}`, bodyFormData, { headers: uploadHeaders })
         .then((response) => response.data.url);
     };
   }

@@ -1,55 +1,81 @@
 <script setup>
 import { ref, onMounted } from 'vue';
-import { useToast } from 'primevue/usetoast';
 import { fetchStableUrl } from '@/utils/domains';
 
-const toast = useToast();
 const stableUrl = ref('');
 const isLoading = ref(true);
-
-const onUpload = () => {
-    toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-};
+const hasError = ref(false);
 
 onMounted(async () => {
-    stableUrl.value = await fetchStableUrl();
-    isLoading.value = false;
+    try {
+        const url = await fetchStableUrl();
+        if (url) {
+            stableUrl.value = url;
+        } else {
+            hasError.value = true;
+        }
+    } catch {
+        hasError.value = true;
+    } finally {
+        isLoading.value = false;
+    }
 });
 </script>
 
 <template>
     <div class="grid">
-
         <div class="col-12">
-
-            <div class="card">
-                <div v-if="isLoading" style="display: flex; justify-content: center; align-items: center; height: 100vh;">
+            <div class="card studio-card">
+                <!-- Loading -->
+                <div v-if="isLoading" class="studio-placeholder">
                     <ProgressSpinner />
+                    <p class="mt-3 text-500">Connecting to Stable Diffusion...</p>
                 </div>
-                <iframe
-                v-else
-                style="margin-top:90px;"
-              width="100%"
-              height="100%"
-              :src="stableUrl"
-              frameBorder='0'
-              tabIndex='-1'
-              />
 
-              <div style="position:absolute; bottom:5px;left:1080px; margin-bottom:10px;">
-              <FileUpload name="demo[]" @uploader="onUpload" :multiple="true" accept="image/*" :maxFileSize="1000000" customUpload />
-            </div>
+                <!-- No URL configured / unreachable -->
+                <div v-else-if="hasError || !stableUrl" class="studio-placeholder">
+                    <i class="pi pi-desktop text-5xl text-500 mb-3" style="opacity: 0.4;" />
+                    <h3 class="m-0 font-bold">Stable Diffusion UI not available</h3>
+                    <p class="text-500 mt-2 mb-0 text-center" style="max-width: 420px;">
+                        The external Stable Diffusion interface is not configured or cannot be reached.
+                        Set <code>VITE_STABLE_URL</code> in your environment to connect.
+                    </p>
+                </div>
+
+                <!-- Iframe -->
+                <iframe
+                    v-else
+                    class="studio-iframe"
+                    :src="stableUrl"
+                    frameborder="0"
+                    tabindex="-1"
+                    allow="clipboard-write"
+                />
             </div>
         </div>
-        <Toast />
     </div>
 </template>
-<style>
-iframe {
+
+<style scoped>
+.studio-card {
+    position: relative;
+    min-height: 80vh;
+}
+
+.studio-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+}
+
+.studio-iframe {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-  }
+    border: none;
+}
 </style>

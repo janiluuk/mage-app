@@ -1,157 +1,179 @@
 <script setup>
+import { ref, computed, onMounted } from 'vue';
+import { useStore } from 'vuex';
 import { useToast } from 'primevue/usetoast';
 
+const store = useStore();
 const toast = useToast();
 
-const onUpload = () => {
-  toast.add({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-};
+const loading = ref(true);
+const saving = ref(false);
+const file = ref(null);
+const previewUrl = ref(null);
+
+const user = ref({
+  name: '',
+  email: '',
+  profile_image: null,
+});
+
+const profileImage = computed(() => {
+  if (previewUrl.value) return previewUrl.value;
+  if (user.value.profile_image) return user.value.profile_image;
+  return null;
+});
+
+const initials = computed(() => {
+  const name = user.value.name || '';
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2) || '?';
+});
+
+onMounted(async () => {
+  loading.value = true;
+  try {
+    await store.dispatch('profile/getProfile');
+    const profile = store.getters['profile/getUserProfile'];
+    if (profile) {
+      user.value = {
+        id: profile.id,
+        name: profile.name || '',
+        email: profile.email || '',
+        profile_image: profile.profile_image || null,
+      };
+    }
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Could not load profile', life: 4000 });
+  } finally {
+    loading.value = false;
+  }
+});
+
+function onFileSelect(event) {
+  const selected = event.files?.[0] || event.target?.files?.[0];
+  if (selected) {
+    file.value = selected;
+    previewUrl.value = URL.createObjectURL(selected);
+  }
+}
+
+function removeImage() {
+  if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+  file.value = null;
+  previewUrl.value = null;
+}
+
+async function handleSubmit() {
+  saving.value = true;
+  try {
+    if (file.value) {
+      await store.dispatch('profile/uploadPic', file.value);
+      user.value.profile_image = store.getters['profile/getUserProfileImage'];
+      file.value = null;
+      if (previewUrl.value) URL.revokeObjectURL(previewUrl.value);
+      previewUrl.value = null;
+    }
+
+    await store.dispatch('profile/editProfile', user.value);
+    const updated = store.getters['profile/getUserProfile'];
+    if (updated) {
+      user.value = {
+        id: updated.id,
+        name: updated.name || '',
+        email: updated.email || '',
+        profile_image: updated.profile_image || null,
+      };
+    }
+    toast.add({ severity: 'success', summary: 'Saved', detail: 'Profile updated', life: 3000 });
+  } catch (error) {
+    toast.add({ severity: 'error', summary: 'Error', detail: 'Failed to update profile', life: 4000 });
+  } finally {
+    saving.value = false;
+  }
+}
 </script>
 
 <template>
-  <div class="grid">
-    <div class="col-12">
-      <div class="card">
-        <div class="row mt-4 overflow-hidden">
-          <div>
-            <material-avatar :img="getImage" shadow="regular" class="img-fluid w-20 mt-7" :fixedSize="true">
-            </material-avatar>
-          </div>
-          <div class="mt-1  mb-2" v-show="!file">
+  <div v-if="loading" class="flex justify-content-center p-5">
+    <ProgressSpinner />
+  </div>
 
-
-            <FileUpload mode="basic" :auto="true" name="imageInput[]" accept="image/*" :maxFileSize="1000000"
-               @uploader="onFileChange" customUpload />
-          </div>
-
-          <div v-show="file">
-            <Button label="Remove" class="p-button-text mr-2 mb-2" @click.prevent="onFileRemove" />
-            <material-button size="sm" type="button">
-              <label for="imageInput" class="mb-0 text-white small cursor-pointer">Change</label>
-              <input id="imageInput" type="file" style="display: none;" accept="image/*" @change.prevent="onFileChange">
-            </material-button>
-          </div>
-
+  <div v-else class="profile-info">
+    <!-- Avatar / Image -->
+    <div class="flex flex-column align-items-center mb-4">
+      <div class="profile-avatar-wrapper mb-3">
+        <img v-if="profileImage" :src="profileImage" alt="Profile" class="profile-avatar" />
+        <div v-else class="profile-avatar profile-avatar--placeholder">
+          {{ initials }}
         </div>
+      </div>
 
+      <div class="flex gap-2">
+        <label class="p-button p-button-outlined p-button-sm cursor-pointer">
+          <i class="pi pi-upload mr-2"></i>
+          {{ file ? 'Change Photo' : 'Upload Photo' }}
+          <input type="file" accept="image/*" style="display: none" @change="onFileSelect" />
+        </label>
+        <Button
+          v-if="file || profileImage"
+          icon="pi pi-times"
+          class="p-button-text p-button-sm p-button-danger"
+          label="Remove"
+          @click="removeImage"
+        />
+      </div>
+    </div>
 
-        <div class="row mt-5">
+    <!-- Fields -->
+    <div class="flex flex-column gap-4">
+      <div class="field">
+        <label for="profile-name" class="font-semibold block mb-2">Name</label>
+        <InputText id="profile-name" v-model="user.name" class="w-full" />
+      </div>
 
-          <material-input id="name" label="Name" variant="static" v-model:value="user.name" name="name" />
-          <validation-error :errors="apiValidationErrors.name" />
+      <div class="field">
+        <label for="profile-email" class="font-semibold block mb-2">Email</label>
+        <InputText id="profile-email" v-model="user.email" type="email" class="w-full" />
+      </div>
 
-        </div>
-
-        <div class="row mt-5">
-          <material-input id="email" type="email" label="Email Address" variant="static" v-model:value="user.email"
-            name="email" />
-
-          <validation-error :errors="apiValidationErrors.email" />
-        </div>
-
-        <div class="button-row d-flex mt-4">
-          <material-button type="button" color="dark" variant="gradient" class="ms-auto mb-0 js-btn-next"
-            @click="handleSubmit">Submit Changes</material-button>
-        </div>
+      <div class="flex justify-content-end">
+        <Button
+          label="Save Changes"
+          icon="pi pi-check"
+          :loading="saving"
+          @click="handleSubmit"
+        />
       </div>
     </div>
   </div>
 </template>
-  
-<script>
-import MaterialInput from "@/components/material/MaterialInput.vue";
-import MaterialButton from "@/components/material/MaterialButton.vue";
-import MaterialAvatar from "@/components/material/MaterialAvatar.vue";
-import ValidationError from "@/components/ValidationError.vue";
-import formMixin from "@/mixins/formMixin.js";
-import showSwal from "@/mixins/showSwal.js";
-import _ from "lodash"
-import env from "@/utils/env";
 
-export default {
-  name: "Info",
-  components: {
-    MaterialInput,
-    MaterialButton,
-    MaterialAvatar,
-    ValidationError,
-  },
-  data() {
-    return {
-      user: {},
-      file: null,
-      imgSource: '/assets/img/placeholder.jpg',
-      loading: null,
-    }
-  },
-  mixins: [formMixin],
-  computed: {
-    getImage() {
-      if (!this.user.profile_image || this.loading) return "/assets/img/placeholder.jpg";
-      else { return this.user.profile_image }
-    }
-  },
-  async mounted() {
-    this.loading = true
-    try {
-      await this.$store.dispatch("profile/getProfile")
-      this.user = _.omit(this.$store.getters['profile/getUserProfile'], 'links');
-    } catch (error) {
-      showSwal.methods.showSwal({
-        type: "error",
-        message: "Oops, something went wrong!",
-        width: 500
-      });
-    } finally {
-      this.loading = false
-      this.initialImageUrl = this.getImage;
-    }
-    this.loading = false
-  },
-  methods: {
-    onFileChange(event) {
-      this.file = event.files[0];
-      this.user.profile_image = URL.createObjectURL(this.file);
-    },
-    onFileRemove() {
-      this.file = null
-      this.user.profile_image = this.initialImageUrl;
-    },
-    async handleSubmit() {
-      if (this.user.id <= 3 && (env.VITE_IS_DEMO ?? 1) == 1) {
-        showSwal.methods.showSwal({
-          type: "error",
-          message: "You are not allowed to change data of default users.",
-          width: 500
-        });
-      } else {
-        this.resetApiValidation();
+<style scoped>
+.profile-info {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1rem 0;
+}
 
-        try {
-          if (this.file !== null) {
-            await this.$store.dispatch("profile/uploadPic", this.file)
-            this.user.profile_image = this.$store.getters['profile/getUserProfileImage']
-            this.file = null
-          }
+.profile-avatar-wrapper {
+  width: 120px;
+  height: 120px;
+}
 
-          await this.$store.dispatch('profile/editProfile', this.user)
-          this.user = _.omit(this.$store.getters['profile/getUserProfile'], 'links');
-          showSwal.methods.showSwal({
-            type: "success",
-            message: "Profile updated successfully!",
-            width: 500
-          });
-        } catch (error) {
-          this.setApiValidation(error.response.data.errors);
-          showSwal.methods.showSwal({
-            type: "error",
-            message: "Oops, something went wrong!",
-            width: 500
-          });
-        }
-      }
-    }
-  },
-};
-</script>
-  
+.profile-avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--surface-border);
+}
+
+.profile-avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-color);
+  color: var(--primary-color-text);
+  font-size: 2.5rem;
+  font-weight: 700;
+}
+</style>

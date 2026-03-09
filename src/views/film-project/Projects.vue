@@ -1,6 +1,7 @@
 <template>
   <div class="projects-page">
     <div class="card">
+      <!-- Header (only when projects exist) -->
       <div v-if="hasProjects" class="flex justify-content-between align-items-center mb-4">
         <div>
           <h2 class="text-3xl font-bold m-0">Film Projects</h2>
@@ -14,102 +15,69 @@
         />
       </div>
 
+      <!-- Loading State -->
+      <div v-if="isLoading && !hasProjects" class="empty-state">
+        <i class="pi pi-spin pi-spinner empty-state-icon" style="opacity: 0.6;" />
+        <p class="empty-state-subtitle">Loading projects...</p>
+      </div>
+
       <!-- Empty state -->
-      <div v-if="!isLoading && (!projects || projects.length === 0)" class="empty-state">
+      <div v-else-if="!hasProjects" class="empty-state">
         <i class="pi pi-video empty-state-icon" />
-        <h3 class="empty-state-title">No projects</h3>
+        <h3 class="empty-state-title">No projects added yet</h3>
         <p class="empty-state-subtitle">Create your first film project to get started</p>
         <Button 
-          label="New Project" 
+          label="Create New" 
           icon="pi pi-plus" 
           @click="showCreateDialog"
           class="p-button-primary mt-3"
         />
       </div>
 
-      <!-- Data table (only when projects exist) -->
-      <DataTable 
-        v-else
-        :value="projects" 
-        :loading="isLoading"
-        :paginator="true"
-        :rows="10"
-        :rowsPerPageOptions="[10, 25, 50]"
-        responsiveLayout="scroll"
-        :globalFilterFields="['name', 'description', 'status']"
-        v-model:filters="filters"
-        filterDisplay="row"
-        :emptyMessage="'No projects found'"
-      >
-        <template #header>
-          <div class="flex justify-content-between align-items-center">
-            <span class="p-input-icon-left">
-              <i class="pi pi-search" />
-              <InputText v-model="filters['global'].value" placeholder="Search projects..." />
-            </span>
-          </div>
-        </template>
-
-        <Column field="name" header="Name" :sortable="true" style="min-width: 200px">
-          <template #body="{ data }">
-            <div class="flex align-items-center gap-2">
-              <img 
-                v-if="data.thumbnail" 
-                :src="data.thumbnail" 
-                :alt="data.name"
-                class="project-thumbnail"
-              />
-              <span class="font-semibold">{{ data.name }}</span>
-            </div>
-          </template>
-        </Column>
-
-        <Column field="description" header="Description" :sortable="true" style="min-width: 300px">
-          <template #body="{ data }">
-            <span class="text-500">{{ data.description || 'No description' }}</span>
-          </template>
-        </Column>
-
-        <Column field="status" header="Status" :sortable="true" style="min-width: 120px">
-          <template #body="{ data }">
-            <Tag 
-              :value="data.status || 'draft'" 
-              :severity="getStatusSeverity(data.status)"
+      <!-- Project list (simple cards, no DataTable/pagination) -->
+      <div v-else class="project-list">
+        <div 
+          v-for="project in projects" 
+          :key="project.id" 
+          class="project-card surface-card shadow-1 border-round p-3 mb-3 flex align-items-center justify-content-between cursor-pointer"
+          @click="viewProject(project.id)"
+        >
+          <div class="flex align-items-center gap-3">
+            <img 
+              v-if="project.thumbnail" 
+              :src="project.thumbnail" 
+              :alt="project.name"
+              class="project-thumbnail"
             />
-          </template>
-        </Column>
-
-        <Column field="createdAt" header="Created" :sortable="true" style="min-width: 150px">
-          <template #body="{ data }">
-            <span>{{ formatDate(data.createdAt) }}</span>
-          </template>
-        </Column>
-
-        <Column header="Actions" style="min-width: 200px">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <Button 
-                icon="pi pi-eye" 
-                class="p-button-rounded p-button-text"
-                v-tooltip.top="'View Project'"
-                @click="viewProject(data.id)"
-              />
+            <i v-else class="pi pi-video text-3xl text-500" />
+            <div>
+              <div class="font-semibold text-lg">{{ project.name }}</div>
+              <div class="text-500 text-sm mt-1">{{ project.description || 'No description' }}</div>
+            </div>
+          </div>
+          <div class="flex align-items-center gap-3">
+            <Tag 
+              :value="project.status || 'draft'" 
+              :severity="getStatusSeverity(project.status)"
+            />
+            <span class="text-500 text-sm">{{ formatDate(project.createdAt) }}</span>
+            <div class="flex gap-1" @click.stop>
               <Button 
                 icon="pi pi-pencil" 
-                class="p-button-rounded p-button-text"
-                v-tooltip.top="'Edit Project'"
-                @click="editProject(data)"
+                class="p-button-rounded p-button-text p-button-sm"
+                v-tooltip.top="'Edit'"
+                @click="editProject(project)"
               />
               <Button 
                 icon="pi pi-trash" 
-                class="p-button-rounded p-button-text p-button-danger"
-                v-tooltip.top="'Delete Project'"
-                @click="confirmDelete(data)"
+                class="p-button-rounded p-button-text p-button-danger p-button-sm"
+                v-tooltip.top="'Delete'"
+                @click="confirmDelete(project)"
               />
             </div>
-          </template>
-        </Column>
-      </DataTable>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Create/Edit Dialog -->
@@ -207,7 +175,6 @@
 import { ref, computed, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { FilterMatchMode } from 'primevue/api';
 import * as actions from '@/store/modules/film-project/types/actions';
 
 const store = useStore();
@@ -215,7 +182,7 @@ const router = useRouter();
 
 const projects = computed(() => store.getters['FilmProject/projects']);
 const isLoading = computed(() => store.getters['FilmProject/isLoading']);
-const hasProjects = computed(() => !isLoading.value && projects.value && projects.value.length > 0);
+const hasProjects = computed(() => projects.value && projects.value.length > 0);
 
 const showDialog = ref(false);
 const showDeleteDialog = ref(false);
@@ -232,10 +199,6 @@ const statusOptions = [
   { label: 'Completed', value: 'completed' },
   { label: 'On Hold', value: 'on_hold' },
 ];
-
-const filters = ref({
-  global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-});
 
 const formData = ref({
   name: '',
@@ -355,10 +318,18 @@ onMounted(() => {
 }
 
 .project-thumbnail {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
+}
+
+.project-card {
+  transition: background-color 0.15s;
+}
+
+.project-card:hover {
+  background-color: var(--surface-hover) !important;
 }
 
 .empty-state {

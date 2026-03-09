@@ -48,3 +48,4 @@ import AppConfig from '@/layout/AppConfig.vue';
     </div>
     <AppConfig simple />
 </template>
+    

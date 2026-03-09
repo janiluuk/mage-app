@@ -6,9 +6,9 @@
     <div class="banner-item-row">
       <div class="banner-item">
         <div class="banner-media-container">
-          <img src="../../public/img/mona.gif" class="banner-media-main"/>
+          <img src="/img/mona.gif" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="../../public/img/mona2.gif" />
+            <img src="/img/mona2.gif" />
           </div>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
@@ -27,9 +27,9 @@
       </div>
       <div class="banner-item">
         <div class="banner-media-container">
-          <img src="../../public/img/mona.jpg" class="banner-media-main"/>
+          <img src="/img/mona.jpg" class="banner-media-main"/>
           <div class="banner-media-secondary">
-            <img src="../../public/img/mona.jpg" />
+            <img src="/img/mona.jpg" />
           </div>
           <div class="banner-overlay">
             <div class="banner-overlay-icon">
@@ -51,14 +51,8 @@
 </template>
 
 <script>
-
 export default {
-  data() {
-    return {
-      animationVideoSrc: "../../public/videos/Pic_preview.mp4",
-      effectVideoSrc: "../../public/videos/Vid_preview.mp4"
-    };
-  }
+  name: 'FrontPage'
 };
 </script>
 

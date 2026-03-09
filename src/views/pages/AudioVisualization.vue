@@ -253,6 +253,7 @@
     </div>
 
     <!-- Toast + Confirm -->
+    <Toast />
     <ConfirmDialog />
   </div>
 </template>
@@ -278,6 +279,7 @@ import ProgressBar from 'primevue/progressbar';
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
 import ConfirmDialog from 'primevue/confirmdialog';
+import Toast from 'primevue/toast';
 
 import {
   BAND_NAMES,
@@ -313,6 +315,7 @@ export default {
     TabView,
     TabPanel,
     ConfirmDialog,
+    Toast,
   },
   setup() {
     const toast = useToast();
