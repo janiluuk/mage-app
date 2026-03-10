@@ -413,7 +413,6 @@ const rawFiles = computed(() => {
 const selection = useSelectionState();
 // Use browser metadata composable
 const {
-  metadataOverrides,
   isMetadataPanelOpen,
   metadataPanelDismissed,
   metadataDockHeight,
