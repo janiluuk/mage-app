@@ -26,32 +26,6 @@ This directory contains documentation for features implemented in Mage AI Studio
 |----------|-------------|
 | [SCREENSHOT_GUIDE.md](./SCREENSHOT_GUIDE.md) | How to capture screenshots of admin features |
 
-## 🎯 Implemented Features
-
-### Phase 1: Foundation & Quick Wins — ✅ Complete
-| Feature | Status | Components |
-|---------|--------|------------|
-| **Video Trimming** | ✅ Implemented | `VideoTrimPanel.vue` integrated into Editor |
-| **Export/Import Presets** | ✅ Implemented | Built into Presets page (Import/Export buttons) |
-
-### Phase 2: Processing & Management — ✅ Complete
-| Feature | Status | Components |
-|---------|--------|------------|
-| **Batch Processing** | ✅ Implemented | Integrated into Browser context menu + Upload batch progress |
-| **Preset Library** | ✅ Implemented | `Presets.vue` — CRUD, categories, favorites, import/export |
-
-### Phase 3: Visual & Creative Tools — ✅ Complete
-| Feature | Status | Components |
-|---------|--------|------------|
-| **Audio-Reactive Video Generator** | ✅ Implemented | `AudioVisualization.vue` page — upload audio, map frequency bands to Deforum parameters, generate Parseq keyframes, export config |
-| **Movie Editor (Real-time Preview)** | ✅ Implemented | `MovieEditor.vue` — scene organisation, transitions, text overlays with animations, zoomable timeline, JSON export |
-| **Ollama Instance Integration** | ✅ Implemented | Admin panel support for Ollama AI instances alongside SD Forge and ComfyUI |
-
-### Not Started
-| Feature | Status | Notes |
-|---------|--------|-------|
-| **Cloud Storage** | ⬜ Planned | P3 — low priority, not yet scheduled |
-
 ## 🏗️ Architecture Overview
 
 ```
