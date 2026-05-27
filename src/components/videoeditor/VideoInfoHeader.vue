@@ -132,7 +132,7 @@ export default {
     
     const goToStory = () => {
       if (storyInfo.value?.id) {
-        router.push(`/story/${storyInfo.value.id}`);
+        router.push(`/stories/${storyInfo.value.id}/edit`);
       }
     };
     

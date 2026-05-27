@@ -13,6 +13,7 @@ const model = ref([
         items: [
             { label: 'Library', icon: 'pi pi-fw pi-video', to: '/library' },
             { label: 'Browser', icon: 'pi pi-fw pi-th-large', to: '/browser' },
+            { label: 'FreeCut Editor', icon: 'pi pi-fw pi-pencil', to: '/freecut' },
             { label: 'Upload', icon: 'pi pi-fw pi-upload', to: '/upload' },
             { label: 'Jobs', icon: 'pi pi-fw pi-list', to: '/jobs' }
         ]
@@ -29,6 +30,7 @@ const model = ref([
             { label: 'Story Creator', icon: 'pi pi-fw pi-book', to: '/story' },
             // Vid2Vid and Deforum editors are accessed via direct routes (/edit/vid2vid/:id, /edit/deforum/:id)
             // They are not shown in menu as they require a video ID parameter
+            { label: 'My Stories', icon: 'pi pi-fw pi-bookmark', to: '/stories' },
             { label: 'Soundscape Creator', icon: 'pi pi-fw pi-volume-up', to: '/soundscape' }
         ]
     },
