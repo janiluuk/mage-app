@@ -53,12 +53,11 @@ export default ({ mode }) => {
       },
       cors: { origin: "*" },
 
-      //    		open: true,
-      //    		origin: 'http://localhost:8080/',
       headers: {
-//        "Cross-Origin-Embedder-Policy": "require-corp",
-//        "Cross-Origin-Opener-Policy": "same-origin",
-//        "Cross-Origin-Resource-Policy": "cross-origin",
+        // Required for freecut (WebGPU + SharedArrayBuffer)
+        "Cross-Origin-Embedder-Policy": "require-corp",
+        "Cross-Origin-Opener-Policy": "same-origin",
+        "Cross-Origin-Resource-Policy": "cross-origin",
         "Access-Control-Allow-Origin": "*",
       },
     },
