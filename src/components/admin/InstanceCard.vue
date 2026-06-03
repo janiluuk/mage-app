@@ -62,7 +62,7 @@
       <div class="col-12 md:col-6">
         <label class="block text-sm mb-2 text-600">Queue Status</label>
         <div class="text-sm">
-          Queue: {{ instance.queue_count || 0 }} | 
+          Queue: {{ instance.queue_count || 0 }} |
           Processing: {{ instance.processing_count || 0 }}
         </div>
       </div>
@@ -144,7 +144,7 @@ export default {
     });
 
     const currentModel = computed(() => {
-      return props.instance.metrics?.current_model || 'N/A';
+      return props.instance.metrics?.current_model || null;
     });
 
     const healthStatusLabel = computed(() => {
