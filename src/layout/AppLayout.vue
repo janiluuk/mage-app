@@ -24,8 +24,9 @@ const checkApi = async () => {
             method: 'HEAD',
             signal: controller.signal,
         });
-        // Mark API healthy only for successful HTTP responses.
-        apiStatus.value = response.ok;
+        // Any HTTP response (including 4xx) means the server is reachable.
+        // Only network failures / timeouts (caught below) mean it's down.
+        apiStatus.value = response.status < 500;
     } catch (err) {
         // AbortError (timeout) or TypeError (network failure) = API unreachable
         apiStatus.value = false;
