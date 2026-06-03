@@ -392,20 +392,6 @@ const onStatusFilterChange = (event) => {
                 </div>
             </template>
 
-            <template #empty>
-                <div class="empty-state-container">
-                    <div class="empty-state">
-                        <i class="pi pi-inbox empty-state-icon"></i>
-                        <h3 class="empty-state-title">No Content Yet</h3>
-                        <p class="empty-state-message">Your library is empty. Start creating by uploading or generating your first video!</p>
-                        <a href="/upload/">
-                            <Button icon="pi pi-plus" label="Create Your First Video"
-                                class="p-button p-button-lg p-button-rounded p-button-success"></Button>
-                        </a>
-                    </div>
-                </div>
-            </template>
-
             <template #grid="slotProps">
                 <div class="grid-item-container col-12 md:col-6 xl:col-3" :key="slotProps.data.id">
                     <div @click="menuClick(slotProps.data.id, slotProps.data.generator)" class="grid-item m-1">
