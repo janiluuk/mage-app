@@ -356,6 +356,12 @@ const router = createRouter({
       ],
     },
     {
+      path: "/freecut",
+      name: "FreeCutEditor",
+      meta: { requiresAuth: true },
+      component: () => import("@/views/FreeCutEditor.vue"),
+    },
+    {
       path: "/demo/admin-ui",
       name: "AdminUIDemo",
       component: () => import("@/views/dev/AdminUIDemo.vue"),

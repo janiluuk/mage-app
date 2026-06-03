@@ -13,7 +13,7 @@ class StoryService {
    */
   async listStories(params = {}) {
     try {
-      const response = await this.request.get('/story', { params })
+      const response = await this.request.get('/stories', { params })
       return response.data
     } catch (error) {
       const normalized = normalizeError(error, 'StoryService.listStories');
@@ -28,7 +28,7 @@ class StoryService {
    */
   async getStory(id) {
     try {
-      const response = await this.request.get(`/story/${id}`)
+      const response = await this.request.get(`/stories/${id}`)
       return response.data
     } catch (error) {
       const normalized = normalizeError(error, `StoryService.getStory(${id})`);
@@ -47,7 +47,7 @@ class StoryService {
    */
   async updateStory(id, data) {
     try {
-      const response = await this.request.put(`/story/${id}`, data)
+      const response = await this.request.put(`/stories/${id}`, data)
       return response.data
     } catch (error) {
       console.error(`Failed to update story ${id}:`, error)
@@ -69,7 +69,7 @@ class StoryService {
    */
   async updateJobOrder(id, jobOrders) {
     try {
-      const response = await this.request.put(`/story/${id}/jobs/order`, {
+      const response = await this.request.put(`/stories/${id}/jobs/order`, {
         job_orders: jobOrders
       })
       return response.data
@@ -91,7 +91,7 @@ class StoryService {
    */
   async assignJobs(id, jobIds, descriptions = {}) {
     try {
-      const response = await this.request.post(`/story/${id}/jobs`, {
+      const response = await this.request.post(`/stories/${id}/jobs`, {
         job_ids: jobIds,
         descriptions: descriptions
       })
@@ -113,7 +113,7 @@ class StoryService {
    */
   async removeJobs(id, jobIds) {
     try {
-      const response = await this.request.delete(`/story/${id}/jobs`, {
+      const response = await this.request.delete(`/stories/${id}/jobs`, {
         data: { job_ids: jobIds }
       })
       return response.data

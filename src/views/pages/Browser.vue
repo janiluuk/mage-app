@@ -355,6 +355,7 @@ import { useFullScreenModal } from "@/browser/composables/useFullScreenModal";
 import { useZoomControls } from "@/browser/composables/useZoomControls";
 import { useHotkeys } from "@/browser/composables/useHotkeys";
 import { useBrowserMetadata } from "@/browser/composables/useBrowserMetadata";
+import { injectDemoData } from "@/browser/demo/demoData";
 import { SortKey } from "@/browser/utils/sorting";
 import { parseSortValue, formatSortValue } from "@/browser/utils/sortOption";
 import {
@@ -386,6 +387,8 @@ const metadataPanelRef = ref(null);
 
 const isLoading = ref(false);
 const refreshInterval = ref(null);
+
+const isDemo = computed(() => import.meta.env.DEV || window.location.search.includes('demo'));
 
 const startAutoRefresh = (ms = 10000) => {
   stopAutoRefresh();
@@ -934,7 +937,7 @@ const { handleZoomChangeSafe, getMinimumZoomLevel } = useZoomControls({
 });
 
 const loadJobs = async () => {
-  if (isLoading.value) return;
+  if (isLoading.value || isDemo.value) return;
   isLoading.value = true;
   try {
     await store.dispatch("videojobs/list", { include: "modelfile,user" });
@@ -944,7 +947,7 @@ const loadJobs = async () => {
 };
 
 const loadFiles = async () => {
-  if (isLoading.value) return;
+  if (isLoading.value || isDemo.value) return;
   isLoading.value = true;
   try {
     const params = {
@@ -1017,7 +1020,7 @@ const loadFiles = async () => {
 };
 
 const loadFilesGroupedByTags = async () => {
-  if (isLoading.value) return;
+  if (isLoading.value || isDemo.value) return;
   isLoading.value = true;
   try {
     await store.dispatch("files/listByTags");
@@ -1039,14 +1042,12 @@ const refreshData = async () => {
 };
 
 onMounted(async () => {
-  await refreshData();
-  // Debug logging (dev only)
-  if (import.meta.env.DEV) {
-    console.log('Browser mounted - rawJobs:', rawJobs.value.length, 'videos:', videos.value.length);
-    console.log('filteredVideos:', filteredVideos.value.length, 'orderedVideos:', orderedVideos.value.length);
-    console.log('videosToRender:', videosToRender.value.length);
+  if (isDemo.value) {
+    injectDemoData(store);
+  } else {
+    await refreshData();
+    startAutoRefresh(10000);
   }
-  startAutoRefresh(10000);
 });
 
 onBeforeUnmount(() => {
@@ -1148,6 +1149,9 @@ const runContextAction = (actionId, selectionSet = selection.selected.value, con
           router.push(`/edit/${primaryVideo.generator || "vid2vid"}/${primaryVideo.id}`);
         }
       }
+      break;
+    case "freecut":
+      router.push('/freecut');
       break;
     case "download":
       if (primaryJob) {

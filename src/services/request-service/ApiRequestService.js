@@ -37,9 +37,9 @@ apiClient.interceptors.response.use(
   (error) => {
     const payload = error?.response?.data?.error;
 
-    if (payload?.code === 404) {
-      router.push({ name: 'Error404' });
-    }
+    // API errors should NOT trigger page-level redirects (this was causing
+    // 404 pages to appear instead of inline error messages in components).
+    // Components handle their own error display via catch blocks.
 
     if (payload === 'Unauthorized' || error?.response?.status === 401) {
       AuthService.removeToken();

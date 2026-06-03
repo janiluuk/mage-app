@@ -227,8 +227,8 @@ test('capture admin and user route screenshots', async ({ browser, request }) =>
   const routes = collectRoutes();
   fs.mkdirSync(screenshotRoot, { recursive: true });
 
-  const adminEmail = process.env.SCREENSHOT_ADMIN_EMAIL || 'admin@jsonapi.com';
-  const adminPassword = process.env.SCREENSHOT_ADMIN_PASSWORD || 'secret';
+  const adminEmail = process.env.SCREENSHOT_ADMIN_EMAIL || 'admin';
+  const adminPassword = process.env.SCREENSHOT_ADMIN_PASSWORD || 'admin';
   const userEmail = process.env.SCREENSHOT_USER_EMAIL || 'user@example.com';
   const userPassword = process.env.SCREENSHOT_USER_PASSWORD || 'secret123';
 

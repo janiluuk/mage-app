@@ -81,6 +81,7 @@ const menuItems = computed(() => {
 
   pushSection([
     { id: "edit", label: "Edit", action: "edit" },
+    { id: "freecut", label: "Open in FreeCut", action: "freecut" },
     { id: "download", label: "Download", action: "download", disabled: status !== "finished" },
     { id: "soundtrack", label: "Add Soundtrack", action: "soundtrack", disabled: status !== "finished" },
     { id: "extend", label: "Extend Video", action: "extend", disabled: status !== "finished" },
