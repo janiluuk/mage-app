@@ -188,8 +188,22 @@ docker exec mage-api php artisan jwt:secret
 ```
 
 **Access:**
-- **App**: http://localhost (via nginx gateway)
+- **App**: http://localhost (via nginx gateway; if port 80 is already in use on your machine, Docker maps the gateway to **8888** instead — check `docker compose ps`)
 - **mage-api**: http://localhost:8000 (direct) or http://localhost/mage-api (via gateway)
+
+**Regenerating README screenshots** (requires Docker stack + Playwright):
+
+```bash
+# Start full stack (mage-api from ../mage-api; skip Ollama if no NVIDIA GPU)
+docker compose -f docker-compose.yml -f docker-compose.stack.yml up -d --scale ollama=0
+docker compose -f docker-compose.yml -f docker-compose.stack.yml exec mage-api php artisan migrate --force
+docker compose -f docker-compose.yml -f docker-compose.stack.yml exec mage-api php artisan db:seed --force
+
+# Capture all views into docs/screenshots/ (uses gateway on :8888 when host :80 is busy)
+node scripts/capture-all-pages.js
+```
+
+Default login for seeded data: `admin@jsonapi.com` / `secret`. Override with `LOGIN_EMAIL` and `LOGIN_PASSWORD` if needed. Set `BASE_URL` when the gateway is not on port 8888 (e.g. `BASE_URL=http://localhost npm run ...`).
 
 **Optional:** Override mage-api source path:
 ```bash
