@@ -28,7 +28,7 @@ The top of the panel displays four key metrics:
 - **Total Queue**: Combined queue size across all instances
 - **Processing**: Number of jobs currently being processed
 
-![Summary Statistics](screenshots/summary-stats.png)
+![Summary Statistics](screenshots/10-admin-instances.png)
 
 ### Instance Cards
 
@@ -43,7 +43,7 @@ Each generator instance is displayed as a card showing:
 - **GPU/CPU/Memory**: Utilization percentages
 - **Last Health Check**: Timestamp of last status check
 
-![Instance Cards](screenshots/instance-cards.png)
+![Instance Cards](screenshots/10-admin-instances.png)
 
 ### Instance Actions
 
@@ -55,7 +55,7 @@ Each instance card provides several action buttons:
 4. **Edit** (✏️): Modify instance configuration
 5. **Delete** (🗑️): Remove instance
 
-![Instance Actions](screenshots/instance-actions.png)
+![Instance Actions](screenshots/10-admin-instances.png)
 
 ## Managing Instances
 
@@ -69,7 +69,7 @@ Each instance card provides several action buttons:
    - **Enabled**: Toggle to enable/disable immediately
 3. Click **"Save"** to create the instance
 
-![Add Instance Dialog](screenshots/add-instance-dialog.png)
+![Add Instance Dialog](screenshots/10-admin-instances.png)
 
 ### Editing an Instance
 
@@ -104,7 +104,7 @@ The chart displays:
 - **Queue Size**: Number of queued jobs over time
 - **Processing Count**: Active jobs over time
 
-![Metrics Chart](screenshots/metrics-chart.png)
+![Metrics Chart](screenshots/10-admin-instances.png)
 
 ### Chart Controls
 
@@ -129,7 +129,7 @@ The table displays:
 - **Completed At**: Timestamp of completion
 - **Video Job Details**: Prompt and generator type
 
-![Job History](screenshots/job-history.png)
+![Job History](screenshots/10-admin-instances.png)
 
 ### Job History Features
 
@@ -146,7 +146,7 @@ The bottom section shows FFMpeg encoding status:
 - **Pending Encoding**: Number of videos waiting to be encoded
 - **Active Jobs**: List of currently encoding videos with progress
 
-![FFMpeg Status](screenshots/ffmpeg-status.png)
+![FFMpeg Status](screenshots/10-admin-instances.png)
 
 ## Auto-Refresh
 

@@ -38,14 +38,14 @@ Vue 3 + Vite frontend for Mage AI Studio. Focused on AI video workflows, a rich 
 #### Login
 Enter your email and password to sign in. Includes a "Forgot Password" link for account recovery and a link to register a new account.
 
-![Login](docs/screenshots/01-login-page.png)
+![Login](./docs/screenshots/01-login-page.png)
 
 ---
 
 ### Dashboard
 The main landing page showing an overview of your video processing activity: total videos ready for processing, jobs currently in progress, completed jobs today, and a "Recent Video Jobs" table with pagination.
 
-![Dashboard](docs/screenshots/02-dashboard.png)
+![Dashboard](./docs/screenshots/02-dashboard.png)
 
 ---
 
@@ -54,17 +54,17 @@ The main landing page showing an overview of your video processing activity: tot
 #### Upload / Create
 Choose what to create — animation, deforum video, or vid2vid — with large preview cards for each workflow. Drag-and-drop file upload, prompt entry, and multi-file batch support with progress tracking.
 
-![Upload](docs/screenshots/05-upload.png)
+![Upload](./docs/screenshots/05-upload.png)
 
 #### My Library
 Browse all your generated videos in a filterable, sortable grid or list view. Filter by generator type or status, search by prompt, and toggle between grid and list layouts. When you have no items yet, the page shows a friendly empty state with a camera icon and a "Create your first video!" button.
 
-![Library](docs/screenshots/03-library.png)
+![Library](./docs/screenshots/03-library.png)
 
 #### Media Browser
 The media browser offers advanced filtering and sorting with a responsive grid layout. Filter by tags, status, or generator and use the search bar to find specific items. Group by tags, view as video jobs or files.
 
-![Browser](docs/screenshots/04-browser.png)
+![Browser](./docs/screenshots/04-browser.png)
 
 ---
 
@@ -73,7 +73,7 @@ The media browser offers advanced filtering and sorting with a responsive grid l
 #### Film Projects
 Manage your film projects in a hierarchical structure: **Projects → Sequences → Shots**. The DataTable lists all projects with name, description, status, creation date, and action buttons. Create new projects, search existing ones, and open any project to manage its sequences and shots. Each level supports AI-assisted content generation.
 
-![Film Projects](docs/screenshots/06-film-projects.png)
+![Film Projects](./docs/screenshots/06-film-projects.png)
 
 #### Movie Editor
 Assemble shots from a film project into a finished film. The editor features:
@@ -83,7 +83,7 @@ Assemble shots from a film project into a finished film. The editor features:
 - **Timeline** — zoomable track view with clip and overlay lanes, red playhead synced to the preview
 - **Export** — save the assembled project configuration as JSON
 
-![Movie Editor](docs/screenshots/movie-editor.png)
+![Movie Editor](./docs/screenshots/movie-editor.png)
 
 ---
 
@@ -92,17 +92,17 @@ Assemble shots from a film project into a finished film. The editor features:
 #### Story Creator
 Build multi-scene narrative-driven animations. The Story Builder tab shows a story summary with total scenes, frames, estimated duration, and keyframe count. Use the Advanced Settings tab to fine-tune parameters, the Live Preview tab to watch the animation in real time, and Export & Share to save or distribute configs. One-click "Generate All Frames" sends the story to the generation pipeline.
 
-![Story Creator](docs/screenshots/07-story-creator.png)
+![Story Creator](./docs/screenshots/07-story-creator.png)
 
 #### Soundscape Creator
 Create audio-driven animations by describing a soundscape or mood. Type a description or use the microphone for speech input, pick between "Relaxing" and "Energizing" mood presets, and hit Generate to produce a soundscape-driven animation.
 
-![Soundscape Creator](docs/screenshots/08-soundscape-creator.png)
+![Soundscape Creator](./docs/screenshots/08-soundscape-creator.png)
 
 #### Audio-Reactive Video Generator
 Upload an audio file (MP3, WAV, OGG), set FPS and keyframe interval, then click "Analyse Audio" to extract frequency bands. The analyser splits audio into seven bands (sub-bass, bass, low-mid, mid, upper-mid, presence, brilliance) and lets you map each band to a Deforum animation parameter — X/Y/Z translation, rotation, strength, noise, contrast, zoom, or angle. Adjust sensitivity with min/max ranges, preview the generated Parseq-style keyframe schedules, then export the full configuration as JSON or send it directly to generate video.
 
-![Audio Visualizer](docs/screenshots/16-audio-visualizer.png)
+![Audio Visualizer](./docs/screenshots/16-audio-visualizer.png)
 
 ---
 
@@ -111,22 +111,22 @@ Upload an audio file (MP3, WAV, OGG), set FPS and keyframe interval, then click 
 #### Preset Library
 Manage generation presets with a toolbar for Import/Export, summary stats (total presets, categories, favorites), and a searchable list with category filter buttons (All, Camera Movements, Effects, Styles, General, Custom). Create new presets, toggle between grid and list views, and mark favorites for quick access.
 
-![Preset Library](docs/screenshots/13-preset-library.png)
+![Preset Library](./docs/screenshots/13-preset-library.png)
 
 #### Timeline
 Studio timeline view for sequencing video clips. Upload or select media, arrange on the timeline track, and use the upload/cancel controls to manage content.
 
-![Timeline](docs/screenshots/14-timeline.png)
+![Timeline](./docs/screenshots/14-timeline.png)
 
 #### Story Browser
 Browse and manage your stories with pagination. View or edit stories from the list.
 
-![Story Browser](docs/screenshots/19-story-browser.png)
+![Story Browser](./docs/screenshots/19-story-browser.png)
 
 #### Mage Helper
 Monitor the backend queue and live processing state.
 
-![Mage Helper](docs/screenshots/15-mage-helper.png)
+![Mage Helper](./docs/screenshots/15-mage-helper.png)
 
 ---
 
@@ -135,7 +135,7 @@ Monitor the backend queue and live processing state.
 #### User Profile
 View and edit your profile information under the Profile tab, or change your password under the Password tab. The tabbed interface keeps account management clean and organised.
 
-![Profile](docs/screenshots/09-profile.png)
+![Profile](./docs/screenshots/09-profile.png)
 
 ---
 
@@ -144,7 +144,7 @@ View and edit your profile information under the Profile tab, or change your pas
 #### Instance Management
 Monitor and manage AI backend instances — **Stable Diffusion Forge**, **ComfyUI**, and **Ollama**. Add new instances with the "+ Add Instance" button, view real-time connection status, toggle instances on/off, and retry failed connections. Ollama instances support LLM text generation alongside the image and video backends.
 
-![Admin Instances](docs/screenshots/10-admin-instances.png)
+![Admin Instances](./docs/screenshots/10-admin-instances.png)
 
 ## Setup
 

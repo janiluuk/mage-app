@@ -86,19 +86,15 @@ Enter your email and password to sign in. Includes a "Forgot Password" link and 
 #### Sign Up (`/signup`)
 Create a new account with name, email, and password.
 
-![Sign Up](screenshots/02-signup-page.png)
-
 #### Forgot Password (`/forgot-password`)
 Request a password-reset email.
-
-![Forgot Password](screenshots/03-forgot-password.png)
 
 ---
 
 ### Dashboard (`/`)
 Overview of video processing activity: total videos ready, jobs in progress, completed today, and a "Recent Video Jobs" table with pagination.
 
-![Dashboard](screenshots/dashboard.png)
+![Dashboard](screenshots/02-dashboard.png)
 
 ---
 
@@ -107,23 +103,17 @@ Overview of video processing activity: total videos ready, jobs in progress, com
 #### Upload / Create (`/upload`)
 Choose a workflow — animation, deforum video, or vid2vid — with large preview cards. Drag-and-drop file upload, prompt entry, and multi-file batch support with progress tracking.
 
-![Upload](screenshots/upload.png)
+![Upload](screenshots/05-upload.png)
 
 #### My Library (`/library`)
 Filterable, sortable grid or list of all generated videos. Filter by generator or status, search by prompt, toggle layouts. Empty state shows a camera icon and "Create your first video!" button.
 
-![Library Empty State](screenshots/library-empty.png)
-
-Each library card shows a thumbnail (animated on hover), status badge, prompt text, duration, and a context menu for download, reprocess, delete, and batch operations.
-
-![Media Library](screenshots/04-media-library.png)
+![Library](screenshots/03-library.png)
 
 #### Media Browser (`/browser`)
 Advanced filtering and sorting with a responsive grid. Filter by tags, status, or generator, and search for specific items.
 
-![Browser Grid View](screenshots/09-browser-grid-view.png)
-
-![Browser Filtered View](screenshots/07-browser-filtered-view.png)
+![Browser](screenshots/04-browser.png)
 
 ---
 
@@ -132,7 +122,7 @@ Advanced filtering and sorting with a responsive grid. Filter by tags, status, o
 #### Film Projects (`/projects`)
 Manage film projects in a hierarchical structure: **Projects → Sequences → Shots**. DataTable lists all projects with name, description, status, created date, and actions. AI-assisted content generation at every level.
 
-![Film Projects](screenshots/film-projects.png)
+![Film Projects](screenshots/06-film-projects.png)
 
 #### Movie Editor (`/projects/:id/editor`)
 Assemble shots into a finished film:
@@ -151,17 +141,17 @@ Assemble shots into a finished film:
 #### Story Creator (`/story`)
 Build multi-scene narrative animations. The Story Builder shows a summary (scenes, frames, duration, keyframes). Tabs for Advanced Settings, Live Preview, and Export & Share. One-click "Generate All Frames" sends the story to the pipeline.
 
-![Story Creator](screenshots/story-creator.png)
+![Story Creator](screenshots/07-story-creator.png)
 
 #### Soundscape Creator (`/soundscape`)
 Create audio-driven animations by describing a mood. Type a description or use speech input, pick "Relaxing" or "Energizing" presets, and generate.
 
-![Soundscape Creator](screenshots/soundscape-creator.png)
+![Soundscape Creator](screenshots/08-soundscape-creator.png)
 
 #### Audio-Reactive Video Generator (`/audio-visualizer`)
 Upload audio (MP3, WAV, OGG), set FPS and keyframe interval, then analyse frequency bands. Maps seven bands (sub-bass through brilliance) to Deforum parameters — translation, rotation, strength, noise, contrast, zoom, angle. Adjust sensitivity, preview Parseq-style keyframe schedules, export config or generate video directly.
 
-![Audio Visualizer](screenshots/audio-visualizer.png)
+![Audio Visualizer](screenshots/16-audio-visualizer.png)
 
 ---
 
@@ -170,12 +160,12 @@ Upload audio (MP3, WAV, OGG), set FPS and keyframe interval, then analyse freque
 #### Preset Library (`/presets`)
 Manage generation presets with Import/Export toolbar, summary stats, and searchable list with category filters (All, Camera Movements, Effects, Styles, General, Custom). Grid and list views, favorites.
 
-![Preset Library](screenshots/preset-library.png)
+![Preset Library](screenshots/13-preset-library.png)
 
 #### Timeline (`/timeline`)
 Studio timeline view for sequencing video clips. Upload or select media, arrange on the track, and manage content.
 
-![Timeline](screenshots/timeline.png)
+![Timeline](screenshots/14-timeline.png)
 
 ---
 
@@ -184,7 +174,7 @@ Studio timeline view for sequencing video clips. Upload or select media, arrange
 #### User Profile (`/profile`)
 Profile tab for viewing/editing personal information. Password tab for changing credentials. Clean tabbed interface.
 
-![Profile](screenshots/profile.png)
+![Profile](screenshots/09-profile.png)
 
 ---
 
@@ -193,7 +183,7 @@ Profile tab for viewing/editing personal information. Password tab for changing 
 #### Instance Management (`/admin/instances`)
 Monitor and manage **Stable Diffusion Forge**, **ComfyUI**, and **Ollama** instances. Add new instances, view real-time status, toggle on/off, retry connections. Ollama supports LLM text generation alongside image/video backends.
 
-![Admin Instances](screenshots/admin-instances.png)
+![Admin Instances](screenshots/10-admin-instances.png)
 
 ## 🚀 Quick Start
 

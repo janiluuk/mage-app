@@ -20,8 +20,11 @@ const LOGIN_EMAIL = process.env.LOGIN_EMAIL || 'admin@jsonapi.com';
 const LOGIN_PASSWORD = process.env.LOGIN_PASSWORD || 'secret';
 const VIEWPORT = { width: 1920, height: 1080 };
 
-const ALL_PAGES = [
-  { path: '/login', name: '01-login-page', public: true },
+const PUBLIC_PAGES = [
+  { path: '/login', name: '01-login-page' },
+];
+
+const AUTH_PAGES = [
   { path: '/', name: '02-dashboard' },
   { path: '/library', name: '03-library' },
   { path: '/browser', name: '04-browser' },
@@ -44,6 +47,7 @@ const ALL_PAGES = [
   { path: '/stories', name: '19-story-browser' },
 ];
 
+const ALL_PAGES = [...PUBLIC_PAGES, ...AUTH_PAGES];
 const START = parseInt(process.env.START || '0', 10);
 const END = parseInt(process.env.END || String(ALL_PAGES.length), 10);
 const PAGES = ALL_PAGES.slice(START, END);
@@ -63,6 +67,25 @@ async function login(page) {
   return !page.url().includes('/login');
 }
 
+async function capturePage(page, pagePath, name) {
+  const url = `${BASE_URL}${pagePath}`;
+  const dest = path.join(SCREENSHOT_DIR, `${name}.png`);
+  await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
+  await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => null);
+  await page.waitForTimeout(2500);
+  await page.evaluate(() => {
+    document.querySelectorAll('.p-toast, .p-toast-message').forEach((el) => el.remove());
+  });
+  await page.waitForTimeout(300);
+  try {
+    await page.screenshot({ path: dest, fullPage: true });
+    console.log(`  ${name}: saved`);
+  } catch {
+    await page.screenshot({ path: dest, fullPage: false });
+    console.log(`  ${name}: saved (viewport only)`);
+  }
+}
+
 async function captureAll() {
   console.log('Screenshot capture for mage-app');
   console.log(`Base URL: ${BASE_URL}`);
@@ -72,6 +95,21 @@ async function captureAll() {
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   });
+
+  const publicContext = await browser.newContext({
+    viewport: VIEWPORT,
+    ignoreHTTPSErrors: true,
+  });
+  const publicPage = await publicContext.newPage();
+  for (const { path: pagePath, name } of PUBLIC_PAGES) {
+    try {
+      await capturePage(publicPage, pagePath, name);
+    } catch (err) {
+      console.log(`  ${name}: error - ${err.message}`);
+    }
+  }
+  await publicContext.close();
+
   const context = await browser.newContext({
     viewport: VIEWPORT,
     ignoreHTTPSErrors: true,
@@ -82,32 +120,17 @@ async function captureAll() {
   const loggedIn = await login(page);
   console.log(loggedIn ? 'Logged in successfully\n' : 'Login failed, capturing public pages only\n');
 
-  for (const { path: pagePath, name, public: isPublic } of PAGES) {
-    const url = `${BASE_URL}${pagePath}`;
-    const dest = path.join(SCREENSHOT_DIR, `${name}.png`);
+  const authPages = PAGES.filter(({ name }) => !PUBLIC_PAGES.some((p) => p.name === name));
+  for (const { path: pagePath, name } of authPages) {
     try {
-      await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-      const finalUrl = page.url();
-      if (!loggedIn && !isPublic && finalUrl.includes('/login')) {
-        console.log(`  ${name}: skipped (auth required)`);
-        await page.waitForTimeout(500);
-        continue;
+      if (!loggedIn) {
+        await page.goto(`${BASE_URL}${pagePath}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
+        if (page.url().includes('/login')) {
+          console.log(`  ${name}: skipped (auth required)`);
+          continue;
+        }
       }
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => null);
-      await page.waitForTimeout(2500);
-      // Dismiss transient error toasts for cleaner documentation shots.
-      await page.locator('.p-toast .p-toast-message-close').all().then((buttons) =>
-        Promise.all(buttons.map((btn) => btn.click().catch(() => null)))
-      );
-      await page.waitForTimeout(300);
-      try {
-        await page.screenshot({ path: dest, fullPage: true });
-        console.log(`  ${name}: saved`);
-      } catch (shotErr) {
-        await page.screenshot({ path: dest, fullPage: false });
-        console.log(`  ${name}: saved (viewport only)`);
-      }
-      await page.waitForTimeout(1000);
+      await capturePage(page, pagePath, name);
     } catch (err) {
       console.log(`  ${name}: error - ${err.message}`);
     }
