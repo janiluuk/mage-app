@@ -43,17 +43,17 @@ The Video Browser is an advanced video gallery interface for the Mage AI Studio 
 ### Filtered Grid View
 Active filters applied (landscape, cinematic tags + 4+ star rating) showing matching videos with one selected.
 
-![Browser Filtered View](screenshots/07-browser-filtered-view.png)
+![Browser Filtered View](screenshots/04-browser.png)
 
 ### Clean Grid View
 Full video library without filters, showing all available videos in a responsive masonry grid.
 
-![Browser Grid View](screenshots/09-browser-grid-view.png)
+![Browser Grid View](screenshots/04-browser.png)
 
 ### Empty State
 Initial state when library is empty, prompting user to refresh from API.
 
-![Browser Empty State](screenshots/08-browser-empty-state.png)
+![Browser Empty State](screenshots/03-library.png)
 
 ## Technical Implementation
 
